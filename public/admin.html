@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="utf-8">
+    <title>Administrare produse - Traditum By Victoria</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="robots" content="noindex, nofollow">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background:#f6f3ef; }
+        .brand { font-family:'Playfair Display',serif; }
+        .card-admin { border:none; box-shadow:0 .5rem 1.5rem rgba(0,0,0,.08); }
+        .thumb { width:64px; height:64px; object-fit:cover; border-radius:.5rem; background:#eee; }
+        #login-view, #app-view { display:none; }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark px-4">
+        <span class="navbar-brand brand mb-0 h1">Traditum By Victoria <small class="text-secondary fs-6">· administrare</small></span>
+        <div>
+            <a href="index.html" class="btn btn-sm btn-outline-light me-2"><i class="bi bi-box-arrow-up-right"></i> Vezi site-ul</a>
+            <button id="logout-btn" class="btn btn-sm btn-outline-warning" style="display:none"><i class="bi bi-box-arrow-right"></i> Ieșire</button>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+
+        <!-- LOGIN -->
+        <div id="login-view" class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card card-admin p-4">
+                    <h4 class="mb-3 brand">Autentificare</h4>
+                    <p class="text-muted small">Introdu parola de administrare pentru a gestiona produsele.</p>
+                    <form id="login-form">
+                        <input type="password" id="password" class="form-control mb-3" placeholder="Parolă" required autofocus>
+                        <button class="btn btn-dark w-100" type="submit">Intră</button>
+                        <div id="login-error" class="text-danger small mt-2"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- APP -->
+        <div id="app-view">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="brand mb-0">Produse</h3>
+                <button id="add-btn" class="btn btn-dark"><i class="bi bi-plus-lg"></i> Adaugă produs</button>
+            </div>
+            <div class="card card-admin">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr><th></th><th>Nume</th><th>Categorie</th><th>Preț</th><th class="text-end">Acțiuni</th></tr>
+                        </thead>
+                        <tbody id="product-rows"></tbody>
+                    </table>
+                </div>
+                <div id="empty-state" class="text-center text-muted py-5" style="display:none">Niciun produs încă. Apasă „Adaugă produs".</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL produs -->
+    <div class="modal fade" id="product-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="product-form">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modal-title">Adaugă produs</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="f-id">
+                        <div class="mb-3">
+                            <label class="form-label">Nume *</label>
+                            <input type="text" id="f-name" class="form-control" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Categorie</label>
+                                <input type="text" id="f-category" class="form-control" placeholder="ex. Torturi" list="cat-list">
+                                <datalist id="cat-list"></datalist>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Preț</label>
+                                <input type="text" id="f-price" class="form-control" placeholder="ex. 150 lei / La comandă">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descriere</label>
+                            <textarea id="f-description" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Imagine</label>
+                            <input type="file" id="f-image-file" class="form-control" accept="image/*">
+                            <div class="form-text">Încarcă o poză (max 5 MB) sau lasă gol ca să păstrezi imaginea curentă.</div>
+                        </div>
+                        <input type="hidden" id="f-image">
+                        <img id="f-image-preview" class="img-fluid rounded mt-2" style="max-height:160px; display:none">
+                        <div id="form-error" class="text-danger small mt-2"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anulează</button>
+                        <button type="submit" class="btn btn-dark" id="save-btn">Salvează</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    const $ = (id) => document.getElementById(id);
+    let products = [];
+    let modal;
+
+    async function api(path, opts = {}) {
+        const res = await fetch(path, { credentials: "same-origin", ...opts });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Eroare");
+        return data;
+    }
+
+    function show(view) {
+        $("login-view").style.display = view === "login" ? "" : "none";
+        $("app-view").style.display = view === "app" ? "" : "none";
+        $("logout-btn").style.display = view === "app" ? "" : "none";
+    }
+
+    function escapeHtml(s) {
+        return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    }
+
+    function render() {
+        const rows = $("product-rows");
+        rows.innerHTML = "";
+        const cats = new Set();
+        products.forEach(p => {
+            if (p.category) cats.add(p.category);
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><img class="thumb" src="${escapeHtml(p.image) || ''}" alt="" onerror="this.style.visibility='hidden'"></td>
+                <td>${escapeHtml(p.name)}</td>
+                <td>${escapeHtml(p.category)}</td>
+                <td>${escapeHtml(p.price)}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-secondary" data-edit="${escapeHtml(p.id)}"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" data-del="${escapeHtml(p.id)}"><i class="bi bi-trash"></i></button>
+                </td>`;
+            rows.appendChild(tr);
+        });
+        $("empty-state").style.display = products.length ? "none" : "";
+        $("cat-list").innerHTML = [...cats].map(c => `<option value="${escapeHtml(c)}">`).join("");
+    }
+
+    async function loadProducts() {
+        products = await api("/api/products");
+        render();
+    }
+
+    function openModal(product) {
+        $("form-error").textContent = "";
+        $("product-form").reset();
+        $("f-id").value = product ? product.id : "";
+        $("f-name").value = product ? product.name : "";
+        $("f-category").value = product ? product.category : "";
+        $("f-price").value = product ? product.price : "";
+        $("f-description").value = product ? product.description : "";
+        $("f-image").value = product ? (product.image || "") : "";
+        $("modal-title").textContent = product ? "Editează produs" : "Adaugă produs";
+        const prev = $("f-image-preview");
+        if (product && product.image) { prev.src = product.image; prev.style.display = ""; }
+        else { prev.style.display = "none"; }
+        modal.show();
+    }
+
+    // ---- evenimente ----
+    $("login-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        $("login-error").textContent = "";
+        try {
+            await api("/api/login", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ password: $("password").value }),
+            });
+            await init();
+        } catch (err) {
+            $("login-error").textContent = err.message;
+        }
+    });
+
+    $("logout-btn").addEventListener("click", async () => {
+        await api("/api/logout", { method: "POST" });
+        show("login");
+    });
+
+    $("add-btn").addEventListener("click", () => openModal(null));
+
+    $("product-rows").addEventListener("click", async (e) => {
+        const edit = e.target.closest("[data-edit]");
+        const del = e.target.closest("[data-del]");
+        if (edit) {
+            const p = products.find(x => x.id === edit.dataset.edit);
+            openModal(p);
+        } else if (del) {
+            if (!confirm("Sigur ștergi acest produs?")) return;
+            await api("/api/products/" + encodeURIComponent(del.dataset.del), { method: "DELETE" });
+            await loadProducts();
+        }
+    });
+
+    $("f-image-file").addEventListener("change", () => {
+        const file = $("f-image-file").files[0];
+        if (file) {
+            const prev = $("f-image-preview");
+            prev.src = URL.createObjectURL(file);
+            prev.style.display = "";
+        }
+    });
+
+    $("product-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        $("form-error").textContent = "";
+        $("save-btn").disabled = true;
+        try {
+            // upload imagine nouă dacă există
+            const file = $("f-image-file").files[0];
+            let image = $("f-image").value;
+            if (file) {
+                const fd = new FormData();
+                fd.append("file", file);
+                const up = await api("/api/upload", { method: "POST", body: fd });
+                image = up.url;
+            }
+            const payload = {
+                name: $("f-name").value,
+                category: $("f-category").value,
+                price: $("f-price").value,
+                description: $("f-description").value,
+                image,
+            };
+            const id = $("f-id").value;
+            if (id) {
+                await api("/api/products/" + encodeURIComponent(id), {
+                    method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(payload),
+                });
+            } else {
+                await api("/api/products", {
+                    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload),
+                });
+            }
+            modal.hide();
+            await loadProducts();
+        } catch (err) {
+            $("form-error").textContent = err.message;
+        } finally {
+            $("save-btn").disabled = false;
+        }
+    });
+
+    async function init() {
+        const me = await api("/api/me");
+        if (me.authed) {
+            show("app");
+            await loadProducts();
+        } else {
+            show("login");
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        modal = new bootstrap.Modal($("product-modal"));
+        init().catch(() => show("login"));
+    });
+    </script>
+</body>
+
+</html>

@@ -1,10 +1,20 @@
 {
-  // Configurație Cloudflare Worker pentru site static (doar assets).
-  // Docs: https://developers.cloudflare.com/workers/static-assets/
+  // Worker Traditum By Victoria: site static + API produse + admin.
+  // Docs: https://developers.cloudflare.com/workers/
   "name": "traditumbyvictoria",
   "compatibility_date": "2026-06-17",
+  "main": "src/index.js",
   "assets": {
-    "directory": "./",
+    "directory": "./public",
+    "binding": "ASSETS",
     "not_found_handling": "404-page"
-  }
+  },
+  // ÎNLOCUIEȘTE "id" cu ID-ul real al namespace-ului KV creat în dashboard
+  // (Workers & Pages -> KV -> Create namespace).
+  "kv_namespaces": [
+    {
+      "binding": "PRODUCTS",
+      "id": "INLOCUIESTE_CU_ID_KV"
+    }
+  ]
 }
