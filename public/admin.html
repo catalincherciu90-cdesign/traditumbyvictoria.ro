@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Administrare produse - Traditum By Victoria</title>
+    <title>Administrare - Traditum By Victoria</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta name="robots" content="noindex, nofollow">
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -13,6 +13,7 @@
         .brand { font-family:'Playfair Display',serif; }
         .card-admin { border:none; box-shadow:0 .5rem 1.5rem rgba(0,0,0,.08); }
         .thumb { width:64px; height:64px; object-fit:cover; border-radius:.5rem; background:#eee; }
+        .slide-card { background:#fff; border:1px solid #eee; border-radius:.75rem; }
         #login-view, #app-view { display:none; }
         .is-visible { display:block !important; }
         #login-view.is-visible { display:flex !important; }
@@ -35,7 +36,7 @@
             <div class="col-md-5">
                 <div class="card card-admin p-4">
                     <h4 class="mb-3 brand">Autentificare</h4>
-                    <p class="text-muted small">Introdu parola de administrare pentru a gestiona produsele.</p>
+                    <p class="text-muted small">Introdu parola de administrare.</p>
                     <form id="login-form">
                         <input type="password" id="password" class="form-control mb-3" placeholder="Parolă" required autofocus>
                         <button class="btn btn-dark w-100" type="submit">Intră</button>
@@ -47,20 +48,93 @@
 
         <!-- APP -->
         <div id="app-view">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3 class="brand mb-0">Produse</h3>
-                <button id="add-btn" class="btn btn-dark"><i class="bi bi-plus-lg"></i> Adaugă produs</button>
-            </div>
-            <div class="card card-admin">
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <thead class="table-light">
-                            <tr><th></th><th>Nume</th><th>Categorie</th><th>Preț</th><th class="text-end">Acțiuni</th></tr>
-                        </thead>
-                        <tbody id="product-rows"></tbody>
-                    </table>
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-products" type="button">Produse</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-content" type="button">Conținut site</button></li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- PRODUSE -->
+                <div class="tab-pane fade show active" id="tab-products">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="brand mb-0">Produse</h4>
+                        <button id="add-btn" class="btn btn-dark"><i class="bi bi-plus-lg"></i> Adaugă produs</button>
+                    </div>
+                    <div class="card card-admin">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr><th></th><th>Nume</th><th>Categorie</th><th>Preț</th><th class="text-end">Acțiuni</th></tr>
+                                </thead>
+                                <tbody id="product-rows"></tbody>
+                            </table>
+                        </div>
+                        <div id="empty-state" class="text-center text-muted py-5" style="display:none">Niciun produs încă. Apasă „Adaugă produs".</div>
+                    </div>
                 </div>
-                <div id="empty-state" class="text-center text-muted py-5" style="display:none">Niciun produs încă. Apasă „Adaugă produs".</div>
+
+                <!-- CONTINUT -->
+                <div class="tab-pane fade" id="tab-content">
+                    <form id="config-form">
+                        <!-- Carousel -->
+                        <div class="card card-admin mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="brand mb-0">Carousel pagina principală</h5>
+                                    <button type="button" id="add-slide" class="btn btn-sm btn-outline-dark"><i class="bi bi-plus-lg"></i> Adaugă slide</button>
+                                </div>
+                                <div id="carousel-slides"></div>
+                            </div>
+                        </div>
+
+                        <!-- Promo -->
+                        <div class="card card-admin mb-4">
+                            <div class="card-body">
+                                <h5 class="brand mb-3">Banner promo</h5>
+                                <label class="form-label">Titlu banner</label>
+                                <input type="text" id="c-promo-title" class="form-control">
+                                <div class="form-text">Numărul de telefon din banner se ia din secțiunea „Date de contact".</div>
+                            </div>
+                        </div>
+
+                        <!-- Titluri pagini -->
+                        <div class="card card-admin mb-4">
+                            <div class="card-body">
+                                <h5 class="brand mb-3">Titluri pagini interioare</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-4"><label class="form-label">Despre noi</label><input type="text" id="pt-about" class="form-control"></div>
+                                    <div class="col-md-4"><label class="form-label">Servicii</label><input type="text" id="pt-service" class="form-control"></div>
+                                    <div class="col-md-4"><label class="form-label">Produse</label><input type="text" id="pt-product" class="form-control"></div>
+                                    <div class="col-md-4"><label class="form-label">Echipă</label><input type="text" id="pt-team" class="form-control"></div>
+                                    <div class="col-md-4"><label class="form-label">Testimoniale</label><input type="text" id="pt-testimonial" class="form-control"></div>
+                                    <div class="col-md-4"><label class="form-label">Contact</label><input type="text" id="pt-contact" class="form-control"></div>
+                                    <div class="col-md-4"><label class="form-label">Pagina 404</label><input type="text" id="pt-notfound" class="form-control"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact -->
+                        <div class="card card-admin mb-4">
+                            <div class="card-body">
+                                <h5 class="brand mb-3">Date de contact</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-4"><label class="form-label">Telefon</label><input type="text" id="ct-phone" class="form-control"></div>
+                                    <div class="col-md-4"><label class="form-label">Email</label><input type="text" id="ct-email" class="form-control"></div>
+                                    <div class="col-md-4"><label class="form-label">Adresă</label><input type="text" id="ct-address" class="form-control"></div>
+                                    <div class="col-md-4"><label class="form-label">Facebook (URL)</label><input type="text" id="ct-facebook" class="form-control" placeholder="https://facebook.com/..."></div>
+                                    <div class="col-md-4"><label class="form-label">Instagram (URL)</label><input type="text" id="ct-instagram" class="form-control" placeholder="https://instagram.com/..."></div>
+                                    <div class="col-md-4"><label class="form-label">TikTok (URL)</label><input type="text" id="ct-tiktok" class="form-control" placeholder="https://tiktok.com/@..."></div>
+                                </div>
+                                <div class="form-text mt-2">Linkurile social goale sunt ascunse automat pe site.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <button type="submit" class="btn btn-dark" id="config-save"><i class="bi bi-save"></i> Salvează conținutul</button>
+                            <span id="config-status" class="small"></span>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -125,17 +199,16 @@
         if (!res.ok) throw new Error(data.error || "Eroare");
         return data;
     }
-
     function show(view) {
         $("login-view").classList.toggle("is-visible", view === "login");
         $("app-view").classList.toggle("is-visible", view === "app");
         $("logout-btn").style.display = view === "app" ? "" : "none";
     }
-
     function escapeHtml(s) {
         return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
     }
 
+    // ---------------- PRODUSE ----------------
     function render() {
         const rows = $("product-rows");
         rows.innerHTML = "";
@@ -157,12 +230,7 @@
         $("empty-state").style.display = products.length ? "none" : "";
         $("cat-list").innerHTML = [...cats].map(c => `<option value="${escapeHtml(c)}">`).join("");
     }
-
-    async function loadProducts() {
-        products = await api("/api/products");
-        render();
-    }
-
+    async function loadProducts() { products = await api("/api/products"); render(); }
     function openModal(product) {
         $("form-error").textContent = "";
         $("product-form").reset();
@@ -178,102 +246,133 @@
         else { prev.style.display = "none"; }
         modal.show();
     }
-
-    // ---- evenimente ----
-    $("login-form").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        $("login-error").textContent = "";
-        try {
-            await api("/api/login", {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ password: $("password").value }),
-            });
-            await init();
-        } catch (err) {
-            $("login-error").textContent = err.message;
-        }
-    });
-
-    $("logout-btn").addEventListener("click", async () => {
-        await api("/api/logout", { method: "POST" });
-        show("login");
-    });
-
     $("add-btn").addEventListener("click", () => openModal(null));
-
     $("product-rows").addEventListener("click", async (e) => {
         const edit = e.target.closest("[data-edit]");
         const del = e.target.closest("[data-del]");
-        if (edit) {
-            const p = products.find(x => x.id === edit.dataset.edit);
-            openModal(p);
-        } else if (del) {
+        if (edit) { openModal(products.find(x => x.id === edit.dataset.edit)); }
+        else if (del) {
             if (!confirm("Sigur ștergi acest produs?")) return;
             await api("/api/products/" + encodeURIComponent(del.dataset.del), { method: "DELETE" });
             await loadProducts();
         }
     });
-
     $("f-image-file").addEventListener("change", () => {
         const file = $("f-image-file").files[0];
-        if (file) {
-            const prev = $("f-image-preview");
-            prev.src = URL.createObjectURL(file);
-            prev.style.display = "";
-        }
+        if (file) { const prev = $("f-image-preview"); prev.src = URL.createObjectURL(file); prev.style.display = ""; }
     });
-
     $("product-form").addEventListener("submit", async (e) => {
         e.preventDefault();
-        $("form-error").textContent = "";
-        $("save-btn").disabled = true;
+        $("form-error").textContent = ""; $("save-btn").disabled = true;
         try {
-            // upload imagine nouă dacă există
             const file = $("f-image-file").files[0];
             let image = $("f-image").value;
-            if (file) {
-                const fd = new FormData();
-                fd.append("file", file);
-                const up = await api("/api/upload", { method: "POST", body: fd });
-                image = up.url;
-            }
-            const payload = {
-                name: $("f-name").value,
-                category: $("f-category").value,
-                price: $("f-price").value,
-                description: $("f-description").value,
-                image,
-            };
+            if (file) { const fd = new FormData(); fd.append("file", file); image = (await api("/api/upload", { method: "POST", body: fd })).url; }
+            const payload = { name: $("f-name").value, category: $("f-category").value, price: $("f-price").value, description: $("f-description").value, image };
             const id = $("f-id").value;
-            if (id) {
-                await api("/api/products/" + encodeURIComponent(id), {
-                    method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(payload),
-                });
-            } else {
-                await api("/api/products", {
-                    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload),
-                });
-            }
-            modal.hide();
-            await loadProducts();
-        } catch (err) {
-            $("form-error").textContent = err.message;
-        } finally {
-            $("save-btn").disabled = false;
-        }
+            if (id) await api("/api/products/" + encodeURIComponent(id), { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+            else await api("/api/products", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+            modal.hide(); await loadProducts();
+        } catch (err) { $("form-error").textContent = err.message; }
+        finally { $("save-btn").disabled = false; }
     });
+
+    // ---------------- CONȚINUT SITE ----------------
+    function slideEditor(s) {
+        s = s || {};
+        const wrap = document.createElement("div");
+        wrap.className = "slide-card p-3 mb-3";
+        wrap.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <strong>Slide</strong>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-remove-slide><i class="bi bi-trash"></i></button>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <input type="file" class="form-control form-control-sm s-file" accept="image/*">
+                    <input type="hidden" class="s-image" value="${escapeHtml(s.image || '')}">
+                    <img class="img-fluid rounded mt-2 s-preview" style="max-height:90px; ${s.image ? '' : 'display:none'}" src="${escapeHtml(s.image || '')}">
+                </div>
+                <div class="col-md-8">
+                    <input type="text" class="form-control form-control-sm mb-2 s-eyebrow" placeholder="Text mic (ex. Laborator de cofetărie)" value="${escapeHtml(s.eyebrow || '')}">
+                    <input type="text" class="form-control form-control-sm mb-2 s-title" placeholder="Titlu mare" value="${escapeHtml(s.title || '')}">
+                    <input type="text" class="form-control form-control-sm mb-2 s-subtitle" placeholder="Subtitlu" value="${escapeHtml(s.subtitle || '')}">
+                    <div class="row g-2">
+                        <div class="col-6"><input type="text" class="form-control form-control-sm s-btntext" placeholder="Text buton" value="${escapeHtml(s.buttonText || '')}"></div>
+                        <div class="col-6"><input type="text" class="form-control form-control-sm s-btnlink" placeholder="Link buton (ex. product.html)" value="${escapeHtml(s.buttonLink || '')}"></div>
+                    </div>
+                </div>
+            </div>`;
+        return wrap;
+    }
+    function addSlide(s) { $("carousel-slides").appendChild(slideEditor(s)); }
+
+    $("add-slide").addEventListener("click", () => addSlide({}));
+    $("carousel-slides").addEventListener("click", (e) => {
+        const rm = e.target.closest("[data-remove-slide]");
+        if (rm) rm.closest(".slide-card").remove();
+    });
+    // upload imagine slide
+    $("carousel-slides").addEventListener("change", async (e) => {
+        if (!e.target.classList.contains("s-file")) return;
+        const file = e.target.files[0]; if (!file) return;
+        const card = e.target.closest(".slide-card");
+        const prev = card.querySelector(".s-preview");
+        prev.src = URL.createObjectURL(file); prev.style.display = "";
+        try {
+            const up = await api("/api/upload", { method: "POST", body: (function(){ const fd = new FormData(); fd.append("file", file); return fd; })() });
+            card.querySelector(".s-image").value = up.url;
+        } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
+    });
+
+    function fillConfig(cfg) {
+        $("carousel-slides").innerHTML = "";
+        (cfg.carousel || []).forEach(addSlide);
+        $("c-promo-title").value = (cfg.promo && cfg.promo.title) || "";
+        const pt = cfg.pageTitles || {};
+        ["about","service","product","team","testimonial","contact","notfound"].forEach(k => { $("pt-" + k).value = pt[k] || ""; });
+        const ct = cfg.contact || {};
+        ["phone","email","address","facebook","instagram","tiktok"].forEach(k => { $("ct-" + k).value = ct[k] || ""; });
+    }
+    function gatherConfig() {
+        const carousel = [...document.querySelectorAll("#carousel-slides .slide-card")].map(card => ({
+            image: card.querySelector(".s-image").value,
+            eyebrow: card.querySelector(".s-eyebrow").value,
+            title: card.querySelector(".s-title").value,
+            subtitle: card.querySelector(".s-subtitle").value,
+            buttonText: card.querySelector(".s-btntext").value,
+            buttonLink: card.querySelector(".s-btnlink").value,
+        }));
+        const pt = {}; ["about","service","product","team","testimonial","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
+        const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
+        return { carousel, promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
+    }
+    async function loadConfig() { fillConfig(await api("/api/config")); }
+    $("config-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const status = $("config-status"); status.textContent = ""; $("config-save").disabled = true;
+        try {
+            await api("/api/config", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(gatherConfig()) });
+            status.className = "small text-success"; status.textContent = "Salvat! Modificările apar pe site la reîncărcare.";
+        } catch (err) { status.className = "small text-danger"; status.textContent = err.message; }
+        finally { $("config-save").disabled = false; }
+    });
+
+    // ---------------- LOGIN / INIT ----------------
+    $("login-form").addEventListener("submit", async (e) => {
+        e.preventDefault(); $("login-error").textContent = "";
+        try {
+            await api("/api/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ password: $("password").value }) });
+            await init();
+        } catch (err) { $("login-error").textContent = err.message; }
+    });
+    $("logout-btn").addEventListener("click", async () => { await api("/api/logout", { method: "POST" }); show("login"); });
 
     async function init() {
         const me = await api("/api/me");
-        if (me.authed) {
-            show("app");
-            await loadProducts();
-        } else {
-            show("login");
-        }
+        if (me.authed) { show("app"); await loadProducts(); await loadConfig(); }
+        else { show("login"); }
     }
-
     document.addEventListener("DOMContentLoaded", () => {
         modal = new bootstrap.Modal($("product-modal"));
         init().catch(() => show("login"));

@@ -40,6 +40,47 @@ const DEFAULT_PRODUCTS = [
   },
 ];
 
+// Configurația de conținut (bannere, titluri, contact), salvată la prima accesare.
+const CONFIG_KEY = "siteconfig";
+const DEFAULT_CONFIG = {
+  carousel: [
+    {
+      image: "/img/carousel-1.jpg",
+      eyebrow: "Laborator de cofetărie",
+      title: "Creăm dulciuri cu pasiune",
+      subtitle: "Bine ați venit în laboratorul nostru de cofetărie, unde pasiunea pentru dulciuri întâlnește măiestria culinară!",
+      buttonText: "Vezi produsele",
+      buttonLink: "product.html",
+    },
+    {
+      image: "/img/carousel-2.jpg",
+      eyebrow: "Traditum By Victoria",
+      title: "O experiență culinară inedită",
+      subtitle: "Un proiect născut din dorința de a oferi o experiență culinară inedită, în fiecare desert pe care îl creăm.",
+      buttonText: "Comandă acum",
+      buttonLink: "contact.html",
+    },
+  ],
+  promo: { title: "Cea mai dulce cofetărie din orașul tău" },
+  pageTitles: {
+    about: "Despre noi",
+    service: "Servicii",
+    product: "Produse",
+    team: "Echipa noastră",
+    testimonial: "Testimoniale",
+    contact: "Contact",
+    notfound: "Pagina 404",
+  },
+  contact: {
+    phone: "+40 7XX XXX XXX",
+    email: "contact@traditumbyvictoria.ro",
+    address: "Adresa ta, Localitate, România",
+    facebook: "",
+    instagram: "",
+    tiktok: "",
+  },
+};
+
 // ---------------------------------------------------------------- utilitare
 
 function json(data, status = 200, extraHeaders = {}) {
@@ -139,6 +180,58 @@ function sanitizeProduct(body) {
   };
 }
 
+// ---------------------------------------------------------------- configurație
+
+async function getConfig(env) {
+  let data = await env.PRODUCTS.get(CONFIG_KEY, "json");
+  if (!data) {
+    data = DEFAULT_CONFIG;
+    await env.PRODUCTS.put(CONFIG_KEY, JSON.stringify(data));
+  }
+  return data;
+}
+
+function str(v, max) {
+  return String(v == null ? "" : v).slice(0, max).trim();
+}
+
+function sanitizeConfig(body) {
+  const d = DEFAULT_CONFIG;
+  const carouselSrc = Array.isArray(body.carousel) ? body.carousel.slice(0, 8) : [];
+  const carousel = carouselSrc.map((s) => ({
+    image: str(s.image, 300),
+    eyebrow: str(s.eyebrow, 120),
+    title: str(s.title, 160),
+    subtitle: str(s.subtitle, 400),
+    buttonText: str(s.buttonText, 60),
+    buttonLink: str(s.buttonLink, 200),
+  }));
+  const pt = body.pageTitles || {};
+  const ct = body.contact || {};
+  const promo = body.promo || {};
+  return {
+    carousel: carousel.length ? carousel : d.carousel,
+    promo: { title: str(promo.title, 160) || d.promo.title },
+    pageTitles: {
+      about: str(pt.about, 80) || d.pageTitles.about,
+      service: str(pt.service, 80) || d.pageTitles.service,
+      product: str(pt.product, 80) || d.pageTitles.product,
+      team: str(pt.team, 80) || d.pageTitles.team,
+      testimonial: str(pt.testimonial, 80) || d.pageTitles.testimonial,
+      contact: str(pt.contact, 80) || d.pageTitles.contact,
+      notfound: str(pt.notfound, 80) || d.pageTitles.notfound,
+    },
+    contact: {
+      phone: str(ct.phone, 60),
+      email: str(ct.email, 120),
+      address: str(ct.address, 200),
+      facebook: str(ct.facebook, 200),
+      instagram: str(ct.instagram, 200),
+      tiktok: str(ct.tiktok, 200),
+    },
+  };
+}
+
 // ---------------------------------------------------------------- API
 
 async function handleApi(request, env, url) {
@@ -175,6 +268,11 @@ async function handleApi(request, env, url) {
     return json(await getProducts(env));
   }
 
+  // configurație conținut (public)
+  if (pathname === "/api/config" && method === "GET") {
+    return json(await getConfig(env));
+  }
+
   // imagine (public)
   if (pathname.startsWith("/api/img/") && method === "GET") {
     const key = IMG_PREFIX + pathname.slice("/api/img/".length);
@@ -189,6 +287,14 @@ async function handleApi(request, env, url) {
   // --- de aici încolo, doar autentificat ---
   if (!(await isAuthed(request, env))) {
     return json({ error: "Neautorizat" }, 401);
+  }
+
+  // salvare configurație conținut
+  if (pathname === "/api/config" && method === "PUT") {
+    const body = await request.json().catch(() => ({}));
+    const config = sanitizeConfig(body);
+    await env.PRODUCTS.put(CONFIG_KEY, JSON.stringify(config));
+    return json(config);
   }
 
   // upload imagine

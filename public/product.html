@@ -31,7 +31,7 @@
     <link href="css/style.css" rel="stylesheet">
 </head>
 
-<body>
+<body data-page="product">
     <!-- Spinner Start -->
     <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
         <div class="spinner-grow text-primary" role="status"></div>
@@ -53,9 +53,9 @@
             <div class="col-lg-6 px-5 text-end">
                 <small>Urmărește-ne:</small>
                 <div class="h-100 d-inline-flex align-items-center">
-                    <a class="btn-lg-square text-primary border-end rounded-0" href=""><i class="fab fa-facebook-f"></i></a>
-                    <a class="btn-lg-square text-primary border-end rounded-0" href=""><i class="fab fa-instagram"></i></a>
-                    <a class="btn-lg-square text-primary pe-0" href=""><i class="fab fa-tiktok"></i></a>
+                    <a class="btn-lg-square text-primary border-end rounded-0" data-social="facebook" href=""><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn-lg-square text-primary border-end rounded-0" data-social="instagram" href=""><i class="fab fa-instagram"></i></a>
+                    <a class="btn-lg-square text-primary pe-0" data-social="tiktok" href=""><i class="fab fa-tiktok"></i></a>
                 </div>
             </div>
         </div>
@@ -93,7 +93,7 @@
                 </div>
                 <div class="ps-3">
                     <small class="text-primary mb-0">Sună-ne</small>
-                    <p class="text-light fs-5 mb-0">+40 7XX XXX XXX</p>
+                    <p class="text-light fs-5 mb-0" data-content="contact-phone">+40 7XX XXX XXX</p>
                 </div>
             </div>
         </div>
@@ -104,12 +104,12 @@
     <!-- Page Header Start -->
     <div class="container-fluid page-header py-6 wow fadeIn" data-wow-delay="0.1s">
         <div class="container text-center pt-5 pb-3">
-            <h1 class="display-4 text-white animated slideInDown mb-3">Produse</h1>
+            <h1 class="display-4 text-white animated slideInDown mb-3" data-content="page-title">Produse</h1>
             <nav aria-label="breadcrumb animated slideInDown">
                 <ol class="breadcrumb justify-content-center mb-0">
                     <li class="breadcrumb-item"><a class="text-white" href="index.html">Acasă</a></li>
                     <li class="breadcrumb-item"><a class="text-white" href="#">Pagini</a></li>
-                    <li class="breadcrumb-item text-primary active" aria-current="page">Produse</li>
+                    <li class="breadcrumb-item text-primary active" aria-current="page" data-content="page-title">Produse</li>
                 </ol>
             </nav>
         </div>
@@ -123,14 +123,14 @@
             <div class="bg-primary text-light rounded-bottom p-5 my-6 mt-0 wow fadeInUp" data-wow-delay="0.1s">
                 <div class="row g-4 align-items-center">
                     <div class="col-lg-6">
-                        <h1 class="display-4 text-light mb-0">Cea mai dulce cofetărie din orașul tău</h1>
+                        <h1 class="display-4 text-light mb-0" data-content="promo-title">Cea mai dulce cofetărie din orașul tău</h1>
                     </div>
                     <div class="col-lg-6 text-lg-end">
                         <div class="d-inline-flex align-items-center text-start">
                             <i class="fa fa-phone-alt fa-4x flex-shrink-0"></i>
                             <div class="ms-4">
                                 <p class="fs-5 fw-bold mb-0">Sună-ne</p>
-                                <p class="fs-1 fw-bold mb-0">+40 7XX XXX XXX</p>
+                                <p class="fs-1 fw-bold mb-0" data-content="contact-phone">+40 7XX XXX XXX</p>
                             </div>
                         </div>
                     </div>
@@ -154,13 +154,13 @@
             <div class="row g-5">
                 <div class="col-lg-4 col-md-6">
                     <h4 class="text-light mb-4">Contact</h4>
-                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Adresa ta, Localitate, România</p>
-                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+40 7XX XXX XXX</p>
-                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>contact@traditumbyvictoria.ro</p>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i><span data-content="contact-address">Adresa ta, Localitate, România</span></p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i><span data-content="contact-phone">+40 7XX XXX XXX</span></p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i><a class="text-light text-decoration-none" data-content="contact-email" href="mailto:contact@traditumbyvictoria.ro">contact@traditumbyvictoria.ro</a></p>
                     <div class="d-flex pt-2">
-                        <a class="btn btn-square btn-outline-light rounded-circle me-1" href=""><i class="fab fa-facebook-f"></i></a>
-                        <a class="btn btn-square btn-outline-light rounded-circle me-1" href=""><i class="fab fa-instagram"></i></a>
-                        <a class="btn btn-square btn-outline-light rounded-circle me-0" href=""><i class="fab fa-tiktok"></i></a>
+                        <a class="btn btn-square btn-outline-light rounded-circle me-1" data-social="facebook" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square btn-outline-light rounded-circle me-1" data-social="instagram" href=""><i class="fab fa-instagram"></i></a>
+                        <a class="btn btn-square btn-outline-light rounded-circle me-0" data-social="tiktok" href=""><i class="fab fa-tiktok"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -233,6 +233,7 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    <script src="js/site-content.js"></script>
 
     <!-- Încărcare dinamică produse -->
     <script>
