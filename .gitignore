@@ -1,0 +1,9 @@
+# wrangler / cloudflare
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
+
+# node
+node_modules
