@@ -14,6 +14,8 @@
         .card-admin { border:none; box-shadow:0 .5rem 1.5rem rgba(0,0,0,.08); }
         .thumb { width:64px; height:64px; object-fit:cover; border-radius:.5rem; background:#eee; }
         #login-view, #app-view { display:none; }
+        .is-visible { display:block !important; }
+        #login-view.is-visible { display:flex !important; }
     </style>
 </head>
 
@@ -125,8 +127,8 @@
     }
 
     function show(view) {
-        $("login-view").style.display = view === "login" ? "" : "none";
-        $("app-view").style.display = view === "app" ? "" : "none";
+        $("login-view").classList.toggle("is-visible", view === "login");
+        $("app-view").classList.toggle("is-visible", view === "app");
         $("logout-btn").style.display = view === "app" ? "" : "none";
     }
 
