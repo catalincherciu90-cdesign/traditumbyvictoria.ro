@@ -1,5 +1,5 @@
 /**
- * Worker Traditum By Victoria
+ * Worker Traditium By Victoria
  * - Servește site-ul static (binding ASSETS)
  * - API produse cu stocare în KV (binding PRODUCTS)
  * - Autentificare admin pe bază de parolă (secret ADMIN_PASSWORD)
@@ -54,7 +54,7 @@ const DEFAULT_CONFIG = {
     },
     {
       image: "/img/carousel-2.jpg",
-      eyebrow: "Traditum By Victoria",
+      eyebrow: "Traditium By Victoria",
       title: "O experiență culinară inedită",
       subtitle: "Un proiect născut din dorința de a oferi o experiență culinară inedită, în fiecare desert pe care îl creăm.",
       buttonText: "Comandă acum",
