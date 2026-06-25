@@ -79,6 +79,22 @@ const DEFAULT_CONFIG = {
     instagram: "",
     tiktok: "",
   },
+  pages: {
+    torturi: {
+      title: "Torturi",
+      description: "Torturi personalizate pentru aniversări, nunți, botezuri și orice ocazie specială. Fiecare tort este realizat la comandă, din ingrediente atent alese, după tema și dorința ta.",
+      priceMin: "150",
+      priceMax: "600",
+      images: ["/img/product-1.jpg", "/img/about-1.jpg"],
+    },
+    candybar: {
+      title: "Candy Bar",
+      description: "Mese dulci și candy bar-uri pentru evenimente — un colț de poveste cu prăjituri asortate, macarons, tarte și deserturi în miniatură, aranjate elegant pentru momentele tale speciale.",
+      priceMin: "300",
+      priceMax: "1500",
+      images: ["/img/product-3.jpg", "/img/service-2.jpg"],
+    },
+  },
 };
 
 // ---------------------------------------------------------------- utilitare
@@ -183,12 +199,17 @@ function sanitizeProduct(body) {
 // ---------------------------------------------------------------- configurație
 
 async function getConfig(env) {
-  let data = await env.PRODUCTS.get(CONFIG_KEY, "json");
+  const data = await env.PRODUCTS.get(CONFIG_KEY, "json");
   if (!data) {
-    data = DEFAULT_CONFIG;
-    await env.PRODUCTS.put(CONFIG_KEY, JSON.stringify(data));
+    await env.PRODUCTS.put(CONFIG_KEY, JSON.stringify(DEFAULT_CONFIG));
+    return DEFAULT_CONFIG;
   }
-  return data;
+  // completează cu cheile noi apărute în DEFAULT_CONFIG (ex. pages)
+  return {
+    ...DEFAULT_CONFIG,
+    ...data,
+    pages: { ...DEFAULT_CONFIG.pages, ...(data.pages || {}) },
+  };
 }
 
 function str(v, max) {
@@ -209,6 +230,18 @@ function sanitizeConfig(body) {
   const pt = body.pageTitles || {};
   const ct = body.contact || {};
   const promo = body.promo || {};
+  const pg = body.pages || {};
+  const page = (src, def) => {
+    src = src || {};
+    const imgs = Array.isArray(src.images) ? src.images.slice(0, 12).map((i) => str(i, 300)).filter(Boolean) : [];
+    return {
+      title: str(src.title, 80) || def.title,
+      description: str(src.description, 1500),
+      priceMin: str(src.priceMin, 30),
+      priceMax: str(src.priceMax, 30),
+      images: imgs.length ? imgs : def.images,
+    };
+  };
   return {
     carousel: carousel.length ? carousel : d.carousel,
     promo: { title: str(promo.title, 160) || d.promo.title },
@@ -228,6 +261,10 @@ function sanitizeConfig(body) {
       facebook: str(ct.facebook, 200),
       instagram: str(ct.instagram, 200),
       tiktok: str(ct.tiktok, 200),
+    },
+    pages: {
+      torturi: page(pg.torturi, d.pages.torturi),
+      candybar: page(pg.candybar, d.pages.candybar),
     },
   };
 }

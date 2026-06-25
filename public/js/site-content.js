@@ -63,6 +63,36 @@
             '</div>';
     }
 
+    function applyProductPage(pages) {
+        if (!pages) return;
+        var page = document.body.getAttribute("data-page");
+        if (page !== "torturi" && page !== "candybar") return;
+        var p = pages[page];
+        if (!p) return;
+        setText('[data-content="page-title"]', p.title);
+        setText("#page-content-title", p.title);
+        var desc = document.getElementById("page-content-desc");
+        if (desc && p.description != null) {
+            desc.innerHTML = String(p.description).split(/\n+/).filter(Boolean)
+                .map(function (par) { return "<p>" + esc(par) + "</p>"; }).join("");
+        }
+        var priceEl = document.getElementById("page-price");
+        if (priceEl) {
+            var min = (p.priceMin || "").trim(), max = (p.priceMax || "").trim(), txt = "";
+            if (min && max) txt = min + " – " + max + " lei";
+            else if (min || max) txt = (min || max) + " lei";
+            if (txt) { priceEl.textContent = txt; }
+            else { var w = priceEl.closest(".d-inline-flex"); if (w) w.style.display = "none"; }
+        }
+        var imgWrap = document.getElementById("page-images");
+        if (imgWrap && Array.isArray(p.images) && p.images.length) {
+            var col = p.images.length === 1 ? "col-12" : "col-6";
+            imgWrap.innerHTML = p.images.map(function (src) {
+                return '<div class="' + col + '"><img class="img-fluid rounded w-100" style="height:260px;object-fit:cover" src="' + esc(src) + '" alt="' + esc(p.title) + '"></div>';
+            }).join("");
+        }
+    }
+
     function applyCarousel(slides) {
         var $ = window.jQuery;
         if (!$ || !slides || !slides.length) return;
@@ -84,6 +114,7 @@
             applyContact(cfg.contact);
             applyPromo(cfg.promo);
             applyPageTitle(cfg.pageTitles);
+            applyProductPage(cfg.pages);
             applyCarousel(cfg.carousel);
         })
         .catch(function () { /* păstrează conținutul static implicit */ });

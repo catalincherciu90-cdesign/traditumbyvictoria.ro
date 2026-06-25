@@ -97,6 +97,14 @@
                             </div>
                         </div>
 
+                        <!-- Pagini produse (Torturi & Candy Bar) -->
+                        <div class="card card-admin mb-4">
+                            <div class="card-body">
+                                <h5 class="brand mb-3">Pagini Torturi &amp; Candy Bar</h5>
+                                <div id="product-pages"></div>
+                            </div>
+                        </div>
+
                         <!-- Titluri pagini -->
                         <div class="card card-admin mb-4">
                             <div class="card-body">
@@ -325,9 +333,80 @@
         } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
     });
 
+    // ---- pagini produse (Torturi / Candy Bar) ----
+    function pimgRow(url) {
+        const row = document.createElement("div");
+        row.className = "pimg d-flex align-items-center gap-2 mb-2";
+        row.innerHTML = `
+            <img class="thumb pimg-preview" src="${escapeHtml(url || '')}" style="${url ? '' : 'visibility:hidden'}">
+            <input type="hidden" class="pimg-url" value="${escapeHtml(url || '')}">
+            <input type="file" class="form-control form-control-sm pimg-file" accept="image/*">
+            <button type="button" class="btn btn-sm btn-outline-danger" data-remove-pimg><i class="bi bi-x-lg"></i></button>`;
+        return row;
+    }
+    function pageEditor(key, label, p) {
+        p = p || {};
+        const wrap = document.createElement("div");
+        wrap.className = "slide-card p-3 mb-3";
+        wrap.dataset.pkey = key;
+        wrap.innerHTML = `
+            <h6 class="mb-3 fw-bold">${label}</h6>
+            <label class="form-label">Titlu</label>
+            <input type="text" class="form-control form-control-sm mb-2 pg-title" value="${escapeHtml(p.title || '')}">
+            <label class="form-label">Descriere</label>
+            <textarea class="form-control form-control-sm mb-2 pg-desc" rows="3">${escapeHtml(p.description || '')}</textarea>
+            <div class="row g-2 mb-2">
+                <div class="col-6"><label class="form-label">Preț minim</label><input type="text" class="form-control form-control-sm pg-pmin" placeholder="ex. 150" value="${escapeHtml(p.priceMin || '')}"></div>
+                <div class="col-6"><label class="form-label">Preț maxim</label><input type="text" class="form-control form-control-sm pg-pmax" placeholder="ex. 600" value="${escapeHtml(p.priceMax || '')}"></div>
+            </div>
+            <label class="form-label">Imagini (stânga paginii)</label>
+            <div class="pg-images mb-2"></div>
+            <button type="button" class="btn btn-sm btn-outline-dark" data-add-pimg><i class="bi bi-plus-lg"></i> Adaugă imagine</button>`;
+        const imgs = wrap.querySelector(".pg-images");
+        (p.images || []).forEach(u => imgs.appendChild(pimgRow(u)));
+        return wrap;
+    }
+    function renderProductPages(pages) {
+        const c = $("product-pages"); c.innerHTML = "";
+        pages = pages || {};
+        c.appendChild(pageEditor("torturi", "Torturi", pages.torturi));
+        c.appendChild(pageEditor("candybar", "Candy Bar", pages.candybar));
+    }
+    function gatherProductPages() {
+        const out = {};
+        document.querySelectorAll("#product-pages [data-pkey]").forEach(w => {
+            out[w.dataset.pkey] = {
+                title: w.querySelector(".pg-title").value,
+                description: w.querySelector(".pg-desc").value,
+                priceMin: w.querySelector(".pg-pmin").value,
+                priceMax: w.querySelector(".pg-pmax").value,
+                images: [...w.querySelectorAll(".pimg-url")].map(i => i.value).filter(Boolean),
+            };
+        });
+        return out;
+    }
+    $("product-pages").addEventListener("click", (e) => {
+        const add = e.target.closest("[data-add-pimg]");
+        const rm = e.target.closest("[data-remove-pimg]");
+        if (add) { add.closest("[data-pkey]").querySelector(".pg-images").appendChild(pimgRow("")); }
+        else if (rm) { rm.closest(".pimg").remove(); }
+    });
+    $("product-pages").addEventListener("change", async (e) => {
+        if (!e.target.classList.contains("pimg-file")) return;
+        const file = e.target.files[0]; if (!file) return;
+        const row = e.target.closest(".pimg");
+        const prev = row.querySelector(".pimg-preview");
+        prev.src = URL.createObjectURL(file); prev.style.visibility = "visible";
+        try {
+            const up = await api("/api/upload", { method: "POST", body: (function(){ const fd = new FormData(); fd.append("file", file); return fd; })() });
+            row.querySelector(".pimg-url").value = up.url;
+        } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
+    });
+
     function fillConfig(cfg) {
         $("carousel-slides").innerHTML = "";
         (cfg.carousel || []).forEach(addSlide);
+        renderProductPages(cfg.pages);
         $("c-promo-title").value = (cfg.promo && cfg.promo.title) || "";
         const pt = cfg.pageTitles || {};
         ["about","service","product","team","testimonial","contact","notfound"].forEach(k => { $("pt-" + k).value = pt[k] || ""; });
@@ -345,7 +424,7 @@
         }));
         const pt = {}; ["about","service","product","team","testimonial","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
         const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
-        return { carousel, promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
+        return { carousel, pages: gatherProductPages(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
     async function loadConfig() { fillConfig(await api("/api/config")); }
     $("config-form").addEventListener("submit", async (e) => {
