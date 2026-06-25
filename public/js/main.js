@@ -17,12 +17,12 @@
 
 
     // Fixed Navbar
-    $('.fixed-top').css('top', $('.top-bar').height());
+    $('.fixed-top').css('top', 0);
     $(window).scroll(function () {
         if ($(this).scrollTop()) {
             $('.fixed-top').addClass('bg-dark').css('top', 0);
         } else {
-            $('.fixed-top').removeClass('bg-dark').css('top', $('.top-bar').height());
+            $('.fixed-top').removeClass('bg-dark').css('top', 0);
         }
     });
     
