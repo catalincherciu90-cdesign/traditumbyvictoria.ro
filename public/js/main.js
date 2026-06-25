@@ -42,7 +42,7 @@
 
 
     // Header carousel
-    $(".header-carousel").owlCarousel({
+    if ($.fn.owlCarousel) $(".header-carousel").owlCarousel({
         autoplay: false,
         smartSpeed: 1500,
         loop: true,
@@ -57,14 +57,14 @@
 
 
     // Facts counter
-    $('[data-toggle="counter-up"]').counterUp({
+    if ($.fn.counterUp) $('[data-toggle="counter-up"]').counterUp({
         delay: 10,
         time: 2000
     });
 
 
     // Testimonials carousel
-    $(".testimonial-carousel").owlCarousel({
+    if ($.fn.owlCarousel) $(".testimonial-carousel").owlCarousel({
         autoplay: false,
         smartSpeed: 1000,
         margin: 25,

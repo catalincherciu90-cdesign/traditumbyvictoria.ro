@@ -393,6 +393,21 @@ async function handleApi(request, env, url) {
 
 // ---------------------------------------------------------------- entry
 
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "SAMEORIGIN",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+};
+
+// Servește un asset static cu headere de securitate adăugate.
+async function asset(env, request) {
+  const res = await env.ASSETS.fetch(request);
+  const headers = new Headers(res.headers);
+  for (const [k, v] of Object.entries(SECURITY_HEADERS)) headers.set(k, v);
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -407,10 +422,10 @@ export default {
 
     // /admin -> servește pagina de administrare statică
     if (url.pathname === "/admin" || url.pathname === "/admin/") {
-      return env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));
+      return asset(env, new Request(new URL("/admin.html", url), request));
     }
 
     // restul: fișiere statice
-    return env.ASSETS.fetch(request);
+    return asset(env, request);
   },
 };
