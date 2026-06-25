@@ -415,3 +415,16 @@ h6,
 .copyright a:hover {
     color: var(--light);
 }
+/* Navbar centrat: logo + meniu + telefon grupate central pe desktop */
+@media (min-width: 992px) {
+    .navbar.nav-centered {
+        justify-content: center;
+    }
+    .navbar.nav-centered .navbar-collapse {
+        flex-grow: 0;
+    }
+    .navbar.nav-centered .navbar-nav {
+        margin-left: 1.5rem;
+        margin-right: 1.5rem;
+    }
+}
