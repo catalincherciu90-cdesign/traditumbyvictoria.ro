@@ -108,6 +108,7 @@
                                 <h5 class="brand mb-3">Banner promo</h5>
                                 <label class="form-label">Titlu banner</label>
                                 <input type="text" id="c-promo-title" class="form-control">
+                                <button type="button" id="ai-promo" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-stars"></i> Generează cu AI</button>
                                 <div class="form-text">Numărul de telefon din banner se ia din secțiunea „Date de contact".</div>
                             </div>
                         </div>
@@ -322,6 +323,7 @@
                         <div class="col-6"><input type="text" class="form-control form-control-sm s-btntext" placeholder="Text buton" value="${escapeHtml(s.buttonText || '')}"></div>
                         <div class="col-6"><input type="text" class="form-control form-control-sm s-btnlink" placeholder="Link buton (ex. product.html)" value="${escapeHtml(s.buttonLink || '')}"></div>
                     </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2 ai-slide"><i class="bi bi-stars"></i> Generează titlu + subtitlu cu AI</button>
                 </div>
             </div>`;
         return wrap;
@@ -329,9 +331,34 @@
     function addSlide(s) { $("carousel-slides").appendChild(slideEditor(s)); }
 
     $("add-slide").addEventListener("click", () => addSlide({}));
-    $("carousel-slides").addEventListener("click", (e) => {
+    async function aiGenerate(kind, hint) {
+        return api("/api/generate", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind, hint: hint || "" }) });
+    }
+    async function withBusy(btn, fn) {
+        const old = btn.innerHTML; btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Generez...';
+        try { await fn(); } catch (err) { alert("AI: " + err.message); }
+        finally { btn.disabled = false; btn.innerHTML = old; }
+    }
+
+    $("carousel-slides").addEventListener("click", async (e) => {
         const rm = e.target.closest("[data-remove-slide]");
-        if (rm) rm.closest(".slide-card").remove();
+        const ai = e.target.closest(".ai-slide");
+        if (rm) { rm.closest(".slide-card").remove(); return; }
+        if (ai) {
+            const card = ai.closest(".slide-card");
+            await withBusy(ai, async () => {
+                const out = await aiGenerate("carousel", card.querySelector(".s-eyebrow").value);
+                if (out.title) card.querySelector(".s-title").value = out.title;
+                if (out.subtitle) card.querySelector(".s-subtitle").value = out.subtitle;
+            });
+        }
+    });
+    $("ai-promo").addEventListener("click", (e) => {
+        withBusy(e.currentTarget, async () => {
+            const out = await aiGenerate("promo", "");
+            if (out.title) $("c-promo-title").value = out.title;
+        });
     });
     // upload imagine slide
     $("carousel-slides").addEventListener("change", async (e) => {

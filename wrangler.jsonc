@@ -16,5 +16,9 @@
       "binding": "PRODUCTS",
       "id": "a217be415b254215bd0343e80e138d24"
     }
-  ]
+  ],
+  // Workers AI — generare texte bannere (cotă gratuită zilnică)
+  "ai": {
+    "binding": "AI"
+  }
 }

@@ -271,6 +271,43 @@ function sanitizeConfig(body) {
   };
 }
 
+// ---------------------------------------------------------------- AI
+
+const AI_MODEL = "@cf/meta/llama-3.1-8b-instruct";
+const AI_BRAND = "Ești copywriter pentru cofetăria premium „Traditum By Victoria\" (laborator de cofetărie artizanală: torturi, prăjituri, candy bar). Scrii exclusiv în limba română, pe un ton cald, elegant și autentic, fără clișee și fără emoji.";
+
+function stripQuotes(s) {
+  return String(s || "").trim().replace(/^["'„”«»]+|["'„”«»]+$/g, "").trim();
+}
+
+async function generateBanner(env, kind, hint) {
+  if (!env.AI) throw new Error("Workers AI nu este activat pe acest cont.");
+  hint = hint ? "Indiciu/temă: " + hint + "." : "";
+  let user;
+  if (kind === "promo") {
+    user = "Generează UN singur titlu scurt și atrăgător (maxim 8 cuvinte) pentru un banner promoțional. " + hint + " Răspunde DOAR cu titlul, fără ghilimele, fără explicații.";
+  } else {
+    user = "Generează textul pentru un slide de carousel de pe prima pagină: un titlu scurt (maxim 6 cuvinte) și un subtitlu (maxim 20 de cuvinte). " + hint + " Răspunde EXACT în formatul:\nTitlu: <titlu>\nSubtitlu: <subtitlu>";
+  }
+  const res = await env.AI.run(AI_MODEL, {
+    messages: [
+      { role: "system", content: AI_BRAND },
+      { role: "user", content: user },
+    ],
+    max_tokens: 200,
+  });
+  const text = String((res && res.response) || "").trim();
+  if (kind === "promo") return { title: stripQuotes(text.split("\n")[0] || "") };
+  let title = "", subtitle = "";
+  for (const line of text.split("\n")) {
+    const l = line.trim();
+    if (/^titlu\s*:/i.test(l)) title = l.replace(/^titlu\s*:/i, "");
+    else if (/^subtitlu\s*:/i.test(l)) subtitle = l.replace(/^subtitlu\s*:/i, "");
+  }
+  if (!title) title = text.split("\n")[0] || "";
+  return { title: stripQuotes(title), subtitle: stripQuotes(subtitle) };
+}
+
 // ---------------------------------------------------------------- API
 
 async function handleApi(request, env, url) {
@@ -334,6 +371,17 @@ async function handleApi(request, env, url) {
     const config = sanitizeConfig(body);
     await env.PRODUCTS.put(CONFIG_KEY, JSON.stringify(config));
     return json(config);
+  }
+
+  // generare text bannere cu AI
+  if (pathname === "/api/generate" && method === "POST") {
+    const body = await request.json().catch(() => ({}));
+    try {
+      const out = await generateBanner(env, str(body.kind, 30), str(body.hint, 200));
+      return json(out);
+    } catch (e) {
+      return json({ error: String((e && e.message) || e) }, 500);
+    }
   }
 
   // upload imagine
