@@ -273,7 +273,13 @@ function sanitizeConfig(body) {
 
 // ---------------------------------------------------------------- AI
 
-const AI_MODEL = "@cf/meta/llama-3.1-8b-instruct";
+// Modele încercate în ordine — dacă unul e deprecat/indisponibil, trece la următorul.
+const AI_MODELS = [
+  "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "@cf/meta/llama-4-scout-17b-16e-instruct",
+  "@cf/meta/llama-3.1-8b-instruct-fp8",
+  "@cf/meta/llama-3-8b-instruct",
+];
 const AI_BRAND = "Ești copywriter pentru cofetăria premium „Traditum By Victoria\" (laborator de cofetărie artizanală: torturi, prăjituri, candy bar). Scrii exclusiv în limba română, pe un ton cald, elegant și autentic, fără clișee și fără emoji.";
 
 function stripQuotes(s) {
@@ -289,13 +295,19 @@ async function generateBanner(env, kind, hint) {
   } else {
     user = "Generează textul pentru un slide de carousel de pe prima pagină: un titlu scurt (maxim 6 cuvinte) și un subtitlu (maxim 20 de cuvinte). " + hint + " Răspunde EXACT în formatul:\nTitlu: <titlu>\nSubtitlu: <subtitlu>";
   }
-  const res = await env.AI.run(AI_MODEL, {
+  const payload = {
     messages: [
       { role: "system", content: AI_BRAND },
       { role: "user", content: user },
     ],
     max_tokens: 200,
-  });
+  };
+  let res, lastErr;
+  for (const model of AI_MODELS) {
+    try { res = await env.AI.run(model, payload); break; }
+    catch (e) { lastErr = e; }
+  }
+  if (!res) throw new Error("Niciun model AI disponibil: " + String((lastErr && lastErr.message) || lastErr));
   const text = String((res && res.response) || "").trim();
   if (kind === "promo") return { title: stripQuotes(text.split("\n")[0] || "") };
   let title = "", subtitle = "";
