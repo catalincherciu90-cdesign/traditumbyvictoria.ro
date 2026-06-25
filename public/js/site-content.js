@@ -39,7 +39,7 @@
     function applyLogo(url) {
         if (!url) return;
         document.querySelectorAll("a.navbar-brand[data-logo]").forEach(function (a) {
-            a.innerHTML = '<img src="' + esc(url) + '" alt="Traditium By Victoria" style="max-height:60px;width:auto">';
+            a.innerHTML = '<img src="' + esc(url) + '" alt="Traditium By Victoria" style="max-height:85px;width:auto;padding:6px 0">';
         });
     }
 
