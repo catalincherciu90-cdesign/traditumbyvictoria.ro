@@ -36,6 +36,13 @@
         });
     }
 
+    function applyLogo(url) {
+        if (!url) return;
+        document.querySelectorAll("a.navbar-brand[data-logo]").forEach(function (a) {
+            a.innerHTML = '<img src="' + esc(url) + '" alt="Traditium By Victoria" style="max-height:60px;width:auto">';
+        });
+    }
+
     function applyPromo(p) {
         if (p && p.title) setText('[data-content="promo-title"]', p.title);
     }
@@ -123,6 +130,7 @@
         .then(function (r) { return r.json(); })
         .then(function (cfg) {
             if (!cfg) return;
+            applyLogo(cfg.logo);
             applyContact(cfg.contact);
             applyPromo(cfg.promo);
             applyPageTitle(cfg.pageTitles);

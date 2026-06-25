@@ -76,6 +76,21 @@
                 <!-- CONTINUT -->
                 <div class="tab-pane fade" id="tab-content">
                     <form id="config-form">
+                        <!-- Logo -->
+                        <div class="card card-admin mb-4">
+                            <div class="card-body">
+                                <h5 class="brand mb-3">Logo site</h5>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img id="logo-preview" src="" alt="logo" class="bg-dark rounded p-2" style="max-height:64px;display:none">
+                                    <div class="flex-grow-1">
+                                        <input type="file" id="logo-file" class="form-control" accept="image/*">
+                                        <input type="hidden" id="logo-url">
+                                        <div class="form-text">Recomandat PNG cu fundal transparent. Apare în meniul de sus, în locul textului.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Carousel -->
                         <div class="card card-admin mb-4">
                             <div class="card-body">
@@ -403,7 +418,21 @@
         } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
     });
 
+    $("logo-file").addEventListener("change", async (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        const lp = $("logo-preview");
+        lp.src = URL.createObjectURL(file); lp.style.display = "";
+        try {
+            const up = await api("/api/upload", { method: "POST", body: (function(){ const fd = new FormData(); fd.append("file", file); return fd; })() });
+            $("logo-url").value = up.url;
+        } catch (err) { alert("Eroare la încărcarea logo-ului: " + err.message); }
+    });
+
     function fillConfig(cfg) {
+        const logo = cfg.logo || "";
+        $("logo-url").value = logo;
+        const lp = $("logo-preview");
+        if (logo) { lp.src = logo; lp.style.display = ""; } else { lp.style.display = "none"; }
         $("carousel-slides").innerHTML = "";
         (cfg.carousel || []).forEach(addSlide);
         renderProductPages(cfg.pages);
@@ -424,7 +453,7 @@
         }));
         const pt = {}; ["about","service","product","team","testimonial","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
         const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
-        return { carousel, pages: gatherProductPages(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
+        return { logo: $("logo-url").value, carousel, pages: gatherProductPages(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
     async function loadConfig() { fillConfig(await api("/api/config")); }
     $("config-form").addEventListener("submit", async (e) => {

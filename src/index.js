@@ -43,6 +43,7 @@ const DEFAULT_PRODUCTS = [
 // Configurația de conținut (bannere, titluri, contact), salvată la prima accesare.
 const CONFIG_KEY = "siteconfig";
 const DEFAULT_CONFIG = {
+  logo: "",
   carousel: [
     {
       image: "/img/carousel-1.jpg",
@@ -243,6 +244,7 @@ function sanitizeConfig(body) {
     };
   };
   return {
+    logo: str(body.logo, 300),
     carousel: carousel.length ? carousel : d.carousel,
     promo: { title: str(promo.title, 160) || d.promo.title },
     pageTitles: {
