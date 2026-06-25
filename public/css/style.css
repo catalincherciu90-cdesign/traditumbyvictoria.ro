@@ -428,3 +428,19 @@ h6,
         margin-right: 1.5rem;
     }
 }
+
+/* Titluri cu Playfair Display (font de brand) */
+h1, h2, h3,
+.display-1, .display-3, .display-4, .display-5, .display-6,
+.navbar-brand h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+}
+
+/* Titlul mare din carousel — redus pe ecrane mici */
+@media (max-width: 576px) {
+    .header-carousel h1.display-1,
+    .header-carousel .display-1 {
+        font-size: 2.5rem;
+    }
+}

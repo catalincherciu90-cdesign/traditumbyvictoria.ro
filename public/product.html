@@ -3,13 +3,21 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Traditum By Victoria - Laborator de cofetărie</title>
+    <title>Produse - Traditum By Victoria</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="" name="keywords">
-    <meta content="" name="description">
+    <meta content="Descoperă produsele Traditum By Victoria: torturi, prăjituri de casă și mese dulci, pregătite din ingrediente alese cu grijă." name="description">
 
     <!-- Favicon -->
-    <link href="img/favicon.ico" rel="icon">
+    <link href="img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="img/favicon.svg" rel="apple-touch-icon">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Produse - Traditum By Victoria">
+    <meta property="og:description" content="Descoperă produsele Traditum By Victoria: torturi, prăjituri de casă și mese dulci, pregătite din ingrediente alese cu grijă.">
+    <meta property="og:image" content="https://traditumbyvictoria.ro/img/carousel-1.jpg">
+    <meta property="og:url" content="https://traditumbyvictoria.ro/product.html">
+    <meta name="twitter:card" content="summary_large_image">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,7 +93,6 @@
             <nav aria-label="breadcrumb animated slideInDown">
                 <ol class="breadcrumb justify-content-center mb-0">
                     <li class="breadcrumb-item"><a class="text-white" href="index.html">Acasă</a></li>
-                    <li class="breadcrumb-item"><a class="text-white" href="#">Pagini</a></li>
                     <li class="breadcrumb-item text-primary active" aria-current="page" data-content="page-title">Produse</li>
                 </ol>
             </nav>
@@ -198,7 +205,7 @@
         function card(p, i) {
             var delay = (0.1 + (i % 3) * 0.2).toFixed(1);
             var price = p.price ? '<div class="d-inline-block border border-primary rounded-pill px-3 mb-3">' + esc(p.price) + '</div>' : '';
-            var img = p.image ? '<img class="img-fluid" src="' + esc(p.image) + '" alt="' + esc(p.name) + '">' : '';
+            var img = p.image ? '<img loading="lazy" class="img-fluid" src="' + esc(p.image) + '" alt="' + esc(p.name) + '">' : '';
             return '' +
                 '<div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="' + delay + 's">' +
                 '  <div class="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">' +
