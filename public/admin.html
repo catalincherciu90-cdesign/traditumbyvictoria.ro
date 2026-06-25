@@ -128,7 +128,6 @@
                                     <div class="col-md-4"><label class="form-label">Despre noi</label><input type="text" id="pt-about" class="form-control"></div>
                                     <div class="col-md-4"><label class="form-label">Servicii</label><input type="text" id="pt-service" class="form-control"></div>
                                     <div class="col-md-4"><label class="form-label">Produse</label><input type="text" id="pt-product" class="form-control"></div>
-                                    <div class="col-md-4"><label class="form-label">Testimoniale</label><input type="text" id="pt-testimonial" class="form-control"></div>
                                     <div class="col-md-4"><label class="form-label">Contact</label><input type="text" id="pt-contact" class="form-control"></div>
                                     <div class="col-md-4"><label class="form-label">Pagina 404</label><input type="text" id="pt-notfound" class="form-control"></div>
                                 </div>
@@ -437,7 +436,7 @@
         renderProductPages(cfg.pages);
         $("c-promo-title").value = (cfg.promo && cfg.promo.title) || "";
         const pt = cfg.pageTitles || {};
-        ["about","service","product","testimonial","contact","notfound"].forEach(k => { $("pt-" + k).value = pt[k] || ""; });
+        ["about","service","product","contact","notfound"].forEach(k => { $("pt-" + k).value = pt[k] || ""; });
         const ct = cfg.contact || {};
         ["phone","email","address","facebook","instagram","tiktok"].forEach(k => { $("ct-" + k).value = ct[k] || ""; });
     }
@@ -450,7 +449,7 @@
             buttonText: card.querySelector(".s-btntext").value,
             buttonLink: card.querySelector(".s-btnlink").value,
         }));
-        const pt = {}; ["about","service","product","testimonial","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
+        const pt = {}; ["about","service","product","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
         const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
         return { logo: $("logo-url").value, carousel, pages: gatherProductPages(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
