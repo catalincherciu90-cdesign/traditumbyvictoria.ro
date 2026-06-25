@@ -86,10 +86,22 @@
         }
         var imgWrap = document.getElementById("page-images");
         if (imgWrap && Array.isArray(p.images) && p.images.length) {
-            var col = p.images.length === 1 ? "col-12" : "col-6";
-            imgWrap.innerHTML = p.images.map(function (src) {
-                return '<div class="' + col + '"><img class="img-fluid rounded w-100" style="height:260px;object-fit:cover" src="' + esc(src) + '" alt="' + esc(p.title) + '"></div>';
-            }).join("");
+            var jq = window.jQuery;
+            var imgStyle = "height:clamp(300px,42vw,520px);object-fit:cover";
+            if (jq && p.images.length > 1) {
+                imgWrap.className = "owl-carousel page-image-carousel rounded overflow-hidden shadow-sm";
+                imgWrap.innerHTML = p.images.map(function (src) {
+                    return '<div class="page-image-item"><img class="w-100" style="' + imgStyle + '" src="' + esc(src) + '" alt="' + esc(p.title) + '"></div>';
+                }).join("");
+                jq(imgWrap).owlCarousel({
+                    items: 1, loop: true, autoplay: true, autoplayTimeout: 3500,
+                    autoplayHoverPause: true, smartSpeed: 800, dots: false, nav: false,
+                    animateOut: "fadeOut",
+                });
+            } else {
+                imgWrap.className = "";
+                imgWrap.innerHTML = '<img class="img-fluid rounded w-100 shadow-sm" style="' + imgStyle + '" src="' + esc(p.images[0]) + '" alt="' + esc(p.title) + '">';
+            }
         }
     }
 
