@@ -349,8 +349,11 @@
             const card = ai.closest(".slide-card");
             await withBusy(ai, async () => {
                 const out = await aiGenerate("carousel", card.querySelector(".s-eyebrow").value);
+                if (out.eyebrow) card.querySelector(".s-eyebrow").value = out.eyebrow;
                 if (out.title) card.querySelector(".s-title").value = out.title;
                 if (out.subtitle) card.querySelector(".s-subtitle").value = out.subtitle;
+                if (out.buttonText) card.querySelector(".s-btntext").value = out.buttonText;
+                if (out.buttonLink) card.querySelector(".s-btnlink").value = out.buttonLink;
             });
         }
     });

@@ -293,7 +293,13 @@ async function generateBanner(env, kind, hint) {
   if (kind === "promo") {
     user = "Generează UN singur titlu scurt și atrăgător (maxim 8 cuvinte) pentru un banner promoțional. " + hint + " Răspunde DOAR cu titlul, fără ghilimele, fără explicații.";
   } else {
-    user = "Generează textul pentru un slide de carousel de pe prima pagină: un titlu scurt (maxim 6 cuvinte) și un subtitlu (maxim 20 de cuvinte). " + hint + " Răspunde EXACT în formatul:\nTitlu: <titlu>\nSubtitlu: <subtitlu>";
+    user = "Generează conținutul COMPLET pentru un slide de carousel de pe prima pagină a unei cofetării. " + hint +
+      " Răspunde EXACT în acest format, fiecare element pe câte o linie separată:\n" +
+      "Eticheta: <text foarte scurt, maxim 4 cuvinte>\n" +
+      "Titlu: <titlu de impact, maxim 6 cuvinte>\n" +
+      "Subtitlu: <o frază, maxim 20 de cuvinte>\n" +
+      "Buton: <text scurt pentru buton, maxim 3 cuvinte>\n" +
+      "Link: <una dintre valorile: product.html, torturi.html, candybar.html, contact.html>";
   }
   const payload = {
     messages: [
@@ -310,14 +316,21 @@ async function generateBanner(env, kind, hint) {
   if (!res) throw new Error("Niciun model AI disponibil: " + String((lastErr && lastErr.message) || lastErr));
   const text = String((res && res.response) || "").trim();
   if (kind === "promo") return { title: stripQuotes(text.split("\n")[0] || "") };
-  let title = "", subtitle = "";
+  const fields = {};
   for (const line of text.split("\n")) {
-    const l = line.trim();
-    if (/^titlu\s*:/i.test(l)) title = l.replace(/^titlu\s*:/i, "");
-    else if (/^subtitlu\s*:/i.test(l)) subtitle = l.replace(/^subtitlu\s*:/i, "");
+    const m = line.match(/^\s*(eticheta|titlu|subtitlu|buton|link)\s*:\s*(.*)$/i);
+    if (m) fields[m[1].toLowerCase()] = stripQuotes(m[2]);
   }
-  if (!title) title = text.split("\n")[0] || "";
-  return { title: stripQuotes(title), subtitle: stripQuotes(subtitle) };
+  const allowed = ["product.html", "torturi.html", "candybar.html", "contact.html", "about.html"];
+  let link = (fields.link || "").toLowerCase();
+  if (!allowed.includes(link)) link = "product.html";
+  return {
+    eyebrow: fields.eticheta || "",
+    title: fields.titlu || stripQuotes(text.split("\n")[0] || ""),
+    subtitle: fields.subtitlu || "",
+    buttonText: fields.buton || "Vezi produsele",
+    buttonLink: link,
+  };
 }
 
 // ---------------------------------------------------------------- API
