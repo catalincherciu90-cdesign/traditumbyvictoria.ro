@@ -286,27 +286,13 @@ function stripQuotes(s) {
   return String(s || "").trim().replace(/^["'„”«»]+|["'„”«»]+$/g, "").trim();
 }
 
-async function generateBanner(env, kind, hint) {
-  if (!env.AI) throw new Error("Workers AI nu este activat pe acest cont.");
-  hint = hint ? "Indiciu/temă: " + hint + "." : "";
-  let user;
-  if (kind === "promo") {
-    user = "Generează UN singur titlu scurt și atrăgător (maxim 8 cuvinte) pentru un banner promoțional. " + hint + " Răspunde DOAR cu titlul, fără ghilimele, fără explicații.";
-  } else {
-    user = "Generează conținutul COMPLET pentru un slide de carousel de pe prima pagină a unei cofetării. " + hint +
-      " Răspunde EXACT în acest format, fiecare element pe câte o linie separată:\n" +
-      "Eticheta: <text foarte scurt, maxim 4 cuvinte>\n" +
-      "Titlu: <titlu de impact, maxim 6 cuvinte>\n" +
-      "Subtitlu: <o frază, maxim 20 de cuvinte>\n" +
-      "Buton: <text scurt pentru buton, maxim 3 cuvinte>\n" +
-      "Link: <una dintre valorile: product.html, torturi.html, candybar.html, contact.html>";
-  }
+async function runAI(env, user) {
   const payload = {
     messages: [
       { role: "system", content: AI_BRAND },
       { role: "user", content: user },
     ],
-    max_tokens: 200,
+    max_tokens: 300,
   };
   let res, lastErr;
   for (const model of AI_MODELS) {
@@ -314,21 +300,68 @@ async function generateBanner(env, kind, hint) {
     catch (e) { lastErr = e; }
   }
   if (!res) throw new Error("Niciun model AI disponibil: " + String((lastErr && lastErr.message) || lastErr));
-  const text = String((res && res.response) || "").trim();
-  if (kind === "promo") return { title: stripQuotes(text.split("\n")[0] || "") };
+  return String((res && res.response) || "").trim();
+}
+
+function parseFields(text, keys) {
   const fields = {};
+  const re = new RegExp("^\\s*(" + keys.join("|") + ")\\s*:\\s*(.*)$", "i");
   for (const line of text.split("\n")) {
-    const m = line.match(/^\s*(eticheta|titlu|subtitlu|buton|link)\s*:\s*(.*)$/i);
+    const m = line.match(re);
     if (m) fields[m[1].toLowerCase()] = stripQuotes(m[2]);
   }
+  return fields;
+}
+function digits(s) { return String(s || "").replace(/[^\d]/g, ""); }
+
+async function generateBanner(env, kind, hint) {
+  if (!env.AI) throw new Error("Workers AI nu este activat pe acest cont.");
+  const h = hint ? " Indiciu/temă: " + hint + "." : "";
+
+  if (kind === "promo") {
+    const text = await runAI(env, "Generează UN singur titlu scurt și atrăgător (maxim 8 cuvinte) pentru un banner promoțional al unei cofetării." + h + " Răspunde DOAR cu titlul, fără ghilimele, fără explicații.");
+    return { title: stripQuotes(text.split("\n")[0] || "") };
+  }
+
+  if (kind === "product") {
+    const text = await runAI(env, "Generează informațiile pentru un produs de cofetărie." + h +
+      " Răspunde EXACT în acest format, fiecare pe câte o linie:\n" +
+      "Nume: <nume produs, maxim 5 cuvinte>\n" +
+      "Categorie: <categorie, 1-2 cuvinte, ex. Torturi/Prăjituri/Mese dulci>\n" +
+      "Pret: <preț orientativ, ex. 120 lei sau La comandă>\n" +
+      "Descriere: <o frază apetisantă, maxim 25 de cuvinte>");
+    const f = parseFields(text, ["nume", "categorie", "pret", "descriere"]);
+    return { name: f.nume || "", category: f.categorie || "", price: f.pret || "", description: f.descriere || "" };
+  }
+
+  if (kind === "page") {
+    const text = await runAI(env, "Generează conținutul pentru o pagină de categorie de produse dintr-o cofetărie." + h +
+      " Răspunde EXACT în acest format, fiecare pe câte o linie:\n" +
+      "Titlu: <titlu, maxim 4 cuvinte>\n" +
+      "Descriere: <2-3 fraze apetisante, maxim 60 de cuvinte>\n" +
+      "PretMin: <doar număr, ex. 150>\n" +
+      "PretMax: <doar număr, ex. 600>");
+    const f = parseFields(text, ["titlu", "descriere", "pretmin", "pretmax"]);
+    return { title: f.titlu || "", description: f.descriere || "", priceMin: digits(f.pretmin), priceMax: digits(f.pretmax) };
+  }
+
+  // implicit: slide de carousel
+  const text = await runAI(env, "Generează conținutul COMPLET pentru un slide de carousel de pe prima pagină a unei cofetării." + h +
+    " Răspunde EXACT în acest format, fiecare element pe câte o linie separată:\n" +
+    "Eticheta: <text foarte scurt, maxim 4 cuvinte>\n" +
+    "Titlu: <titlu de impact, maxim 6 cuvinte>\n" +
+    "Subtitlu: <o frază, maxim 20 de cuvinte>\n" +
+    "Buton: <text scurt pentru buton, maxim 3 cuvinte>\n" +
+    "Link: <una dintre valorile: product.html, torturi.html, candybar.html, contact.html>");
+  const f = parseFields(text, ["eticheta", "titlu", "subtitlu", "buton", "link"]);
   const allowed = ["product.html", "torturi.html", "candybar.html", "contact.html", "about.html"];
-  let link = (fields.link || "").toLowerCase();
+  let link = (f.link || "").toLowerCase();
   if (!allowed.includes(link)) link = "product.html";
   return {
-    eyebrow: fields.eticheta || "",
-    title: fields.titlu || stripQuotes(text.split("\n")[0] || ""),
-    subtitle: fields.subtitlu || "",
-    buttonText: fields.buton || "Vezi produsele",
+    eyebrow: f.eticheta || "",
+    title: f.titlu || stripQuotes(text.split("\n")[0] || ""),
+    subtitle: f.subtitlu || "",
+    buttonText: f.buton || "Vezi produsele",
     buttonLink: link,
   };
 }

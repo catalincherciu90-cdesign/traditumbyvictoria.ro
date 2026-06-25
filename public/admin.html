@@ -173,6 +173,10 @@
                     <div class="modal-body">
                         <input type="hidden" id="f-id">
                         <div class="mb-3">
+                            <button type="button" id="ai-product" class="btn btn-sm btn-outline-primary"><i class="bi bi-stars"></i> Generează cu AI</button>
+                            <span class="form-text ms-2">completează nume, categorie, preț, descriere</span>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Nume *</label>
                             <input type="text" id="f-name" class="form-control" required>
                         </div>
@@ -269,6 +273,15 @@
         modal.show();
     }
     $("add-btn").addEventListener("click", () => openModal(null));
+    $("ai-product").addEventListener("click", (e) => {
+        withBusy(e.currentTarget, async () => {
+            const out = await aiGenerate("product", $("f-name").value || $("f-category").value || "");
+            if (out.name) $("f-name").value = out.name;
+            if (out.category) $("f-category").value = out.category;
+            if (out.price) $("f-price").value = out.price;
+            if (out.description) $("f-description").value = out.description;
+        });
+    });
     $("product-rows").addEventListener("click", async (e) => {
         const edit = e.target.closest("[data-edit]");
         const del = e.target.closest("[data-del]");
@@ -402,6 +415,7 @@
                 <div class="col-6"><label class="form-label">Preț minim</label><input type="text" class="form-control form-control-sm pg-pmin" placeholder="ex. 150" value="${escapeHtml(p.priceMin || '')}"></div>
                 <div class="col-6"><label class="form-label">Preț maxim</label><input type="text" class="form-control form-control-sm pg-pmax" placeholder="ex. 600" value="${escapeHtml(p.priceMax || '')}"></div>
             </div>
+            <button type="button" class="btn btn-sm btn-outline-primary mb-3 ai-page"><i class="bi bi-stars"></i> Generează titlu, descriere și preț cu AI</button>
             <label class="form-label">Imagini (stânga paginii)</label>
             <div class="pg-images mb-2"></div>
             <button type="button" class="btn btn-sm btn-outline-dark" data-add-pimg><i class="bi bi-plus-lg"></i> Adaugă imagine</button>`;
@@ -428,11 +442,24 @@
         });
         return out;
     }
-    $("product-pages").addEventListener("click", (e) => {
+    $("product-pages").addEventListener("click", async (e) => {
         const add = e.target.closest("[data-add-pimg]");
         const rm = e.target.closest("[data-remove-pimg]");
-        if (add) { add.closest("[data-pkey]").querySelector(".pg-images").appendChild(pimgRow("")); }
-        else if (rm) { rm.closest(".pimg").remove(); }
+        const ai = e.target.closest(".ai-page");
+        if (add) { add.closest("[data-pkey]").querySelector(".pg-images").appendChild(pimgRow("")); return; }
+        if (rm) { rm.closest(".pimg").remove(); return; }
+        if (ai) {
+            const card = ai.closest("[data-pkey]");
+            const label = card.dataset.pkey === "candybar" ? "Candy Bar" : "Torturi";
+            await withBusy(ai, async () => {
+                const cur = card.querySelector(".pg-title").value;
+                const out = await aiGenerate("page", label + (cur ? " — " + cur : ""));
+                if (out.title) card.querySelector(".pg-title").value = out.title;
+                if (out.description) card.querySelector(".pg-desc").value = out.description;
+                if (out.priceMin) card.querySelector(".pg-pmin").value = out.priceMin;
+                if (out.priceMax) card.querySelector(".pg-pmax").value = out.priceMax;
+            });
+        }
     });
     $("product-pages").addEventListener("change", async (e) => {
         if (!e.target.classList.contains("pimg-file")) return;
