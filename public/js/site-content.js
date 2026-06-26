@@ -36,6 +36,21 @@
         });
     }
 
+    function applyImages(images) {
+        if (!images) return;
+        document.querySelectorAll("img[src]").forEach(function (img) {
+            var fname = (img.getAttribute("src") || "").split("/").pop();
+            if (fname && images[fname]) img.setAttribute("src", images[fname]);
+        });
+        if (images.pageHeader) {
+            document.querySelectorAll(".page-header").forEach(function (el) {
+                el.style.backgroundImage = "linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url('" + images.pageHeader + "')";
+                el.style.backgroundSize = "cover";
+                el.style.backgroundPosition = "center";
+            });
+        }
+    }
+
     function applyLogo(url) {
         if (!url) return;
         document.querySelectorAll("a.navbar-brand[data-logo]").forEach(function (a) {
@@ -130,6 +145,7 @@
         .then(function (r) { return r.json(); })
         .then(function (cfg) {
             if (!cfg) return;
+            applyImages(cfg.images);
             applyLogo(cfg.logo);
             applyContact(cfg.contact);
             applyPromo(cfg.promo);

@@ -91,6 +91,15 @@
                             </div>
                         </div>
 
+                        <!-- Imagini site -->
+                        <div class="card card-admin mb-4">
+                            <div class="card-body">
+                                <h5 class="brand mb-1">Imagini site</h5>
+                                <p class="form-text mt-0 mb-3">Înlocuiește pozele decorative din site. Lasă gol ca să păstrezi imaginea implicită.</p>
+                                <div id="site-images" class="row g-3"></div>
+                            </div>
+                        </div>
+
                         <!-- Carousel -->
                         <div class="card card-admin mb-4">
                             <div class="card-body">
@@ -483,11 +492,61 @@
         } catch (err) { alert("Eroare la încărcarea logo-ului: " + err.message); }
     });
 
+    // ---- imagini site ----
+    const SITE_IMAGE_SLOTS = [
+        { key: "about-1.jpg", label: "Despre — imagine 1", sample: "img/about-1.jpg" },
+        { key: "about-2.jpg", label: "Despre — imagine 2", sample: "img/about-2.jpg" },
+        { key: "service-1.jpg", label: "Servicii — imagine 1", sample: "img/service-1.jpg" },
+        { key: "service-2.jpg", label: "Servicii — imagine 2", sample: "img/service-2.jpg" },
+        { key: "product-1.jpg", label: "Homepage — card Torturi", sample: "img/product-1.jpg" },
+        { key: "product-2.jpg", label: "Homepage — card Prăjituri", sample: "img/product-2.jpg" },
+        { key: "product-3.jpg", label: "Homepage — card Mese dulci", sample: "img/product-3.jpg" },
+        { key: "pageHeader", label: "Fundal antet pagini", sample: "img/carousel-1.jpg" },
+    ];
+    function siteImageSlot(slot, images) {
+        const cur = (images && images[slot.key]) || slot.sample;
+        const col = document.createElement("div");
+        col.className = "col-md-6 col-lg-3";
+        col.dataset.imgkey = slot.key;
+        col.innerHTML = `
+            <div class="slide-card p-2 h-100">
+                <div class="small fw-bold mb-1">${escapeHtml(slot.label)}</div>
+                <img class="si-preview w-100 rounded mb-2" style="height:100px;object-fit:cover" src="${escapeHtml(cur)}" onerror="this.style.visibility='hidden'">
+                <input type="hidden" class="si-url" value="${escapeHtml((images && images[slot.key]) || '')}">
+                <input type="file" class="form-control form-control-sm si-file" accept="image/*">
+            </div>`;
+        return col;
+    }
+    function renderSiteImages(images) {
+        const c = $("site-images"); c.innerHTML = "";
+        SITE_IMAGE_SLOTS.forEach(s => c.appendChild(siteImageSlot(s, images || {})));
+    }
+    function gatherSiteImages() {
+        const out = {};
+        document.querySelectorAll("#site-images [data-imgkey]").forEach(col => {
+            const url = col.querySelector(".si-url").value;
+            if (url) out[col.dataset.imgkey] = url;
+        });
+        return out;
+    }
+    $("site-images").addEventListener("change", async (e) => {
+        if (!e.target.classList.contains("si-file")) return;
+        const file = e.target.files[0]; if (!file) return;
+        const col = e.target.closest("[data-imgkey]");
+        const prev = col.querySelector(".si-preview");
+        prev.src = URL.createObjectURL(file); prev.style.visibility = "visible";
+        try {
+            const up = await api("/api/upload", { method: "POST", body: (function(){ const fd = new FormData(); fd.append("file", file); return fd; })() });
+            col.querySelector(".si-url").value = up.url;
+        } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
+    });
+
     function fillConfig(cfg) {
         const logo = cfg.logo || "";
         $("logo-url").value = logo;
         const lp = $("logo-preview");
         if (logo) { lp.src = logo; lp.style.display = ""; } else { lp.style.display = "none"; }
+        renderSiteImages(cfg.images);
         $("carousel-slides").innerHTML = "";
         (cfg.carousel || []).forEach(addSlide);
         renderProductPages(cfg.pages);
@@ -508,7 +567,7 @@
         }));
         const pt = {}; ["about","service","product","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
         const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
-        return { logo: $("logo-url").value, carousel, pages: gatherProductPages(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
+        return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, pages: gatherProductPages(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
     async function loadConfig() { fillConfig(await api("/api/config")); }
     $("config-form").addEventListener("submit", async (e) => {

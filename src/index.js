@@ -44,6 +44,7 @@ const DEFAULT_PRODUCTS = [
 const CONFIG_KEY = "siteconfig";
 const DEFAULT_CONFIG = {
   logo: "",
+  images: {},
   carousel: [
     {
       image: "/img/carousel-1.jpg",
@@ -243,8 +244,15 @@ function sanitizeConfig(body) {
       images: imgs.length ? imgs : def.images,
     };
   };
+  const imagesSrc = body.images && typeof body.images === "object" ? body.images : {};
+  const images = {};
+  for (const k of Object.keys(imagesSrc).slice(0, 40)) {
+    const key = str(k, 60), val = str(imagesSrc[k], 300);
+    if (key && val) images[key] = val;
+  }
   return {
     logo: str(body.logo, 300),
+    images: images,
     carousel: carousel.length ? carousel : d.carousel,
     promo: { title: str(promo.title, 160) || d.promo.title },
     pageTitles: {
