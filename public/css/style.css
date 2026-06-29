@@ -444,3 +444,49 @@ h1, h2, h3,
         font-size: 2.5rem;
     }
 }
+
+/* Lightbox galerie foto (pagini Torturi / Candy Bar) */
+.tv-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(0, 0, 0, .9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: tvFade .2s ease;
+}
+@keyframes tvFade { from { opacity: 0; } to { opacity: 1; } }
+.tv-lightbox .tv-lb-img {
+    max-width: 92vw;
+    max-height: 88vh;
+    border-radius: .5rem;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, .6);
+}
+.tv-lightbox .tv-lb-close {
+    position: absolute;
+    top: 14px;
+    right: 26px;
+    color: #fff;
+    font-size: 2.6rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.tv-lightbox .tv-lb-prev,
+.tv-lightbox .tv-lb-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 2.6rem;
+    padding: 1rem;
+    cursor: pointer;
+    user-select: none;
+}
+.tv-lightbox .tv-lb-prev { left: 8px; }
+.tv-lightbox .tv-lb-next { right: 8px; }
+.tv-lightbox .tv-lb-close:hover,
+.tv-lightbox .tv-lb-prev:hover,
+.tv-lightbox .tv-lb-next:hover { color: var(--primary); }
+
+#page-images img { cursor: zoom-in; }

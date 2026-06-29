@@ -36,6 +36,37 @@
         });
     }
 
+    function openLightbox(images, startIndex) {
+        if (!images || !images.length) return;
+        var idx = startIndex || 0;
+        var ov = document.createElement("div");
+        ov.className = "tv-lightbox";
+        var multi = images.length > 1;
+        ov.innerHTML =
+            '<span class="tv-lb-close" aria-label="Închide">&times;</span>' +
+            (multi ? '<span class="tv-lb-prev" aria-label="Înapoi">&#10094;</span>' : '') +
+            '<img class="tv-lb-img" alt="">' +
+            (multi ? '<span class="tv-lb-next" aria-label="Înainte">&#10095;</span>' : '');
+        document.body.appendChild(ov);
+        document.body.style.overflow = "hidden";
+        var imgEl = ov.querySelector(".tv-lb-img");
+        function show(i) { idx = (i + images.length) % images.length; imgEl.src = images[idx]; }
+        function close() { document.removeEventListener("keydown", key); document.body.style.overflow = ""; ov.remove(); }
+        function key(e) {
+            if (e.key === "Escape") close();
+            else if (multi && e.key === "ArrowRight") show(idx + 1);
+            else if (multi && e.key === "ArrowLeft") show(idx - 1);
+        }
+        show(idx);
+        ov.querySelector(".tv-lb-close").onclick = close;
+        if (multi) {
+            ov.querySelector(".tv-lb-next").onclick = function (e) { e.stopPropagation(); show(idx + 1); };
+            ov.querySelector(".tv-lb-prev").onclick = function (e) { e.stopPropagation(); show(idx - 1); };
+        }
+        ov.addEventListener("click", function (e) { if (e.target === ov) close(); });
+        document.addEventListener("keydown", key);
+    }
+
     function applyImages(images) {
         if (!images) return;
         document.querySelectorAll("img[src]").forEach(function (img) {
@@ -124,6 +155,13 @@
                 imgWrap.className = "";
                 imgWrap.innerHTML = '<img class="img-fluid rounded w-100 shadow-sm" style="' + imgStyle + '" src="' + esc(p.images[0]) + '" alt="' + esc(p.title) + '">';
             }
+            imgWrap.style.cursor = "zoom-in";
+            imgWrap.addEventListener("click", function (e) {
+                if (e.target && e.target.tagName === "IMG") {
+                    var i = p.images.indexOf(e.target.getAttribute("src"));
+                    openLightbox(p.images, i < 0 ? 0 : i);
+                }
+            });
         }
     }
 
