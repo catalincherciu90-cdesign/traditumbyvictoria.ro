@@ -192,23 +192,4 @@
             applyCarousel(cfg.carousel);
         })
         .catch(function () { /* păstrează conținutul static implicit */ });
-
-    // Galerie foto (lightbox) pentru cardurile de produse și imaginile decorative
-    document.addEventListener("click", function (e) {
-        var t = e.target;
-        if (!t || !t.closest) return;
-        var pitem = t.closest(".product-item");
-        if (pitem && (t.tagName === "IMG" || t.closest(".product-overlay"))) {
-            e.preventDefault();
-            var all = Array.prototype.slice.call(document.querySelectorAll(".product-item img"));
-            var srcs = all.map(function (i) { return i.getAttribute("src"); });
-            openLightbox(srcs, Math.max(0, all.indexOf(pitem.querySelector("img"))));
-            return;
-        }
-        var grp = t.closest(".img-twice");
-        if (grp && t.tagName === "IMG") {
-            var imgs = Array.prototype.slice.call(grp.querySelectorAll("img"));
-            openLightbox(imgs.map(function (i) { return i.getAttribute("src"); }), imgs.indexOf(t));
-        }
-    });
 })();
