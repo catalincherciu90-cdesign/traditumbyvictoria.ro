@@ -197,8 +197,8 @@
                     <div class="modal-body">
                         <input type="hidden" id="f-id">
                         <div class="mb-3">
-                            <button type="button" id="ai-product" class="btn btn-sm btn-outline-primary"><i class="bi bi-stars"></i> Generează cu AI</button>
-                            <span class="form-text ms-2">completează nume, categorie, preț, descriere</span>
+                            <button type="button" id="ai-product" class="btn btn-sm btn-outline-primary"><i class="bi bi-stars"></i> Generează descrierea cu AI</button>
+                            <span class="form-text ms-2">scrie numele produsului, apoi generează (titlul rămâne neschimbat)</span>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Nume *</label>
@@ -298,12 +298,13 @@
     }
     $("add-btn").addEventListener("click", () => openModal(null));
     $("ai-product").addEventListener("click", (e) => {
+        const name = $("f-name").value.trim();
+        if (!name) { alert("Scrie întâi numele produsului, apoi generează descrierea."); return; }
         withBusy(e.currentTarget, async () => {
-            const out = await aiGenerate("product", $("f-name").value || $("f-category").value || "");
-            if (out.name) $("f-name").value = out.name;
-            if (out.category) $("f-category").value = out.category;
-            if (out.price) $("f-price").value = out.price;
-            if (out.description) $("f-description").value = out.description;
+            const out = await aiGenerate("product", name);
+            if (out.description) $("f-description").value = out.description;   // titlul rămâne neschimbat
+            if (out.category && !$("f-category").value) $("f-category").value = out.category;
+            if (out.price && !$("f-price").value) $("f-price").value = out.price;
         });
     });
     $("product-rows").addEventListener("click", async (e) => {

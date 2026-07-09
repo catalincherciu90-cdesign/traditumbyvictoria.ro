@@ -309,14 +309,14 @@ async function generateBanner(env, kind, hint) {
   }
 
   if (kind === "product") {
-    const text = await runAI(env, "Generează informațiile pentru un produs de cofetărie." + h +
+    const nume = hint || "produs de cofetărie";
+    const text = await runAI(env, "Scrie textul pentru un produs de cofetărie care se numește „" + nume + "\". Nu schimba și nu repeta numele." +
       " Răspunde EXACT în acest format, fiecare pe câte o linie:\n" +
-      "Nume: <nume produs, maxim 5 cuvinte>\n" +
+      "Descriere: <o frază apetisantă despre produs, maxim 25 de cuvinte>\n" +
       "Categorie: <categorie, 1-2 cuvinte, ex. Torturi/Prăjituri/Mese dulci>\n" +
-      "Pret: <preț orientativ, ex. 120 lei sau La comandă>\n" +
-      "Descriere: <o frază apetisantă, maxim 25 de cuvinte>");
-    const f = parseFields(text, ["nume", "categorie", "pret", "descriere"]);
-    return { name: f.nume || "", category: f.categorie || "", price: f.pret || "", description: f.descriere || "" };
+      "Pret: <preț orientativ, ex. 120 lei sau La comandă>");
+    const f = parseFields(text, ["descriere", "categorie", "pret"]);
+    return { description: f.descriere || "", category: f.categorie || "", price: f.pret || "" };
   }
 
   if (kind === "page") {
