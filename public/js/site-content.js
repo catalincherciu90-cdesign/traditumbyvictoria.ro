@@ -192,4 +192,32 @@
             applyCarousel(cfg.carousel);
         })
         .catch(function () { /* păstrează conținutul static implicit */ });
+
+    // Produse pe pagina principală (primele 3 din admin)
+    (function () {
+        var host = document.getElementById("home-products");
+        if (!host) return;
+        function card(p) {
+            var price = p.price ? '<div class="d-inline-block border border-primary rounded-pill px-3 mb-3">' + esc(p.price) + '</div>' : '';
+            var img = p.image ? '<img loading="lazy" class="img-fluid" src="' + esc(p.image) + '" alt="' + esc(p.name) + '">' : '';
+            return '<div class="col-lg-4 col-md-6 wow fadeInUp">' +
+                '<div class="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">' +
+                '<div class="text-center p-4">' + price + '<h3 class="mb-3">' + esc(p.name) + '</h3><span>' + esc(p.description) + '</span></div>' +
+                '<div class="position-relative mt-auto">' + img +
+                '<div class="product-overlay"><a class="btn btn-lg-square btn-outline-light rounded-circle" href="product.html"><i class="fa fa-eye text-primary"></i></a></div>' +
+                '</div></div></div>';
+        }
+        fetch("/api/products", { credentials: "same-origin" })
+            .then(function (r) { return r.json(); })
+            .then(function (list) {
+                if (!Array.isArray(list) || !list.length) {
+                    host.innerHTML = '<div class="col-12 text-center text-muted py-4">Momentan nu sunt produse.</div>';
+                    return;
+                }
+                host.innerHTML = list.slice(0, 3).map(card).join("");
+            })
+            .catch(function () {
+                host.innerHTML = '<div class="col-12 text-center text-muted py-4">Produsele nu au putut fi încărcate.</div>';
+            });
+    })();
 })();
