@@ -12,33 +12,8 @@ const IMG_PREFIX = "img:";
 const COOKIE_NAME = "tv_session";
 const SESSION_TTL = 60 * 60 * 8; // 8 ore
 
-// Produse inițiale, salvate la prima accesare dacă magazinul e gol.
-const DEFAULT_PRODUCTS = [
-  {
-    id: "seed-torturi",
-    name: "Tort personalizat",
-    price: "La comandă",
-    category: "Torturi",
-    description: "Torturi personalizate pentru aniversări, nunți și orice ocazie specială, create după dorința ta.",
-    image: "/img/product-1.jpg",
-  },
-  {
-    id: "seed-prajituri",
-    name: "Prăjituri de casă",
-    price: "La comandă",
-    category: "Prăjituri",
-    description: "Prăjituri fine și aromate, pregătite zilnic după rețete artizanale.",
-    image: "/img/product-2.jpg",
-  },
-  {
-    id: "seed-mesedulci",
-    name: "Mese dulci",
-    price: "La comandă",
-    category: "Mese dulci",
-    description: "Candy bar și mese dulci pentru evenimente — un colț de poveste pentru momentele tale speciale.",
-    image: "/img/product-3.jpg",
-  },
-];
+// ID-urile produselor demo (se curăță automat din KV dacă mai există).
+const SEED_IDS = ["seed-torturi", "seed-prajituri", "seed-mesedulci"];
 
 // Configurația de conținut (bannere, titluri, contact), salvată la prima accesare.
 const CONFIG_KEY = "siteconfig";
@@ -177,11 +152,13 @@ async function isAuthed(request, env) {
 
 async function getProducts(env) {
   let data = await env.PRODUCTS.get(PRODUCTS_KEY, "json");
-  if (!data) {
-    data = DEFAULT_PRODUCTS;
-    await env.PRODUCTS.put(PRODUCTS_KEY, JSON.stringify(data));
+  if (!Array.isArray(data)) return [];
+  // curăță produsele demo rămase în KV (o singură dată)
+  const cleaned = data.filter((p) => SEED_IDS.indexOf(p.id) === -1);
+  if (cleaned.length !== data.length) {
+    await env.PRODUCTS.put(PRODUCTS_KEY, JSON.stringify(cleaned));
   }
-  return data;
+  return cleaned;
 }
 
 async function saveProducts(env, products) {
