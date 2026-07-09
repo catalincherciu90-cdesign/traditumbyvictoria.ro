@@ -50,7 +50,13 @@
         <div id="app-view">
             <ul class="nav nav-tabs mb-4" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-products" type="button">Produse</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-content" type="button">Conținut site</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-logo" type="button">Logo</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-images" type="button">Imagini</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-carousel" type="button">Carousel</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-promo" type="button">Promo</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pages" type="button">Pagini</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-titles" type="button">Titluri</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button">Contact</button></li>
             </ul>
 
             <div class="tab-content">
@@ -58,7 +64,7 @@
                 <div class="tab-pane fade show active" id="tab-products">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="brand mb-0">Produse</h4>
-                        <button id="add-btn" class="btn btn-dark"><i class="bi bi-plus-lg"></i> Adaugă produs</button>
+                        <button id="add-btn" type="button" class="btn btn-dark"><i class="bi bi-plus-lg"></i> Adaugă produs</button>
                     </div>
                     <div class="card card-admin">
                         <div class="table-responsive">
@@ -73,99 +79,108 @@
                     </div>
                 </div>
 
-                <!-- CONTINUT -->
-                <div class="tab-pane fade" id="tab-content">
-                    <form id="config-form">
-                        <!-- Logo -->
-                        <div class="card card-admin mb-4">
-                            <div class="card-body">
-                                <h5 class="brand mb-3">Logo site</h5>
-                                <div class="d-flex align-items-center gap-3">
-                                    <img id="logo-preview" src="" alt="logo" class="bg-dark rounded p-2" style="max-height:64px;display:none">
-                                    <div class="flex-grow-1">
-                                        <input type="file" id="logo-file" class="form-control" accept="image/*">
-                                        <input type="hidden" id="logo-url">
-                                        <div class="form-text">Recomandat PNG cu fundal transparent. Apare în meniul de sus, în locul textului.</div>
-                                    </div>
+                <!-- LOGO -->
+                <div class="tab-pane fade" id="tab-logo">
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <h5 class="brand mb-3">Logo site</h5>
+                            <div class="d-flex align-items-center gap-3">
+                                <img id="logo-preview" src="" alt="logo" class="bg-dark rounded p-2" style="max-height:64px;display:none">
+                                <div class="flex-grow-1">
+                                    <input type="file" id="logo-file" class="form-control" accept="image/*">
+                                    <input type="hidden" id="logo-url">
+                                    <div class="form-text">Recomandat PNG cu fundal transparent. Apare în meniul de sus, în locul textului.</div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Imagini site -->
-                        <div class="card card-admin mb-4">
-                            <div class="card-body">
-                                <h5 class="brand mb-1">Imagini site</h5>
-                                <p class="form-text mt-0 mb-3">Înlocuiește pozele decorative din site. Lasă gol ca să păstrezi imaginea implicită.</p>
-                                <div id="site-images" class="row g-3"></div>
-                            </div>
-                        </div>
-
-                        <!-- Carousel -->
-                        <div class="card card-admin mb-4">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="brand mb-0">Carousel pagina principală</h5>
-                                    <button type="button" id="add-slide" class="btn btn-sm btn-outline-dark"><i class="bi bi-plus-lg"></i> Adaugă slide</button>
-                                </div>
-                                <div id="carousel-slides"></div>
-                            </div>
-                        </div>
-
-                        <!-- Promo -->
-                        <div class="card card-admin mb-4">
-                            <div class="card-body">
-                                <h5 class="brand mb-3">Banner promo</h5>
-                                <label class="form-label">Titlu banner</label>
-                                <input type="text" id="c-promo-title" class="form-control">
-                                <button type="button" id="ai-promo" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-stars"></i> Generează cu AI</button>
-                                <div class="form-text">Numărul de telefon din banner se ia din secțiunea „Date de contact".</div>
-                            </div>
-                        </div>
-
-                        <!-- Pagini produse (Torturi & Candy Bar) -->
-                        <div class="card card-admin mb-4">
-                            <div class="card-body">
-                                <h5 class="brand mb-3">Pagini Torturi &amp; Candy Bar</h5>
-                                <div id="product-pages"></div>
-                            </div>
-                        </div>
-
-                        <!-- Titluri pagini -->
-                        <div class="card card-admin mb-4">
-                            <div class="card-body">
-                                <h5 class="brand mb-3">Titluri pagini interioare</h5>
-                                <div class="row g-3">
-                                    <div class="col-md-4"><label class="form-label">Despre noi</label><input type="text" id="pt-about" class="form-control"></div>
-                                    <div class="col-md-4"><label class="form-label">Servicii</label><input type="text" id="pt-service" class="form-control"></div>
-                                    <div class="col-md-4"><label class="form-label">Produse</label><input type="text" id="pt-product" class="form-control"></div>
-                                    <div class="col-md-4"><label class="form-label">Contact</label><input type="text" id="pt-contact" class="form-control"></div>
-                                    <div class="col-md-4"><label class="form-label">Pagina 404</label><input type="text" id="pt-notfound" class="form-control"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Contact -->
-                        <div class="card card-admin mb-4">
-                            <div class="card-body">
-                                <h5 class="brand mb-3">Date de contact</h5>
-                                <div class="row g-3">
-                                    <div class="col-md-4"><label class="form-label">Telefon</label><input type="text" id="ct-phone" class="form-control"></div>
-                                    <div class="col-md-4"><label class="form-label">Email</label><input type="text" id="ct-email" class="form-control"></div>
-                                    <div class="col-md-4"><label class="form-label">Adresă</label><input type="text" id="ct-address" class="form-control"></div>
-                                    <div class="col-md-4"><label class="form-label">Facebook (URL)</label><input type="text" id="ct-facebook" class="form-control" placeholder="https://facebook.com/..."></div>
-                                    <div class="col-md-4"><label class="form-label">Instagram (URL)</label><input type="text" id="ct-instagram" class="form-control" placeholder="https://instagram.com/..."></div>
-                                    <div class="col-md-4"><label class="form-label">TikTok (URL)</label><input type="text" id="ct-tiktok" class="form-control" placeholder="https://tiktok.com/@..."></div>
-                                </div>
-                                <div class="form-text mt-2">Linkurile social goale sunt ascunse automat pe site.</div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-3">
-                            <button type="submit" class="btn btn-dark" id="config-save"><i class="bi bi-save"></i> Salvează conținutul</button>
-                            <span id="config-status" class="small"></span>
-                        </div>
-                    </form>
+                    </div>
                 </div>
+
+                <!-- IMAGINI -->
+                <div class="tab-pane fade" id="tab-images">
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <h5 class="brand mb-1">Imagini site</h5>
+                            <p class="form-text mt-0 mb-3">Înlocuiește pozele decorative din site. Lasă gol ca să păstrezi imaginea implicită.</p>
+                            <div id="site-images" class="row g-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CAROUSEL -->
+                <div class="tab-pane fade" id="tab-carousel">
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="brand mb-0">Carousel pagina principală</h5>
+                                <button type="button" id="add-slide" class="btn btn-sm btn-outline-dark"><i class="bi bi-plus-lg"></i> Adaugă slide</button>
+                            </div>
+                            <div id="carousel-slides"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROMO -->
+                <div class="tab-pane fade" id="tab-promo">
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <h5 class="brand mb-3">Banner promo</h5>
+                            <label class="form-label">Titlu banner</label>
+                            <input type="text" id="c-promo-title" class="form-control">
+                            <button type="button" id="ai-promo" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-stars"></i> Generează cu AI</button>
+                            <div class="form-text">Numărul de telefon din banner se ia din secțiunea „Contact".</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGINI -->
+                <div class="tab-pane fade" id="tab-pages">
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <h5 class="brand mb-3">Pagini Torturi &amp; Candy Bar</h5>
+                            <div id="product-pages"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TITLURI -->
+                <div class="tab-pane fade" id="tab-titles">
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <h5 class="brand mb-3">Titluri pagini interioare</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label">Despre noi</label><input type="text" id="pt-about" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Servicii</label><input type="text" id="pt-service" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Produse</label><input type="text" id="pt-product" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Contact</label><input type="text" id="pt-contact" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Pagina 404</label><input type="text" id="pt-notfound" class="form-control"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTACT -->
+                <div class="tab-pane fade" id="tab-contact">
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <h5 class="brand mb-3">Date de contact</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label">Telefon</label><input type="text" id="ct-phone" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Email</label><input type="text" id="ct-email" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Adresă</label><input type="text" id="ct-address" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Facebook (URL)</label><input type="text" id="ct-facebook" class="form-control" placeholder="https://facebook.com/..."></div>
+                                <div class="col-md-4"><label class="form-label">Instagram (URL)</label><input type="text" id="ct-instagram" class="form-control" placeholder="https://instagram.com/..."></div>
+                                <div class="col-md-4"><label class="form-label">TikTok (URL)</label><input type="text" id="ct-tiktok" class="form-control" placeholder="https://tiktok.com/@..."></div>
+                            </div>
+                            <div class="form-text mt-2">Linkurile social goale sunt ascunse automat pe site.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="config-save-bar" class="d-flex align-items-center gap-3 mt-3" style="display:none">
+                <button type="button" class="btn btn-dark" id="config-save"><i class="bi bi-save"></i> Salvează conținutul</button>
+                <span id="config-status" class="small"></span>
             </div>
         </div>
     </div>
@@ -570,8 +585,7 @@
         return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, pages: gatherProductPages(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
     async function loadConfig() { fillConfig(await api("/api/config")); }
-    $("config-form").addEventListener("submit", async (e) => {
-        e.preventDefault();
+    $("config-save").addEventListener("click", async () => {
         const status = $("config-status"); status.textContent = ""; $("config-save").disabled = true;
         try {
             await api("/api/config", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(gatherConfig()) });
@@ -597,6 +611,13 @@
     }
     document.addEventListener("DOMContentLoaded", () => {
         modal = new bootstrap.Modal($("product-modal"));
+        // bara de salvare apare doar pe tab-urile de conținut (nu pe Produse)
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach((btn) => {
+            btn.addEventListener("shown.bs.tab", (e) => {
+                const products = e.target.getAttribute("data-bs-target") === "#tab-products";
+                $("config-save-bar").style.display = products ? "none" : "flex";
+            });
+        });
         init().catch(() => show("login"));
     });
     </script>
