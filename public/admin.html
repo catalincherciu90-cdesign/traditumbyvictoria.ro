@@ -1048,7 +1048,7 @@
             li.style.display = match ? "" : "none";
             if (match && !first) first = li.querySelector(".nav-link");
         });
-        if (first) bootstrap.Tab.getOrCreateInstance(first).show();
+        if (first) new bootstrap.Tab(first).show();
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -1065,8 +1065,8 @@
         document.querySelectorAll("#cat-nav [data-cat]").forEach((btn) => {
             btn.addEventListener("click", () => showCategory(btn.dataset.cat));
         });
-        showCategory("products");
         init().catch(() => show("login"));
+        try { showCategory("products"); } catch (e) { /* nu bloca panoul dacă nav-ul dă eroare */ }
     });
     </script>
 </body>
