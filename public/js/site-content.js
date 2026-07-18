@@ -75,7 +75,7 @@
         });
         if (images.pageHeader) {
             document.querySelectorAll(".page-header").forEach(function (el) {
-                el.style.backgroundImage = "linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url('" + images.pageHeader + "')";
+                el.style.backgroundImage = "linear-gradient(135deg, rgba(30,25,22,.78), rgba(201,164,92,.38)), url('" + images.pageHeader + "')";
                 el.style.backgroundSize = "cover";
                 el.style.backgroundPosition = "center";
             });
@@ -100,7 +100,7 @@
     }
 
     function slideHtml(s) {
-        var eyebrow = s.eyebrow ? '<p class="text-primary text-uppercase fw-bold mb-2">// ' + esc(s.eyebrow) + '</p>' : '';
+        var eyebrow = s.eyebrow ? '<p class="text-primary text-uppercase fw-bold mb-2 tv-eyebrow">' + esc(s.eyebrow) + '</p>' : '';
         var subtitle = s.subtitle ? '<p class="text-light fs-5 mb-4 pb-3">' + esc(s.subtitle) + '</p>' : '';
         var button = s.buttonText ? '<a href="' + esc(s.buttonLink || '#') + '" class="btn btn-primary rounded-pill py-3 px-5">' + esc(s.buttonText) + '</a>' : '';
         return '' +
@@ -165,6 +165,33 @@
         }
     }
 
+    function applyWhatsApp(contact) {
+        if (!contact || !contact.phone) return;
+        var digits = String(contact.phone).replace(/\D/g, "");
+        if (digits.length < 9) return; // număr incomplet / placeholder → nu afișa butonul
+        if (digits.charAt(0) === "0") digits = "40" + digits.slice(1);
+        if (document.querySelector(".tv-whatsapp")) return;
+        var a = document.createElement("a");
+        a.className = "tv-whatsapp";
+        a.href = "https://wa.me/" + digits + "?text=" +
+            encodeURIComponent("Bună ziua! Aș dori informații despre produsele Traditum By Victoria.");
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.setAttribute("aria-label", "Scrie-ne pe WhatsApp");
+        a.innerHTML = '<i class="fab fa-whatsapp"></i>';
+        document.body.appendChild(a);
+    }
+
+    function applyEyebrows() {
+        document.querySelectorAll("p.text-primary.text-uppercase").forEach(function (el) {
+            var t = el.textContent.trim();
+            if (t.indexOf("//") !== 0) return;
+            el.textContent = t.replace(/^\/\/\s*/, "");
+            el.classList.add("tv-eyebrow");
+            if (el.closest(".text-center")) el.classList.add("tv-eyebrow-center");
+        });
+    }
+
     function applyCarousel(slides) {
         var $ = window.jQuery;
         if (!$ || !slides || !slides.length) return;
@@ -179,6 +206,8 @@
         });
     }
 
+    applyEyebrows();
+
     fetch("/api/config", { credentials: "same-origin" })
         .then(function (r) { return r.json(); })
         .then(function (cfg) {
@@ -186,6 +215,7 @@
             applyImages(cfg.images);
             applyLogo(cfg.logo);
             applyContact(cfg.contact);
+            applyWhatsApp(cfg.contact);
             applyPromo(cfg.promo);
             applyPageTitle(cfg.pageTitles);
             applyProductPage(cfg.pages);
