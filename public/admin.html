@@ -23,6 +23,12 @@
         .tut ol, .tut ul { margin:0; padding-left:1.15rem; }
         .tut li { margin-bottom:.15rem; }
         .tut li:last-child { margin-bottom:0; }
+        .tv-catnav { gap:.4rem; border-bottom:2px solid #e7dcc9; padding-bottom:.85rem; }
+        .tv-catnav .nav-link { color:#6b5424; font-weight:600; border:1px solid #e0d3ba; background:#fff; }
+        .tv-catnav .nav-link:hover { border-color:#C9A45C; }
+        .tv-catnav .nav-link.active { background:#C9A45C; color:#fff; border-color:#C9A45C; }
+        #sub-nav .nav-link { color:#5b4a2a; }
+        #sub-nav .nav-link.active { color:#C9A45C; font-weight:600; }
     </style>
 </head>
 
@@ -54,20 +60,30 @@
 
         <!-- APP -->
         <div id="app-view">
-            <ul class="nav nav-tabs mb-4" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-products" type="button"><i class="bi bi-box-seam"></i> Produse</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pages" type="button"><i class="bi bi-basket"></i> Torturi &amp; Candy Bar</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-content-pages" type="button"><i class="bi bi-file-text"></i> Conținut pagini</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gallery" type="button"><i class="bi bi-images"></i> Galerie</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-carousel" type="button"><i class="bi bi-collection-play"></i> Carousel</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-promo" type="button"><i class="bi bi-megaphone"></i> Banner promo</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-testimonials" type="button"><i class="bi bi-chat-quote"></i> Testimoniale</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-images" type="button"><i class="bi bi-image"></i> Imagini</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-logo" type="button"><i class="bi bi-award"></i> Logo</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button"><i class="bi bi-telephone"></i> Contact</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-hours" type="button"><i class="bi bi-clock"></i> Program</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-messages" type="button"><i class="bi bi-envelope"></i> Mesaje</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-titles" type="button"><i class="bi bi-fonts"></i> Titluri pagini</button></li>
+            <!-- Categorii principale -->
+            <ul class="nav nav-pills tv-catnav mb-3" id="cat-nav">
+                <li class="nav-item"><button type="button" class="nav-link active" data-cat="products"><i class="bi bi-box-seam"></i> Produse</button></li>
+                <li class="nav-item"><button type="button" class="nav-link" data-cat="content"><i class="bi bi-file-text"></i> Conținut</button></li>
+                <li class="nav-item"><button type="button" class="nav-link" data-cat="images"><i class="bi bi-images"></i> Imagini</button></li>
+                <li class="nav-item"><button type="button" class="nav-link" data-cat="home"><i class="bi bi-house"></i> Prima pagină</button></li>
+                <li class="nav-item"><button type="button" class="nav-link" data-cat="settings"><i class="bi bi-gear"></i> Setări</button></li>
+                <li class="nav-item"><button type="button" class="nav-link" data-cat="messages"><i class="bi bi-envelope"></i> Mesaje</button></li>
+            </ul>
+            <!-- Sub-taburi (filtrate după categoria aleasă) -->
+            <ul class="nav nav-tabs mb-4" role="tablist" id="sub-nav">
+                <li class="nav-item" data-cat="products"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-products" type="button"><i class="bi bi-box-seam"></i> Produse</button></li>
+                <li class="nav-item" data-cat="products"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pages" type="button"><i class="bi bi-basket"></i> Torturi &amp; Candy Bar</button></li>
+                <li class="nav-item" data-cat="content"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-content-pages" type="button"><i class="bi bi-file-text"></i> Conținut pagini</button></li>
+                <li class="nav-item" data-cat="content"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-titles" type="button"><i class="bi bi-fonts"></i> Titluri pagini</button></li>
+                <li class="nav-item" data-cat="content"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-testimonials" type="button"><i class="bi bi-chat-quote"></i> Testimoniale</button></li>
+                <li class="nav-item" data-cat="images"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gallery" type="button"><i class="bi bi-images"></i> Galerie</button></li>
+                <li class="nav-item" data-cat="images"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-images" type="button"><i class="bi bi-card-image"></i> Imagini decor</button></li>
+                <li class="nav-item" data-cat="images"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-logo" type="button"><i class="bi bi-award"></i> Logo</button></li>
+                <li class="nav-item" data-cat="home"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-carousel" type="button"><i class="bi bi-collection-play"></i> Carousel</button></li>
+                <li class="nav-item" data-cat="home"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-promo" type="button"><i class="bi bi-megaphone"></i> Banner promo</button></li>
+                <li class="nav-item" data-cat="settings"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button"><i class="bi bi-telephone"></i> Contact</button></li>
+                <li class="nav-item" data-cat="settings"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-hours" type="button"><i class="bi bi-clock"></i> Program</button></li>
+                <li class="nav-item" data-cat="messages"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-messages" type="button"><i class="bi bi-envelope"></i> Mesaje</button></li>
             </ul>
 
             <div class="tab-content">
@@ -1023,6 +1039,18 @@
         if (me.authed) { show("app"); await loadProducts(); await loadConfig(); }
         else { show("login"); }
     }
+    // Categorii: arată doar sub-taburile din categoria aleasă
+    function showCategory(cat) {
+        document.querySelectorAll("#cat-nav [data-cat]").forEach(b => b.classList.toggle("active", b.dataset.cat === cat));
+        let first = null;
+        document.querySelectorAll("#sub-nav .nav-item").forEach(li => {
+            const match = li.dataset.cat === cat;
+            li.style.display = match ? "" : "none";
+            if (match && !first) first = li.querySelector(".nav-link");
+        });
+        if (first) bootstrap.Tab.getOrCreateInstance(first).show();
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         modal = new bootstrap.Modal($("product-modal"));
         // bara de salvare apare doar pe tab-urile de conținut (nu pe Produse)
@@ -1034,6 +1062,10 @@
                 if (target === "#tab-messages") loadMessages();
             });
         });
+        document.querySelectorAll("#cat-nav [data-cat]").forEach((btn) => {
+            btn.addEventListener("click", () => showCategory(btn.dataset.cat));
+        });
+        showCategory("products");
         init().catch(() => show("login"));
     });
     </script>
