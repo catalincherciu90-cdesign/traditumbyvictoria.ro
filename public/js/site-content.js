@@ -220,4 +220,33 @@
                 host.innerHTML = '<div class="col-12 text-center text-muted py-4">Produsele nu au putut fi încărcate.</div>';
             });
     })();
+
+    // Formular de contact -> /api/contact
+    (function () {
+        var cf = document.getElementById("contact-form");
+        if (!cf) return;
+        cf.addEventListener("submit", function (e) {
+            e.preventDefault();
+            var btn = cf.querySelector('button[type="submit"]');
+            var status = document.getElementById("contact-status");
+            function val(id) { var el = document.getElementById(id); return el ? el.value : ""; }
+            var payload = { name: val("name"), email: val("email"), subject: val("subject"), message: val("message") };
+            var old = btn.innerHTML; btn.disabled = true; btn.textContent = "Se trimite...";
+            if (status) status.innerHTML = "";
+            fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok) {
+                        cf.reset();
+                        if (status) status.innerHTML = '<div class="alert alert-success mb-0">Mulțumim! Mesajul a fost trimis. Te contactăm în curând.</div>';
+                    } else {
+                        if (status) status.innerHTML = '<div class="alert alert-danger mb-0">' + esc((res && res.error) || "A apărut o eroare. Încearcă din nou.") + '</div>';
+                    }
+                })
+                .catch(function () {
+                    if (status) status.innerHTML = '<div class="alert alert-danger mb-0">Eroare de rețea. Încearcă din nou.</div>';
+                })
+                .finally(function () { btn.disabled = false; btn.innerHTML = old; });
+        });
+    })();
 })();

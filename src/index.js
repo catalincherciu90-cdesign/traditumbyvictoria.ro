@@ -8,6 +8,7 @@
  */
 
 const PRODUCTS_KEY = "products";
+const MESSAGES_KEY = "messages";
 const IMG_PREFIX = "img:";
 const COOKIE_NAME = "tv_session";
 const SESSION_TTL = 60 * 60 * 8; // 8 ore
@@ -173,6 +174,13 @@ function sanitizeProduct(body) {
     description: String(body.description || "").slice(0, 600).trim(),
     image: String(body.image || "").slice(0, 300).trim(),
   };
+}
+
+async function addMessage(env, msg) {
+  const list = (await env.PRODUCTS.get(MESSAGES_KEY, "json")) || [];
+  list.unshift(msg);
+  if (list.length > 200) list.length = 200;
+  await env.PRODUCTS.put(MESSAGES_KEY, JSON.stringify(list));
 }
 
 // ---------------------------------------------------------------- configurație
@@ -392,6 +400,15 @@ async function handleApi(request, env, url) {
     return json(await getConfig(env));
   }
 
+  // primire mesaj din formularul de contact (public)
+  if (pathname === "/api/contact" && method === "POST") {
+    const body = await request.json().catch(() => ({}));
+    const name = str(body.name, 120), email = str(body.email, 160), subject = str(body.subject, 160), message = str(body.message, 4000);
+    if (!name || !message) return json({ error: "Numele și mesajul sunt obligatorii." }, 400);
+    await addMessage(env, { id: crypto.randomUUID(), name, email, subject, message, date: new Date().toISOString() });
+    return json({ ok: true });
+  }
+
   // imagine (public)
   if (pathname.startsWith("/api/img/") && method === "GET") {
     const key = IMG_PREFIX + pathname.slice("/api/img/".length);
@@ -425,6 +442,19 @@ async function handleApi(request, env, url) {
     } catch (e) {
       return json({ error: String((e && e.message) || e) }, 500);
     }
+  }
+
+  // mesaje de contact (autentificat)
+  if (pathname === "/api/messages" && method === "GET") {
+    return json((await env.PRODUCTS.get(MESSAGES_KEY, "json")) || []);
+  }
+  const mMsg = pathname.match(/^\/api\/messages\/([^/]+)$/);
+  if (mMsg && method === "DELETE") {
+    const id = decodeURIComponent(mMsg[1]);
+    let list = (await env.PRODUCTS.get(MESSAGES_KEY, "json")) || [];
+    list = list.filter((m) => m.id !== id);
+    await env.PRODUCTS.put(MESSAGES_KEY, JSON.stringify(list));
+    return json({ ok: true });
   }
 
   // upload imagine

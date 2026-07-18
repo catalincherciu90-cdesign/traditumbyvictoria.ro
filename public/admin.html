@@ -49,14 +49,15 @@
         <!-- APP -->
         <div id="app-view">
             <ul class="nav nav-tabs mb-4" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-products" type="button">Produse</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-logo" type="button">Logo</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-images" type="button">Imagini</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-carousel" type="button">Carousel</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-promo" type="button">Promo</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pages" type="button">Pagini</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-titles" type="button">Titluri</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button">Contact</button></li>
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-products" type="button"><i class="bi bi-box-seam"></i> Produse</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pages" type="button"><i class="bi bi-basket"></i> Torturi &amp; Candy Bar</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-carousel" type="button"><i class="bi bi-images"></i> Carousel</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-promo" type="button"><i class="bi bi-megaphone"></i> Banner promo</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-images" type="button"><i class="bi bi-image"></i> Imagini</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-logo" type="button"><i class="bi bi-award"></i> Logo</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button"><i class="bi bi-telephone"></i> Contact</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-messages" type="button"><i class="bi bi-envelope"></i> Mesaje</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-titles" type="button"><i class="bi bi-fonts"></i> Titluri pagini</button></li>
             </ul>
 
             <div class="tab-content">
@@ -175,6 +176,15 @@
                             <div class="form-text mt-2">Linkurile social goale sunt ascunse automat pe site.</div>
                         </div>
                     </div>
+                </div>
+
+                <!-- MESAJE -->
+                <div class="tab-pane fade" id="tab-messages">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="brand mb-0">Mesaje de contact</h5>
+                        <button type="button" id="msg-refresh" class="btn btn-sm btn-outline-dark"><i class="bi bi-arrow-clockwise"></i> Reîmprospătează</button>
+                    </div>
+                    <div id="messages-list"></div>
                 </div>
             </div>
 
@@ -595,6 +605,36 @@
         finally { $("config-save").disabled = false; }
     });
 
+    // ---------------- MESAJE ----------------
+    function msgCard(m) {
+        const d = m.date ? new Date(m.date).toLocaleString("ro-RO") : "";
+        return '<div class="card card-admin mb-2"><div class="card-body">' +
+            '<div class="d-flex justify-content-between align-items-start">' +
+            '<div><strong>' + escapeHtml(m.name) + '</strong>' + (m.email ? ' · <a href="mailto:' + escapeHtml(m.email) + '">' + escapeHtml(m.email) + '</a>' : '') + '</div>' +
+            '<button class="btn btn-sm btn-outline-danger" data-del-msg="' + escapeHtml(m.id) + '"><i class="bi bi-trash"></i></button>' +
+            '</div>' +
+            (m.subject ? '<div class="fw-bold small mt-1">' + escapeHtml(m.subject) + '</div>' : '') +
+            '<div class="small text-muted mb-2">' + escapeHtml(d) + '</div>' +
+            '<div>' + escapeHtml(m.message).replace(/\n/g, "<br>") + '</div>' +
+            '</div></div>';
+    }
+    async function loadMessages() {
+        const host = $("messages-list");
+        host.innerHTML = '<div class="text-muted py-3">Se încarcă...</div>';
+        try {
+            const list = await api("/api/messages");
+            host.innerHTML = list.length ? list.map(msgCard).join("") : '<div class="text-muted text-center py-5">Niciun mesaj încă.</div>';
+        } catch (e) { host.innerHTML = '<div class="text-danger">' + e.message + '</div>'; }
+    }
+    $("messages-list").addEventListener("click", async (e) => {
+        const del = e.target.closest("[data-del-msg]");
+        if (!del) return;
+        if (!confirm("Ștergi acest mesaj?")) return;
+        await api("/api/messages/" + encodeURIComponent(del.dataset.delMsg), { method: "DELETE" });
+        loadMessages();
+    });
+    $("msg-refresh").addEventListener("click", loadMessages);
+
     // ---------------- LOGIN / INIT ----------------
     $("login-form").addEventListener("submit", async (e) => {
         e.preventDefault(); $("login-error").textContent = "";
@@ -615,8 +655,10 @@
         // bara de salvare apare doar pe tab-urile de conținut (nu pe Produse)
         document.querySelectorAll('[data-bs-toggle="tab"]').forEach((btn) => {
             btn.addEventListener("shown.bs.tab", (e) => {
-                const products = e.target.getAttribute("data-bs-target") === "#tab-products";
-                $("config-save-bar").style.display = products ? "none" : "flex";
+                const target = e.target.getAttribute("data-bs-target");
+                const noSave = target === "#tab-products" || target === "#tab-messages";
+                $("config-save-bar").style.display = noSave ? "none" : "flex";
+                if (target === "#tab-messages") loadMessages();
             });
         });
         init().catch(() => show("login"));
