@@ -17,6 +17,12 @@
         #login-view, #app-view { display:none; }
         .is-visible { display:block !important; }
         #login-view.is-visible { display:flex !important; }
+        .tut { background:#fff7e9; border:1px solid #f0e0c0; border-left:4px solid #C9A45C;
+               border-radius:.5rem; padding:.75rem 1rem; margin-bottom:1rem; font-size:.9rem; color:#5b4a2a; }
+        .tut .tut-head { font-weight:600; display:flex; align-items:center; gap:.4rem; margin-bottom:.35rem; color:#6b5424; }
+        .tut ol, .tut ul { margin:0; padding-left:1.15rem; }
+        .tut li { margin-bottom:.15rem; }
+        .tut li:last-child { margin-bottom:0; }
     </style>
 </head>
 
@@ -63,6 +69,15 @@
             <div class="tab-content">
                 <!-- PRODUSE -->
                 <div class="tab-pane fade show active" id="tab-products">
+                    <div class="tut">
+                        <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                        <ol>
+                            <li>Apasă <strong>Adaugă produs</strong> ca să pui un produs nou (nume, categorie, preț, poză).</li>
+                            <li>În fereastra produsului poți apăsa <strong>Generează descrierea cu AI</strong> — scrii doar numele, restul îl completează.</li>
+                            <li>Cu creionul <i class="bi bi-pencil"></i> editezi, iar cu coșul <i class="bi bi-trash"></i> ștergi un produs.</li>
+                            <li>Primele 3 produse apar automat pe prima pagină a site-ului.</li>
+                        </ol>
+                    </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="brand mb-0">Produse</h4>
                         <button id="add-btn" type="button" class="btn btn-dark"><i class="bi bi-plus-lg"></i> Adaugă produs</button>
@@ -84,6 +99,14 @@
                 <div class="tab-pane fade" id="tab-logo">
                     <div class="card card-admin">
                         <div class="card-body">
+                            <div class="tut">
+                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                                <ol>
+                                    <li>Apasă <strong>Alege fișier</strong> și încarcă logo-ul (ideal PNG cu fundal transparent).</li>
+                                    <li>Se afișează în meniul de sus al site-ului, în locul textului.</li>
+                                    <li>Nu uita să apeși <strong>Salvează conținutul</strong> jos.</li>
+                                </ol>
+                            </div>
                             <h5 class="brand mb-3">Logo site</h5>
                             <div class="d-flex align-items-center gap-3">
                                 <img id="logo-preview" src="" alt="logo" class="bg-dark rounded p-2" style="max-height:64px;display:none">
@@ -101,6 +124,15 @@
                 <div class="tab-pane fade" id="tab-images">
                     <div class="card card-admin">
                         <div class="card-body">
+                            <div class="tut">
+                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                                <ol>
+                                    <li>Fiecare căsuță e o poziție din site (Despre, Servicii, carduri homepage, fundal antet).</li>
+                                    <li>Apasă <strong>Alege fișier</strong> sub imaginea pe care vrei s-o schimbi.</li>
+                                    <li>Lasă gol dacă vrei să păstrezi poza implicită.</li>
+                                    <li>La final apasă <strong>Salvează conținutul</strong> jos.</li>
+                                </ol>
+                            </div>
                             <h5 class="brand mb-1">Imagini site</h5>
                             <p class="form-text mt-0 mb-3">Înlocuiește pozele decorative din site. Lasă gol ca să păstrezi imaginea implicită.</p>
                             <div id="site-images" class="row g-3"></div>
@@ -112,6 +144,15 @@
                 <div class="tab-pane fade" id="tab-carousel">
                     <div class="card card-admin">
                         <div class="card-body">
+                            <div class="tut">
+                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                                <ol>
+                                    <li>Carouselul e slideshow-ul mare de sus, de pe prima pagină.</li>
+                                    <li>Apasă <strong>Adaugă slide</strong>, încarcă o imagine și completează titlul, subtitlul și butonul.</li>
+                                    <li>Poți folosi <strong>Generează titlu + subtitlu cu AI</strong> ca să-ți sugereze texte.</li>
+                                    <li>Coșul <i class="bi bi-trash"></i> șterge un slide. La final apasă <strong>Salvează conținutul</strong>.</li>
+                                </ol>
+                            </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="brand mb-0">Carousel pagina principală</h5>
                                 <button type="button" id="add-slide" class="btn btn-sm btn-outline-dark"><i class="bi bi-plus-lg"></i> Adaugă slide</button>
@@ -125,6 +166,15 @@
                 <div class="tab-pane fade" id="tab-promo">
                     <div class="card card-admin">
                         <div class="card-body">
+                            <div class="tut">
+                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                                <ol>
+                                    <li>Bannerul promo e fâșia colorată cu îndemn (ex. „Comandă acum") de pe prima pagină.</li>
+                                    <li>Scrie textul în <strong>Titlu banner</strong> sau folosește <strong>Generează cu AI</strong>.</li>
+                                    <li>Numărul de telefon se ia automat din tab-ul <strong>Contact</strong>.</li>
+                                    <li>La final apasă <strong>Salvează conținutul</strong> jos.</li>
+                                </ol>
+                            </div>
                             <h5 class="brand mb-3">Banner promo</h5>
                             <label class="form-label">Titlu banner</label>
                             <input type="text" id="c-promo-title" class="form-control">
@@ -138,6 +188,15 @@
                 <div class="tab-pane fade" id="tab-pages">
                     <div class="card card-admin">
                         <div class="card-body">
+                            <div class="tut">
+                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                                <ol>
+                                    <li>Aici editezi cele două pagini dedicate: <strong>Torturi</strong> și <strong>Candy Bar</strong>.</li>
+                                    <li>Completează titlul, descrierea și prețul minim/maxim (apar în dreapta paginii).</li>
+                                    <li>Cu <strong>Adaugă imagine</strong> pui pozele din galeria din stânga (se pot mări la click pe site).</li>
+                                    <li><strong>Generează cu AI</strong> îți sugerează titlu, descriere și preț. La final apasă <strong>Salvează conținutul</strong>.</li>
+                                </ol>
+                            </div>
                             <h5 class="brand mb-3">Pagini Torturi &amp; Candy Bar</h5>
                             <div id="product-pages"></div>
                         </div>
@@ -148,6 +207,14 @@
                 <div class="tab-pane fade" id="tab-titles">
                     <div class="card card-admin">
                         <div class="card-body">
+                            <div class="tut">
+                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                                <ol>
+                                    <li>Aici schimbi titlul afișat în antetul (banda de sus) al fiecărei pagini.</li>
+                                    <li>Ex.: pagina „Despre noi" poate deveni „Povestea noastră".</li>
+                                    <li>Lasă gol ca să păstrezi titlul implicit. La final apasă <strong>Salvează conținutul</strong>.</li>
+                                </ol>
+                            </div>
                             <h5 class="brand mb-3">Titluri pagini interioare</h5>
                             <div class="row g-3">
                                 <div class="col-md-4"><label class="form-label">Despre noi</label><input type="text" id="pt-about" class="form-control"></div>
@@ -164,6 +231,15 @@
                 <div class="tab-pane fade" id="tab-contact">
                     <div class="card card-admin">
                         <div class="card-body">
+                            <div class="tut">
+                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                                <ol>
+                                    <li>Datele de aici apar peste tot pe site: în meniu, în footer și în pagina Contact.</li>
+                                    <li>Completează telefonul, emailul și adresa reale.</li>
+                                    <li>La rețele sociale pune linkul complet (ex. https://facebook.com/...). Cele goale se ascund automat.</li>
+                                    <li>La final apasă <strong>Salvează conținutul</strong> jos.</li>
+                                </ol>
+                            </div>
                             <h5 class="brand mb-3">Date de contact</h5>
                             <div class="row g-3">
                                 <div class="col-md-4"><label class="form-label">Telefon</label><input type="text" id="ct-phone" class="form-control"></div>
@@ -180,6 +256,14 @@
 
                 <!-- MESAJE -->
                 <div class="tab-pane fade" id="tab-messages">
+                    <div class="tut">
+                        <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                        <ol>
+                            <li>Aici ajung mesajele trimise de vizitatori din formularul de pe pagina Contact.</li>
+                            <li>Vezi numele, emailul, subiectul și data. Apasă pe email ca să răspunzi direct.</li>
+                            <li>Coșul <i class="bi bi-trash"></i> șterge un mesaj; <strong>Reîmprospătează</strong> încarcă mesajele noi.</li>
+                        </ol>
+                    </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="brand mb-0">Mesaje de contact</h5>
                         <button type="button" id="msg-refresh" class="btn btn-sm btn-outline-dark"><i class="bi bi-arrow-clockwise"></i> Reîmprospătează</button>
