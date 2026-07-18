@@ -88,6 +88,39 @@ const DEFAULT_CONFIG = {
     sat: "10:00 - 16:00",
     sun: "",
   },
+  // Conținut editabil al paginilor (Despre, Servicii, Cifre)
+  content: {
+    homeAbout: {
+      eyebrow: "Despre noi",
+      title: "Pregătim fiecare produs din toată inima",
+      p1: "Traditum By Victoria este un proiect ce a luat naștere din dorința de a oferi o experiență culinară inedită. În laboratorul nostru de cofetărie, fiecare desert este gândit cu grijă și realizat din ingrediente alese cu atenție.",
+      p2: "Pasiunea pentru dulciuri întâlnește măiestria culinară în fiecare tort, prăjitură sau desert pe care îl creăm — cu rețete artizanale și un strop de tradiție.",
+      bullets: ["Produse de calitate", "Torturi personalizate", "Comenzi online", "Livrare la domiciliu"],
+    },
+    facts: [
+      { value: "10", label: "Ani de experiență" },
+      { value: "80", label: "Rețete artizanale" },
+      { value: "120", label: "Sortimente de produse" },
+      { value: "2500", label: "Clienți mulțumiți" },
+    ],
+    services: {
+      eyebrow: "Serviciile noastre",
+      title: "Ce îți oferim?",
+      intro: "De la torturi personalizate până la mese dulci pentru evenimente, ne ocupăm de fiecare detaliu ca momentele tale să fie cu adevărat dulci.",
+      items: [
+        { title: "Produse de calitate", text: "Ingrediente alese cu grijă și rețete artizanale, pentru un gust pe care îl ții minte." },
+        { title: "Torturi personalizate", text: "Creăm torturi după dorința ta, pentru aniversări, nunți, botezuri și orice ocazie." },
+        { title: "Comenzi online", text: "Comanzi simplu, prin telefon sau mesaj, iar noi ne ocupăm de rest." },
+        { title: "Livrare la domiciliu", text: "Aducem deserturile proaspete direct la tine, gata pentru momentul special." },
+      ],
+    },
+    aboutPage: {
+      eyebrow: "Despre noi",
+      title: "Povestea Traditum by Victoria",
+      story: "Povestea Traditum by Victoria a început în urmă cu peste 15 ani, din dorința de a aduce pe masă gustul autentic al deserturilor făcute în casă.\n\nLa început pregăteam cozonaci, pască, prăjituri și produse tradiționale în propria bucătărie. Ceea ce a pornit din necesitate s-a transformat treptat într-o pasiune care m-a însoțit zi de zi.\n\nDe-a lungul anilor am investit timp, muncă și multă dorință de a învăța. Am urmat cursuri, am testat rețete, am perfecționat tehnici și am căutat mereu să ofer produse realizate cu atenție la fiecare detaliu.\n\nAstăzi, în laboratorul propriu, pregătesc cu aceeași grijă torturi, prăjituri, candy bar-uri și produse tradiționale de sezon. Fiecare comandă este realizată cu ingrediente atent alese și cu respect pentru gustul autentic care m-a inspirat încă de la început.",
+      highlight: "Traditum by Victoria înseamnă tradiție, perseverență și dragoste pentru ceea ce fac.",
+    },
+  },
   // Testimoniale (editabile din admin)
   testimonials: [
     { name: "Andreea M.", role: "Client", rating: 5, text: "Cel mai bun tort de la aniversarea fiicei mele! Arăta superb și avea un gust pe măsură. Recomand cu drag." },
@@ -222,11 +255,78 @@ async function getConfig(env) {
     hours: { ...DEFAULT_CONFIG.hours, ...(data.hours || {}) },
     gallery: Array.isArray(data.gallery) ? data.gallery : DEFAULT_CONFIG.gallery,
     testimonials: Array.isArray(data.testimonials) ? data.testimonials : DEFAULT_CONFIG.testimonials,
+    content: mergeContent(data.content),
+  };
+}
+
+// Îmbină conținutul salvat cu structura implicită (păstrează cheile lipsă).
+function mergeContent(c) {
+  const d = DEFAULT_CONFIG.content;
+  c = c && typeof c === "object" ? c : {};
+  const ha = c.homeAbout || {}, sv = c.services || {}, ap = c.aboutPage || {};
+  return {
+    homeAbout: {
+      eyebrow: ha.eyebrow != null ? ha.eyebrow : d.homeAbout.eyebrow,
+      title: ha.title != null ? ha.title : d.homeAbout.title,
+      p1: ha.p1 != null ? ha.p1 : d.homeAbout.p1,
+      p2: ha.p2 != null ? ha.p2 : d.homeAbout.p2,
+      bullets: Array.isArray(ha.bullets) ? ha.bullets : d.homeAbout.bullets,
+    },
+    facts: Array.isArray(c.facts) ? c.facts : d.facts,
+    services: {
+      eyebrow: sv.eyebrow != null ? sv.eyebrow : d.services.eyebrow,
+      title: sv.title != null ? sv.title : d.services.title,
+      intro: sv.intro != null ? sv.intro : d.services.intro,
+      items: Array.isArray(sv.items) ? sv.items : d.services.items,
+    },
+    aboutPage: {
+      eyebrow: ap.eyebrow != null ? ap.eyebrow : d.aboutPage.eyebrow,
+      title: ap.title != null ? ap.title : d.aboutPage.title,
+      story: ap.story != null ? ap.story : d.aboutPage.story,
+      highlight: ap.highlight != null ? ap.highlight : d.aboutPage.highlight,
+    },
   };
 }
 
 function str(v, max) {
   return String(v == null ? "" : v).slice(0, max).trim();
+}
+
+function sanitizeContent(body) {
+  const d = DEFAULT_CONFIG.content;
+  body = body && typeof body === "object" ? body : {};
+  const ha = body.homeAbout || {}, sv = body.services || {}, ap = body.aboutPage || {};
+  const bullets = Array.isArray(ha.bullets) ? ha.bullets : [];
+  const facts = Array.isArray(body.facts) ? body.facts : [];
+  const items = Array.isArray(sv.items) ? sv.items : [];
+  return {
+    homeAbout: {
+      eyebrow: str(ha.eyebrow, 60) || d.homeAbout.eyebrow,
+      title: str(ha.title, 160) || d.homeAbout.title,
+      p1: str(ha.p1, 800),
+      p2: str(ha.p2, 800),
+      bullets: d.homeAbout.bullets.map((def, i) => str(bullets[i], 80) || def),
+    },
+    facts: d.facts.map((def, i) => ({
+      value: str(facts[i] && facts[i].value, 20) || def.value,
+      label: str(facts[i] && facts[i].label, 60) || def.label,
+    })),
+    services: {
+      eyebrow: str(sv.eyebrow, 60) || d.services.eyebrow,
+      title: str(sv.title, 160) || d.services.title,
+      intro: str(sv.intro, 400),
+      items: d.services.items.map((def, i) => ({
+        title: str(items[i] && items[i].title, 80) || def.title,
+        text: str(items[i] && items[i].text, 300) || def.text,
+      })),
+    },
+    aboutPage: {
+      eyebrow: str(ap.eyebrow, 60) || d.aboutPage.eyebrow,
+      title: str(ap.title, 160) || d.aboutPage.title,
+      story: str(ap.story, 4000),
+      highlight: str(ap.highlight, 300),
+    },
+  };
 }
 
 function sanitizeConfig(body) {
@@ -309,6 +409,7 @@ function sanitizeConfig(body) {
     gallery,
     hours,
     testimonials,
+    content: sanitizeContent(body.content),
   };
 }
 

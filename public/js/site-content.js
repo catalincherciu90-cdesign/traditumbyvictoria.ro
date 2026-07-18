@@ -310,6 +310,56 @@
         });
     }
 
+    function applyContent(c) {
+        if (!c) return;
+        function setId(id, val) { var el = document.getElementById(id); if (el && val != null) el.textContent = val; }
+        function setAttr(sel, val) { var el = document.querySelector(sel); if (el && val != null) el.textContent = val; }
+        function paragraphs(id, text) {
+            var el = document.getElementById(id);
+            if (!el || text == null) return;
+            var parts = String(text).split(/\n+/).map(function (s) { return s.trim(); }).filter(Boolean);
+            if (parts.length) el.innerHTML = parts.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("");
+        }
+        // Prima pagină — Despre
+        if (c.homeAbout) {
+            var ha = c.homeAbout;
+            setId("home-about-eyebrow", ha.eyebrow);
+            setId("home-about-title", ha.title);
+            var htext = document.getElementById("home-about-text");
+            if (htext) {
+                var ps = [ha.p1, ha.p2].filter(function (x) { return x != null && String(x).trim(); });
+                if (ps.length) htext.innerHTML = ps.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("");
+            }
+            (ha.bullets || []).forEach(function (b, i) { setAttr('[data-bullet="' + i + '"]', b); });
+        }
+        // Cifre
+        if (Array.isArray(c.facts)) {
+            c.facts.forEach(function (f, i) {
+                setAttr('[data-fact="' + i + '"]', f.value);
+                setAttr('[data-factlabel="' + i + '"]', f.label);
+            });
+        }
+        // Servicii
+        if (c.services) {
+            var sv = c.services;
+            setId("home-svc-eyebrow", sv.eyebrow);
+            setId("home-svc-title", sv.title);
+            setId("home-svc-intro", sv.intro);
+            (sv.items || []).forEach(function (it, i) {
+                setAttr('[data-svc-title="' + i + '"]', it.title);
+                setAttr('[data-svc-text="' + i + '"]', it.text);
+            });
+        }
+        // Pagina „Despre noi"
+        if (c.aboutPage) {
+            var ap = c.aboutPage;
+            setId("about-page-eyebrow", ap.eyebrow);
+            setId("about-page-title", ap.title);
+            paragraphs("about-page-text", ap.story);
+            setId("about-page-highlight", ap.highlight);
+        }
+    }
+
     function footerLegalLink() {
         var links = document.querySelectorAll(".footer a.btn-link");
         if (!links.length) return;
@@ -355,6 +405,7 @@
             applyTestimonials(cfg.testimonials);
             applyGallery(cfg.gallery);
             applyHours(cfg.hours);
+            applyContent(cfg.content);
         })
         .catch(function () { /* păstrează conținutul static implicit */ });
 

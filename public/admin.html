@@ -57,6 +57,7 @@
             <ul class="nav nav-tabs mb-4" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-products" type="button"><i class="bi bi-box-seam"></i> Produse</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pages" type="button"><i class="bi bi-basket"></i> Torturi &amp; Candy Bar</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-content-pages" type="button"><i class="bi bi-file-text"></i> Conținut pagini</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gallery" type="button"><i class="bi bi-images"></i> Galerie</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-carousel" type="button"><i class="bi bi-collection-play"></i> Carousel</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-promo" type="button"><i class="bi bi-megaphone"></i> Banner promo</button></li>
@@ -202,6 +203,79 @@
                             </div>
                             <h5 class="brand mb-3">Pagini Torturi &amp; Candy Bar</h5>
                             <div id="product-pages"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONȚINUT PAGINI -->
+                <div class="tab-pane fade" id="tab-content-pages">
+                    <div class="tut">
+                        <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                        <ol>
+                            <li>Aici editezi textele de pe prima pagină, pagina „Despre noi" și „Servicii".</li>
+                            <li>Modifică ce vrei în câmpurile de mai jos — poze și iconițele rămân neschimbate.</li>
+                            <li>Câmpurile de titlu, dacă le lași goale, revin la textul implicit.</li>
+                            <li>La final apasă <strong>Salvează conținutul</strong> jos.</li>
+                        </ol>
+                    </div>
+
+                    <div class="card card-admin mb-3">
+                        <div class="card-body">
+                            <h5 class="brand mb-3">Prima pagină — secțiunea „Despre noi"</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label">Text mic (deasupra titlului)</label><input type="text" id="cnt-ha-eyebrow" class="form-control"></div>
+                                <div class="col-md-8"><label class="form-label">Titlu</label><input type="text" id="cnt-ha-title" class="form-control"></div>
+                                <div class="col-12"><label class="form-label">Paragraf 1</label><textarea id="cnt-ha-p1" class="form-control" rows="2"></textarea></div>
+                                <div class="col-12"><label class="form-label">Paragraf 2</label><textarea id="cnt-ha-p2" class="form-control" rows="2"></textarea></div>
+                                <div class="col-12"><label class="form-label">Cele 4 puncte (lista cu bifă verde)</label></div>
+                                <div class="col-md-6"><input type="text" id="cnt-ha-b0" class="form-control"></div>
+                                <div class="col-md-6"><input type="text" id="cnt-ha-b1" class="form-control"></div>
+                                <div class="col-md-6"><input type="text" id="cnt-ha-b2" class="form-control"></div>
+                                <div class="col-md-6"><input type="text" id="cnt-ha-b3" class="form-control"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-admin mb-3">
+                        <div class="card-body">
+                            <h5 class="brand mb-3">Cifre (statistici cu numărătoare)</h5>
+                            <p class="form-text mt-0 mb-3">Apar pe prima pagină și pe pagina „Servicii". Numărul se animează automat.</p>
+                            <div class="row g-3">
+                                <div class="col-md-3 col-6"><label class="form-label">Număr 1</label><input type="text" id="cnt-fact-v0" class="form-control mb-2"><input type="text" id="cnt-fact-l0" class="form-control form-control-sm" placeholder="etichetă"></div>
+                                <div class="col-md-3 col-6"><label class="form-label">Număr 2</label><input type="text" id="cnt-fact-v1" class="form-control mb-2"><input type="text" id="cnt-fact-l1" class="form-control form-control-sm" placeholder="etichetă"></div>
+                                <div class="col-md-3 col-6"><label class="form-label">Număr 3</label><input type="text" id="cnt-fact-v2" class="form-control mb-2"><input type="text" id="cnt-fact-l2" class="form-control form-control-sm" placeholder="etichetă"></div>
+                                <div class="col-md-3 col-6"><label class="form-label">Număr 4</label><input type="text" id="cnt-fact-v3" class="form-control mb-2"><input type="text" id="cnt-fact-l3" class="form-control form-control-sm" placeholder="etichetă"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-admin mb-3">
+                        <div class="card-body">
+                            <h5 class="brand mb-3">Servicii („Ce îți oferim?")</h5>
+                            <p class="form-text mt-0 mb-3">Apar pe prima pagină și pe pagina „Servicii".</p>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4"><label class="form-label">Text mic</label><input type="text" id="cnt-sv-eyebrow" class="form-control"></div>
+                                <div class="col-md-8"><label class="form-label">Titlu</label><input type="text" id="cnt-sv-title" class="form-control"></div>
+                                <div class="col-12"><label class="form-label">Intro</label><textarea id="cnt-sv-intro" class="form-control" rows="2"></textarea></div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6"><label class="form-label">Serviciu 1 — titlu</label><input type="text" id="cnt-sv-t0" class="form-control mb-2"><textarea id="cnt-sv-x0" class="form-control form-control-sm" rows="2" placeholder="descriere"></textarea></div>
+                                <div class="col-md-6"><label class="form-label">Serviciu 2 — titlu</label><input type="text" id="cnt-sv-t1" class="form-control mb-2"><textarea id="cnt-sv-x1" class="form-control form-control-sm" rows="2" placeholder="descriere"></textarea></div>
+                                <div class="col-md-6"><label class="form-label">Serviciu 3 — titlu</label><input type="text" id="cnt-sv-t2" class="form-control mb-2"><textarea id="cnt-sv-x2" class="form-control form-control-sm" rows="2" placeholder="descriere"></textarea></div>
+                                <div class="col-md-6"><label class="form-label">Serviciu 4 — titlu</label><input type="text" id="cnt-sv-t3" class="form-control mb-2"><textarea id="cnt-sv-x3" class="form-control form-control-sm" rows="2" placeholder="descriere"></textarea></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <h5 class="brand mb-3">Pagina „Despre noi" (povestea)</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label">Text mic</label><input type="text" id="cnt-ap-eyebrow" class="form-control"></div>
+                                <div class="col-md-8"><label class="form-label">Titlu</label><input type="text" id="cnt-ap-title" class="form-control"></div>
+                                <div class="col-12"><label class="form-label">Poveste <span class="text-muted small">(lasă un rând gol între paragrafe)</span></label><textarea id="cnt-ap-story" class="form-control" rows="8"></textarea></div>
+                                <div class="col-12"><label class="form-label">Frază de final (îngroșată)</label><input type="text" id="cnt-ap-highlight" class="form-control"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -824,6 +898,44 @@
         return out;
     }
 
+    // ---- conținut pagini ----
+    function renderContent(c) {
+        c = c || {};
+        const ha = c.homeAbout || {}, sv = c.services || {}, ap = c.aboutPage || {}, facts = c.facts || [];
+        $("cnt-ha-eyebrow").value = ha.eyebrow || "";
+        $("cnt-ha-title").value = ha.title || "";
+        $("cnt-ha-p1").value = ha.p1 || "";
+        $("cnt-ha-p2").value = ha.p2 || "";
+        for (let i = 0; i < 4; i++) $("cnt-ha-b" + i).value = (ha.bullets && ha.bullets[i]) || "";
+        for (let i = 0; i < 4; i++) {
+            $("cnt-fact-v" + i).value = (facts[i] && facts[i].value) || "";
+            $("cnt-fact-l" + i).value = (facts[i] && facts[i].label) || "";
+        }
+        $("cnt-sv-eyebrow").value = sv.eyebrow || "";
+        $("cnt-sv-title").value = sv.title || "";
+        $("cnt-sv-intro").value = sv.intro || "";
+        for (let i = 0; i < 4; i++) {
+            $("cnt-sv-t" + i).value = (sv.items && sv.items[i] && sv.items[i].title) || "";
+            $("cnt-sv-x" + i).value = (sv.items && sv.items[i] && sv.items[i].text) || "";
+        }
+        $("cnt-ap-eyebrow").value = ap.eyebrow || "";
+        $("cnt-ap-title").value = ap.title || "";
+        $("cnt-ap-story").value = ap.story || "";
+        $("cnt-ap-highlight").value = ap.highlight || "";
+    }
+    function gatherContent() {
+        const bullets = [], facts = [], items = [];
+        for (let i = 0; i < 4; i++) bullets.push($("cnt-ha-b" + i).value);
+        for (let i = 0; i < 4; i++) facts.push({ value: $("cnt-fact-v" + i).value, label: $("cnt-fact-l" + i).value });
+        for (let i = 0; i < 4; i++) items.push({ title: $("cnt-sv-t" + i).value, text: $("cnt-sv-x" + i).value });
+        return {
+            homeAbout: { eyebrow: $("cnt-ha-eyebrow").value, title: $("cnt-ha-title").value, p1: $("cnt-ha-p1").value, p2: $("cnt-ha-p2").value, bullets },
+            facts,
+            services: { eyebrow: $("cnt-sv-eyebrow").value, title: $("cnt-sv-title").value, intro: $("cnt-sv-intro").value, items },
+            aboutPage: { eyebrow: $("cnt-ap-eyebrow").value, title: $("cnt-ap-title").value, story: $("cnt-ap-story").value, highlight: $("cnt-ap-highlight").value },
+        };
+    }
+
     function fillConfig(cfg) {
         const logo = cfg.logo || "";
         $("logo-url").value = logo;
@@ -836,6 +948,7 @@
         renderGallery(cfg.gallery);
         renderTestimonials(cfg.testimonials);
         renderHours(cfg.hours);
+        renderContent(cfg.content);
         $("c-promo-title").value = (cfg.promo && cfg.promo.title) || "";
         const pt = cfg.pageTitles || {};
         ["about","service","product","contact","notfound"].forEach(k => { $("pt-" + k).value = pt[k] || ""; });
@@ -853,7 +966,7 @@
         }));
         const pt = {}; ["about","service","product","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
         const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
-        return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, pages: gatherProductPages(), gallery: gatherGallery(), testimonials: gatherTestimonials(), hours: gatherHours(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
+        return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, pages: gatherProductPages(), gallery: gatherGallery(), testimonials: gatherTestimonials(), hours: gatherHours(), content: gatherContent(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
     async function loadConfig() { fillConfig(await api("/api/config")); }
     $("config-save").addEventListener("click", async () => {
