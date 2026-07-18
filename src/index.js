@@ -73,6 +73,28 @@ const DEFAULT_CONFIG = {
       images: ["/img/product-3.jpg", "/img/service-2.jpg"],
     },
   },
+  // Galerie „Realizările noastre" — poze reale ale produselor (editabilă din admin)
+  gallery: [
+    "/img/product-1.jpg", "/img/product-2.jpg", "/img/product-3.jpg",
+    "/img/about-1.jpg", "/img/service-1.jpg", "/img/service-2.jpg",
+  ],
+  // Program de lucru (gol = închis în ziua respectivă)
+  hours: {
+    mon: "09:00 - 18:00",
+    tue: "09:00 - 18:00",
+    wed: "09:00 - 18:00",
+    thu: "09:00 - 18:00",
+    fri: "09:00 - 18:00",
+    sat: "10:00 - 16:00",
+    sun: "",
+  },
+  // Testimoniale (editabile din admin)
+  testimonials: [
+    { name: "Andreea M.", role: "Client", rating: 5, text: "Cel mai bun tort de la aniversarea fiicei mele! Arăta superb și avea un gust pe măsură. Recomand cu drag." },
+    { name: "Mihai P.", role: "Client", rating: 5, text: "Am comandat masa dulce pentru nuntă și totul a fost perfect. Invitații au fost încântați de fiecare desert." },
+    { name: "Elena D.", role: "Client", rating: 5, text: "Prăjiturile de casă au exact gustul copilăriei. Se simte că sunt făcute cu suflet și ingrediente bune." },
+    { name: "Cristina V.", role: "Client", rating: 5, text: "Servicii impecabile și deserturi delicioase. Traditum By Victoria a devenit cofetăria mea preferată!" },
+  ],
 };
 
 // ---------------------------------------------------------------- utilitare
@@ -173,6 +195,7 @@ function sanitizeProduct(body) {
     category: String(body.category || "").slice(0, 60).trim(),
     description: String(body.description || "").slice(0, 600).trim(),
     image: String(body.image || "").slice(0, 300).trim(),
+    badge: String(body.badge || "").slice(0, 40).trim(),
   };
 }
 
@@ -196,6 +219,9 @@ async function getConfig(env) {
     ...DEFAULT_CONFIG,
     ...data,
     pages: { ...DEFAULT_CONFIG.pages, ...(data.pages || {}) },
+    hours: { ...DEFAULT_CONFIG.hours, ...(data.hours || {}) },
+    gallery: Array.isArray(data.gallery) ? data.gallery : DEFAULT_CONFIG.gallery,
+    testimonials: Array.isArray(data.testimonials) ? data.testimonials : DEFAULT_CONFIG.testimonials,
   };
 }
 
@@ -235,6 +261,25 @@ function sanitizeConfig(body) {
     const key = str(k, 60), val = str(imagesSrc[k], 300);
     if (key && val) images[key] = val;
   }
+  // galerie „Realizările noastre"
+  const gallery = Array.isArray(body.gallery)
+    ? body.gallery.slice(0, 40).map((i) => str(i, 300)).filter(Boolean)
+    : d.gallery;
+  // program de lucru
+  const hoursSrc = body.hours && typeof body.hours === "object" ? body.hours : {};
+  const hours = {};
+  for (const day of ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]) {
+    hours[day] = str(hoursSrc[day], 40);
+  }
+  // testimoniale
+  const testimonials = Array.isArray(body.testimonials)
+    ? body.testimonials.slice(0, 20).map((t) => ({
+        name: str(t && t.name, 80),
+        role: str(t && t.role, 60) || "Client",
+        text: str(t && t.text, 600),
+        rating: Math.min(5, Math.max(1, parseInt((t && t.rating), 10) || 5)),
+      })).filter((t) => t.name || t.text)
+    : d.testimonials;
   return {
     logo: str(body.logo, 300),
     images: images,
@@ -261,6 +306,9 @@ function sanitizeConfig(body) {
       torturi: page(pg.torturi, d.pages.torturi),
       candybar: page(pg.candybar, d.pages.candybar),
     },
+    gallery,
+    hours,
+    testimonials,
   };
 }
 

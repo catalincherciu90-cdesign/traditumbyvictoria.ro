@@ -192,6 +192,136 @@
         });
     }
 
+    function applyTestimonials(list) {
+        var $ = window.jQuery;
+        if (!$ || !Array.isArray(list)) return;
+        var $c = $(".testimonial-carousel");
+        if (!$c.length) return;
+        if (!list.length) {
+            var sec = $c.closest(".container-xxl");
+            if (sec.length) sec.hide();
+            return;
+        }
+        var html = list.map(function (t) {
+            var initial = esc((t.name || "?").trim().charAt(0).toUpperCase());
+            var rating = Math.min(5, Math.max(1, parseInt(t.rating, 10) || 5));
+            var stars = "";
+            for (var i = 1; i <= 5; i++) stars += '<i class="' + (i <= rating ? "fa" : "far") + ' fa-star"></i>';
+            return '' +
+                '<div class="testimonial-item bg-white rounded p-4">' +
+                '  <div class="d-flex align-items-center mb-4">' +
+                '    <div class="flex-shrink-0 rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:56px;height:56px;font-size:1.4rem;font-weight:700;font-family:\'Playfair Display\',serif">' + initial + '</div>' +
+                '    <div class="ms-3"><h5 class="mb-1">' + esc(t.name) + '</h5><span>' + esc(t.role || "Client") + '</span></div>' +
+                '  </div>' +
+                '  <div class="tv-stars">' + stars + '</div>' +
+                '  <p class="mb-0">' + esc(t.text) + '</p>' +
+                '</div>';
+        }).join("");
+        try { $c.trigger("destroy.owl.carousel"); } catch (e) {}
+        $c.removeClass("owl-loaded owl-drag owl-hidden").empty().html(html);
+        $c.owlCarousel({
+            autoplay: false, smartSpeed: 1000, margin: 25, loop: true, center: true,
+            dots: false, nav: true,
+            navText: ['<i class="bi bi-chevron-left"></i>', '<i class="bi bi-chevron-right"></i>'],
+            responsive: { 0: { items: 1 }, 768: { items: 2 }, 992: { items: 3 } },
+        });
+    }
+
+    function applyGallery(list) {
+        var host = document.getElementById("tv-gallery");
+        if (!host) return;
+        var section = document.getElementById("tv-gallery-section");
+        if (!Array.isArray(list) || !list.length) {
+            if (section) section.style.display = "none";
+            return;
+        }
+        host.innerHTML = list.map(function (src, i) {
+            return '<div class="col-lg-3 col-md-4 col-6 wow fadeInUp" data-wow-delay="' + (0.1 + (i % 4) * 0.1).toFixed(1) + 's">' +
+                '<div class="tv-gallery-item rounded overflow-hidden">' +
+                '<img loading="lazy" class="w-100" src="' + esc(src) + '" alt="Realizare Traditum By Victoria">' +
+                '<div class="tv-gallery-zoom"><i class="fa fa-search-plus"></i></div>' +
+                '</div></div>';
+        }).join("");
+        host.addEventListener("click", function (e) {
+            var img = e.target.closest(".tv-gallery-item");
+            if (!img) return;
+            var imgs = [].map.call(host.querySelectorAll("img"), function (im) { return im.getAttribute("src"); });
+            var idx = [].indexOf.call(host.querySelectorAll(".tv-gallery-item"), img);
+            openLightbox(imgs, idx < 0 ? 0 : idx);
+        });
+    }
+
+    function applyHours(hours) {
+        if (!hours) return;
+        var footer = document.querySelector(".footer .container .row");
+        if (!footer || footer.querySelector(".tv-hours")) return;
+        var days = [
+            ["mon", "Luni"], ["tue", "Marți"], ["wed", "Miercuri"], ["thu", "Joi"],
+            ["fri", "Vineri"], ["sat", "Sâmbătă"], ["sun", "Duminică"],
+        ];
+        var jsDayToKey = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+        var now = new Date();
+        var todayKey = jsDayToKey[now.getDay()];
+
+        function isOpenNow() {
+            var t = String(hours[todayKey] || "").trim();
+            if (!t) return false;
+            var m = t.match(/(\d{1,2})[:.](\d{2})\s*[-–]\s*(\d{1,2})[:.](\d{2})/);
+            if (!m) return false;
+            var mins = now.getHours() * 60 + now.getMinutes();
+            var start = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+            var end = parseInt(m[3], 10) * 60 + parseInt(m[4], 10);
+            return mins >= start && mins < end;
+        }
+        var open = isOpenNow();
+        var rows = days.map(function (d) {
+            var val = String(hours[d[0]] || "").trim() || "Închis";
+            var cls = d[0] === todayKey ? ' class="tv-hours-today"' : "";
+            return '<tr' + cls + '><td>' + d[1] + '</td><td class="text-end">' + esc(val) + '</td></tr>';
+        }).join("");
+
+        // reduce cele două coloane existente ca să încapă o a treia
+        footer.querySelectorAll(".col-lg-6").forEach(function (c) {
+            c.classList.remove("col-lg-6");
+            c.classList.add("col-lg-4");
+        });
+        var col = document.createElement("div");
+        col.className = "col-lg-4 col-md-6";
+        col.innerHTML =
+            '<h4 class="text-light mb-4">Program</h4>' +
+            '<span class="tv-openstatus ' + (open ? "is-open" : "is-closed") + '">' +
+            '<i class="bi bi-circle-fill"></i> ' + (open ? "Deschis acum" : "Închis acum") + '</span>' +
+            '<table class="tv-hours"><tbody>' + rows + '</tbody></table>';
+        footer.appendChild(col);
+    }
+
+    function cookieBanner() {
+        try { if (localStorage.getItem("tv-cookie-consent")) return; } catch (e) { return; }
+        var bar = document.createElement("div");
+        bar.className = "tv-cookie";
+        bar.innerHTML =
+            '<span>Folosim cookie-uri pentru o experiență mai bună pe site. ' +
+            '<a href="confidentialitate.html">Detalii</a></span>' +
+            '<button type="button" class="tv-cookie-btn">Accept</button>';
+        document.body.appendChild(bar);
+        bar.querySelector(".tv-cookie-btn").addEventListener("click", function () {
+            try { localStorage.setItem("tv-cookie-consent", "1"); } catch (e) {}
+            bar.remove();
+        });
+    }
+
+    function footerLegalLink() {
+        var links = document.querySelectorAll(".footer a.btn-link");
+        if (!links.length) return;
+        if (document.querySelector('.footer a.btn-link[href="confidentialitate.html"]')) return;
+        var last = links[links.length - 1];
+        var a = document.createElement("a");
+        a.className = "btn btn-link";
+        a.href = "confidentialitate.html";
+        a.textContent = "Confidențialitate";
+        last.parentNode.appendChild(a);
+    }
+
     function applyCarousel(slides) {
         var $ = window.jQuery;
         if (!$ || !slides || !slides.length) return;
@@ -207,6 +337,8 @@
     }
 
     applyEyebrows();
+    cookieBanner();
+    footerLegalLink();
 
     fetch("/api/config", { credentials: "same-origin" })
         .then(function (r) { return r.json(); })
@@ -220,6 +352,9 @@
             applyPageTitle(cfg.pageTitles);
             applyProductPage(cfg.pages);
             applyCarousel(cfg.carousel);
+            applyTestimonials(cfg.testimonials);
+            applyGallery(cfg.gallery);
+            applyHours(cfg.hours);
         })
         .catch(function () { /* păstrează conținutul static implicit */ });
 
@@ -229,9 +364,10 @@
         if (!host) return;
         function card(p) {
             var price = p.price ? '<div class="d-inline-block border border-primary rounded-pill px-3 mb-3">' + esc(p.price) + '</div>' : '';
+            var badge = p.badge ? '<span class="tv-badge">' + esc(p.badge) + '</span>' : '';
             var img = p.image ? '<img loading="lazy" class="img-fluid" src="' + esc(p.image) + '" alt="' + esc(p.name) + '">' : '';
             return '<div class="col-lg-4 col-md-6 wow fadeInUp">' +
-                '<div class="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">' +
+                '<div class="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">' + badge +
                 '<div class="text-center p-4">' + price + '<h3 class="mb-3">' + esc(p.name) + '</h3><span>' + esc(p.description) + '</span></div>' +
                 '<div class="position-relative mt-auto">' + img +
                 '<div class="product-overlay"><a class="btn btn-lg-square btn-outline-light rounded-circle" href="product.html"><i class="fa fa-eye text-primary"></i></a></div>' +

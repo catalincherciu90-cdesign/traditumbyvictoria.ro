@@ -57,11 +57,14 @@
             <ul class="nav nav-tabs mb-4" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-products" type="button"><i class="bi bi-box-seam"></i> Produse</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pages" type="button"><i class="bi bi-basket"></i> Torturi &amp; Candy Bar</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-carousel" type="button"><i class="bi bi-images"></i> Carousel</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gallery" type="button"><i class="bi bi-images"></i> Galerie</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-carousel" type="button"><i class="bi bi-collection-play"></i> Carousel</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-promo" type="button"><i class="bi bi-megaphone"></i> Banner promo</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-testimonials" type="button"><i class="bi bi-chat-quote"></i> Testimoniale</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-images" type="button"><i class="bi bi-image"></i> Imagini</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-logo" type="button"><i class="bi bi-award"></i> Logo</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button"><i class="bi bi-telephone"></i> Contact</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-hours" type="button"><i class="bi bi-clock"></i> Program</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-messages" type="button"><i class="bi bi-envelope"></i> Mesaje</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-titles" type="button"><i class="bi bi-fonts"></i> Titluri pagini</button></li>
             </ul>
@@ -203,6 +206,69 @@
                     </div>
                 </div>
 
+                <!-- GALERIE -->
+                <div class="tab-pane fade" id="tab-gallery">
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <div class="tut">
+                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                                <ol>
+                                    <li>Galeria „Realizările noastre" apare pe prima pagină, cu pozele produselor tale.</li>
+                                    <li>Apasă <strong>Adaugă poză</strong> și încarcă imaginile reale ale torturilor/deserturilor.</li>
+                                    <li>Vizitatorii pot da click pe poze ca să le vadă mari.</li>
+                                    <li>Dacă ștergi toate pozele, secțiunea se ascunde automat. La final apasă <strong>Salvează conținutul</strong>.</li>
+                                </ol>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="brand mb-0">Galerie „Realizările noastre"</h5>
+                                <button type="button" id="add-gallery" class="btn btn-sm btn-outline-dark"><i class="bi bi-plus-lg"></i> Adaugă poză</button>
+                            </div>
+                            <div id="gallery-images" class="row g-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TESTIMONIALE -->
+                <div class="tab-pane fade" id="tab-testimonials">
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <div class="tut">
+                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                                <ol>
+                                    <li>Aici editezi părerile clienților care apar pe prima pagină.</li>
+                                    <li>Completează numele, rolul (ex. „Client"), numărul de stele și textul părerii.</li>
+                                    <li>Cu <strong>Adaugă testimonial</strong> pui unul nou, cu coșul îl ștergi.</li>
+                                    <li>La final apasă <strong>Salvează conținutul</strong> jos.</li>
+                                </ol>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="brand mb-0">Testimoniale clienți</h5>
+                                <button type="button" id="add-testimonial" class="btn btn-sm btn-outline-dark"><i class="bi bi-plus-lg"></i> Adaugă testimonial</button>
+                            </div>
+                            <div id="testimonials-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROGRAM -->
+                <div class="tab-pane fade" id="tab-hours">
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <div class="tut">
+                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                                <ol>
+                                    <li>Programul apare în subsolul (footer) site-ului, pe toate paginile.</li>
+                                    <li>Scrie orele pentru fiecare zi (ex. <em>09:00 - 18:00</em>). Lasă gol dacă e închis.</li>
+                                    <li>Site-ul arată automat „Deschis acum" sau „Închis acum" în funcție de oră.</li>
+                                    <li>La final apasă <strong>Salvează conținutul</strong> jos.</li>
+                                </ol>
+                            </div>
+                            <h5 class="brand mb-3">Program de lucru</h5>
+                            <div class="row g-3" id="hours-fields"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- TITLURI -->
                 <div class="tab-pane fade" id="tab-titles">
                     <div class="card card-admin">
@@ -310,6 +376,19 @@
                             </div>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Etichetă <span class="text-muted small">(opțional)</span></label>
+                            <input type="text" id="f-badge" class="form-control" placeholder="ex. Nou / Best seller" list="badge-list">
+                            <datalist id="badge-list">
+                                <option value="Nou"></option>
+                                <option value="Best seller"></option>
+                                <option value="Recomandat"></option>
+                                <option value="Fără gluten"></option>
+                                <option value="Vegan"></option>
+                                <option value="Reducere"></option>
+                            </datalist>
+                            <div class="form-text">Apare ca o etichetă colorată în colțul produsului. Lasă gol dacă nu vrei etichetă.</div>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Descriere</label>
                             <textarea id="f-description" class="form-control" rows="3"></textarea>
                         </div>
@@ -382,6 +461,7 @@
         $("f-name").value = product ? product.name : "";
         $("f-category").value = product ? product.category : "";
         $("f-price").value = product ? product.price : "";
+        $("f-badge").value = product ? (product.badge || "") : "";
         $("f-description").value = product ? product.description : "";
         $("f-image").value = product ? (product.image || "") : "";
         $("modal-title").textContent = product ? "Editează produs" : "Adaugă produs";
@@ -422,7 +502,7 @@
             const file = $("f-image-file").files[0];
             let image = $("f-image").value;
             if (file) { const fd = new FormData(); fd.append("file", file); image = (await api("/api/upload", { method: "POST", body: fd })).url; }
-            const payload = { name: $("f-name").value, category: $("f-category").value, price: $("f-price").value, description: $("f-description").value, image };
+            const payload = { name: $("f-name").value, category: $("f-category").value, price: $("f-price").value, badge: $("f-badge").value, description: $("f-description").value, image };
             const id = $("f-id").value;
             if (id) await api("/api/products/" + encodeURIComponent(id), { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
             else await api("/api/products", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
@@ -651,6 +731,99 @@
         } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
     });
 
+    // ---- galerie „Realizările noastre" ----
+    function galleryRow(url) {
+        const col = document.createElement("div");
+        col.className = "col-md-4 col-lg-3 g-item";
+        col.innerHTML = `
+            <div class="slide-card p-2 h-100">
+                <img class="gi-preview w-100 rounded mb-2" style="height:110px;object-fit:cover" src="${escapeHtml(url || '')}" onerror="this.style.visibility='hidden'">
+                <input type="hidden" class="gi-url" value="${escapeHtml(url || '')}">
+                <div class="d-flex gap-2">
+                    <input type="file" class="form-control form-control-sm gi-file" accept="image/*">
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-remove-gi><i class="bi bi-trash"></i></button>
+                </div>
+            </div>`;
+        return col;
+    }
+    function renderGallery(list) {
+        const c = $("gallery-images"); c.innerHTML = "";
+        (list || []).forEach(u => c.appendChild(galleryRow(u)));
+    }
+    function gatherGallery() {
+        return [...document.querySelectorAll("#gallery-images .gi-url")].map(i => i.value).filter(Boolean);
+    }
+    $("add-gallery").addEventListener("click", () => $("gallery-images").appendChild(galleryRow("")));
+    $("gallery-images").addEventListener("click", (e) => {
+        const rm = e.target.closest("[data-remove-gi]");
+        if (rm) rm.closest(".g-item").remove();
+    });
+    $("gallery-images").addEventListener("change", async (e) => {
+        if (!e.target.classList.contains("gi-file")) return;
+        const file = e.target.files[0]; if (!file) return;
+        const col = e.target.closest(".g-item");
+        const prev = col.querySelector(".gi-preview");
+        prev.src = URL.createObjectURL(file); prev.style.visibility = "visible";
+        try {
+            const up = await api("/api/upload", { method: "POST", body: (function(){ const fd = new FormData(); fd.append("file", file); return fd; })() });
+            col.querySelector(".gi-url").value = up.url;
+        } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
+    });
+
+    // ---- testimoniale ----
+    function testimonialRow(t) {
+        t = t || {};
+        const wrap = document.createElement("div");
+        wrap.className = "slide-card p-3 mb-3 t-item";
+        const rating = parseInt(t.rating, 10) || 5;
+        let opts = "";
+        for (let i = 5; i >= 1; i--) opts += `<option value="${i}" ${i === rating ? "selected" : ""}>${i} stele</option>`;
+        wrap.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <strong>Testimonial</strong>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-remove-t><i class="bi bi-trash"></i></button>
+            </div>
+            <div class="row g-2 mb-2">
+                <div class="col-md-5"><input type="text" class="form-control form-control-sm t-name" placeholder="Nume (ex. Andreea M.)" value="${escapeHtml(t.name || '')}"></div>
+                <div class="col-md-4"><input type="text" class="form-control form-control-sm t-role" placeholder="Rol (ex. Client)" value="${escapeHtml(t.role || 'Client')}"></div>
+                <div class="col-md-3"><select class="form-select form-select-sm t-rating">${opts}</select></div>
+            </div>
+            <textarea class="form-control form-control-sm t-text" rows="2" placeholder="Părerea clientului">${escapeHtml(t.text || '')}</textarea>`;
+        return wrap;
+    }
+    function renderTestimonials(list) {
+        const c = $("testimonials-list"); c.innerHTML = "";
+        (list || []).forEach(t => c.appendChild(testimonialRow(t)));
+    }
+    function gatherTestimonials() {
+        return [...document.querySelectorAll("#testimonials-list .t-item")].map(w => ({
+            name: w.querySelector(".t-name").value,
+            role: w.querySelector(".t-role").value,
+            rating: parseInt(w.querySelector(".t-rating").value, 10) || 5,
+            text: w.querySelector(".t-text").value,
+        })).filter(t => t.name || t.text);
+    }
+    $("add-testimonial").addEventListener("click", () => $("testimonials-list").appendChild(testimonialRow({})));
+    $("testimonials-list").addEventListener("click", (e) => {
+        const rm = e.target.closest("[data-remove-t]");
+        if (rm) rm.closest(".t-item").remove();
+    });
+
+    // ---- program de lucru ----
+    const HOURS_DAYS = [["mon","Luni"],["tue","Marți"],["wed","Miercuri"],["thu","Joi"],["fri","Vineri"],["sat","Sâmbătă"],["sun","Duminică"]];
+    function renderHours(hours) {
+        hours = hours || {};
+        $("hours-fields").innerHTML = HOURS_DAYS.map(d =>
+            `<div class="col-md-6"><label class="form-label">${d[1]}</label>
+             <input type="text" class="form-control h-day" data-day="${d[0]}" placeholder="ex. 09:00 - 18:00 (gol = închis)" value="${escapeHtml(hours[d[0]] || '')}"></div>`
+        ).join("");
+    }
+    function gatherHours() {
+        const out = {};
+        document.querySelectorAll("#hours-fields .h-day").forEach(i => out[i.dataset.day] = i.value);
+        return out;
+    }
+
     function fillConfig(cfg) {
         const logo = cfg.logo || "";
         $("logo-url").value = logo;
@@ -660,6 +833,9 @@
         $("carousel-slides").innerHTML = "";
         (cfg.carousel || []).forEach(addSlide);
         renderProductPages(cfg.pages);
+        renderGallery(cfg.gallery);
+        renderTestimonials(cfg.testimonials);
+        renderHours(cfg.hours);
         $("c-promo-title").value = (cfg.promo && cfg.promo.title) || "";
         const pt = cfg.pageTitles || {};
         ["about","service","product","contact","notfound"].forEach(k => { $("pt-" + k).value = pt[k] || ""; });
@@ -677,7 +853,7 @@
         }));
         const pt = {}; ["about","service","product","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
         const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
-        return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, pages: gatherProductPages(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
+        return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, pages: gatherProductPages(), gallery: gatherGallery(), testimonials: gatherTestimonials(), hours: gatherHours(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
     async function loadConfig() { fillConfig(await api("/api/config")); }
     $("config-save").addEventListener("click", async () => {

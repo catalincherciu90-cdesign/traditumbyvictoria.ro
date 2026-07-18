@@ -625,3 +625,112 @@ h1, h2, h3,
         border-color: var(--primary);
     }
 }
+
+/* ============ Etichete produse ============ */
+.product-item { position: relative; }
+.tv-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 3;
+    background: var(--primary);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 4px 11px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(30, 25, 22, .2);
+}
+.product-item:hover .tv-badge {
+    background: var(--dark);
+    color: var(--light);
+}
+
+/* ============ Galerie „Realizările noastre" ============ */
+.tv-gallery-item {
+    position: relative;
+    cursor: zoom-in;
+    box-shadow: 0 .3rem 1rem rgba(30, 25, 22, .08);
+}
+.tv-gallery-item img {
+    height: 220px;
+    object-fit: cover;
+    transition: transform .5s ease;
+}
+.tv-gallery-item:hover img { transform: scale(1.08); }
+.tv-gallery-zoom {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(201, 164, 92, .35);
+    color: #fff;
+    font-size: 1.6rem;
+    opacity: 0;
+    transition: opacity .4s ease;
+}
+.tv-gallery-item:hover .tv-gallery-zoom { opacity: 1; }
+
+/* ============ Program de lucru (footer) ============ */
+.tv-openstatus {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .85rem;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+}
+.tv-openstatus i { font-size: .55rem; }
+.tv-openstatus.is-open { background: rgba(37, 211, 102, .15); color: #4ade80; }
+.tv-openstatus.is-closed { background: rgba(220, 53, 69, .15); color: #f87171; }
+.tv-hours {
+    width: 100%;
+    color: rgba(253, 245, 235, .75);
+    font-size: .9rem;
+}
+.tv-hours td { padding: 3px 0; }
+.tv-hours .tv-hours-today td {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* ============ Banner cookie-uri (GDPR) ============ */
+.tv-cookie {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    z-index: 2500;
+    width: min(680px, calc(100% - 32px));
+    background: var(--dark);
+    color: var(--light);
+    border: 1px solid rgba(201, 164, 92, .4);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .35);
+    font-size: .9rem;
+}
+.tv-cookie a { color: var(--primary); }
+.tv-cookie-btn {
+    flex-shrink: 0;
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    padding: 8px 22px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: .3s;
+}
+.tv-cookie-btn:hover { background: #b8934a; }
+@media (max-width: 575px) {
+    .tv-cookie { flex-direction: column; text-align: center; gap: 10px; bottom: 12px; }
+}
