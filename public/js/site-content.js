@@ -116,12 +116,29 @@
             '</div>';
     }
 
-    function applyProductPage(pages) {
-        if (!pages) return;
+    function getParam(name) {
+        var m = new RegExp("[?&]" + name + "=([^&]*)").exec(window.location.search);
+        return m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : "";
+    }
+
+    function findCategory(categories, slug) {
+        if (!Array.isArray(categories)) return null;
+        for (var i = 0; i < categories.length; i++) {
+            if (categories[i] && categories[i].slug === slug) return categories[i];
+        }
+        return null;
+    }
+
+    function applyProductPage(categories) {
         var page = document.body.getAttribute("data-page");
-        if (page !== "torturi" && page !== "candybar") return;
-        var p = pages[page];
-        if (!p) return;
+        // pagină de categorie (generică) sau paginile vechi torturi/candybar
+        var slug = page === "categorie" ? getParam("c") : (page === "torturi" || page === "candybar") ? page : "";
+        if (!slug) return;
+        var p = findCategory(categories, slug);
+        if (!p) {
+            if (page === "categorie") setText("#page-content-title", "Categorie inexistentă");
+            return;
+        }
         setText('[data-content="page-title"]', p.title);
         setText("#page-content-title", p.title);
         var desc = document.getElementById("page-content-desc");
@@ -386,34 +403,47 @@
         });
     }
 
-    // Cardurile de categorie (Torturi / Candy Bar) în secțiunea de pe prima pagină
-    function renderHomeCategories(pages) {
+    // Card de categorie (folosit pe prima pagină și pe „Toate produsele")
+    function categoryCardHtml(p) {
+        if (!p) return "";
+        var href = "categorie.html?c=" + encodeURIComponent(p.slug || "");
+        var img = (p.images && p.images[0]) ? p.images[0] : "";
+        var min = String(p.priceMin || "").trim(), max = String(p.priceMax || "").trim(), price = "";
+        if (min && max) price = min + " – " + max + " lei";
+        else if (min || max) price = (min || max) + " lei";
+        var priceHtml = price ? '<div class="d-inline-block border border-primary rounded-pill px-3 mb-3">' + esc(price) + '</div>' : '';
+        var desc = String(p.description || "");
+        if (desc.length > 130) desc = desc.slice(0, 130).replace(/\s+\S*$/, "") + "…";
+        var imgHtml = img ? '<img loading="lazy" class="img-fluid w-100" style="height:260px;object-fit:cover" src="' + esc(img) + '" alt="' + esc(p.title) + '">' : '';
+        return '<div class="col-lg-4 col-md-6 wow fadeInUp">' +
+            '<a href="' + href + '" class="text-decoration-none text-dark d-block h-100">' +
+            '<div class="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">' +
+            '<div class="text-center p-4">' + priceHtml + '<h3 class="mb-3">' + esc(p.title) + '</h3><span>' + esc(desc) + '</span></div>' +
+            '<div class="position-relative mt-auto">' + imgHtml +
+            '<div class="product-overlay"><span class="btn btn-lg-square btn-outline-light rounded-circle"><i class="fa fa-eye text-primary"></i></span></div>' +
+            '</div></div></a></div>';
+    }
+
+    // Cardurile de categorii în secțiunea de pe prima pagină
+    function renderHomeCategories(categories) {
         var host = document.getElementById("home-products");
-        if (!host || !pages) return;
-        var defs = [
-            { href: "torturi.html", p: pages.torturi },
-            { href: "candybar.html", p: pages.candybar },
-        ];
-        var cards = defs.map(function (d) {
-            var p = d.p; if (!p) return "";
-            var img = (p.images && p.images[0]) ? p.images[0] : "";
-            var min = String(p.priceMin || "").trim(), max = String(p.priceMax || "").trim(), price = "";
-            if (min && max) price = min + " – " + max + " lei";
-            else if (min || max) price = (min || max) + " lei";
-            var priceHtml = price ? '<div class="d-inline-block border border-primary rounded-pill px-3 mb-3">' + esc(price) + '</div>' : '';
-            var desc = String(p.description || "");
-            if (desc.length > 130) desc = desc.slice(0, 130).replace(/\s+\S*$/, "") + "…";
-            var imgHtml = img ? '<img loading="lazy" class="img-fluid w-100" style="height:260px;object-fit:cover" src="' + esc(img) + '" alt="' + esc(p.title) + '">' : '';
-            return '<div class="col-md-6 wow fadeInUp">' +
-                '<a href="' + d.href + '" class="text-decoration-none text-dark d-block h-100">' +
-                '<div class="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">' +
-                '<div class="text-center p-4">' + priceHtml + '<h3 class="mb-3">' + esc(p.title) + '</h3><span>' + esc(desc) + '</span></div>' +
-                '<div class="position-relative mt-auto">' + imgHtml +
-                '<div class="product-overlay"><span class="btn btn-lg-square btn-outline-light rounded-circle"><i class="fa fa-eye text-primary"></i></span></div>' +
-                '</div></div></a></div>';
-        }).join("");
+        if (!host || !Array.isArray(categories)) return;
+        var cards = categories.map(categoryCardHtml).join("");
         host.className = "row g-4 justify-content-center";
         host.innerHTML = cards || '<div class="col-12 text-center text-muted py-4">Momentan nu sunt categorii.</div>';
+    }
+
+    // Rescrie submeniul „Produse" din navbar cu categoriile din config
+    function applyMenuCategories(categories) {
+        if (!Array.isArray(categories)) return;
+        document.querySelectorAll(".navbar .dropdown-menu").forEach(function (menu) {
+            var all = menu.querySelector('a[href="product.html"]');
+            var allHtml = all ? all.outerHTML : '<a href="product.html" class="dropdown-item">Toate produsele</a>';
+            var items = categories.map(function (c) {
+                return '<a href="categorie.html?c=' + encodeURIComponent(c.slug || "") + '" class="dropdown-item">' + esc(c.title) + '</a>';
+            }).join("");
+            menu.innerHTML = allHtml + items;
+        });
     }
 
     applyEyebrows();
@@ -430,13 +460,14 @@
             applyWhatsApp(cfg.contact);
             applyPromo(cfg.promo);
             applyPageTitle(cfg.pageTitles);
-            applyProductPage(cfg.pages);
+            applyMenuCategories(cfg.categories);
+            applyProductPage(cfg.categories);
             applyCarousel(cfg.carousel);
             applyTestimonials(cfg.testimonials);
             applyGallery(cfg.gallery);
             applyHours(cfg.hours);
             applyContent(cfg.content);
-            renderHomeCategories(cfg.pages);
+            renderHomeCategories(cfg.categories);
         })
         .catch(function () { /* păstrează conținutul static implicit */ });
 

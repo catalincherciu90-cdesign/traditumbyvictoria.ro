@@ -57,22 +57,27 @@ const DEFAULT_CONFIG = {
     instagram: "",
     tiktok: "",
   },
-  pages: {
-    torturi: {
+  // Categorii de produse (dinamice — se pot adăuga oricâte din admin)
+  categories: [
+    {
+      id: "torturi",
+      slug: "torturi",
       title: "Torturi",
       description: "Torturi personalizate pentru aniversări, nunți, botezuri și orice ocazie specială. Fiecare tort este realizat la comandă, din ingrediente atent alese, după tema și dorința ta.",
       priceMin: "150",
       priceMax: "600",
       images: ["/img/product-1.jpg", "/img/about-1.jpg"],
     },
-    candybar: {
+    {
+      id: "candybar",
+      slug: "candybar",
       title: "Candy Bar",
       description: "Mese dulci și candy bar-uri pentru evenimente — un colț de poveste cu prăjituri asortate, macarons, tarte și deserturi în miniatură, aranjate elegant pentru momentele tale speciale.",
       priceMin: "300",
       priceMax: "1500",
       images: ["/img/product-3.jpg", "/img/service-2.jpg"],
     },
-  },
+  ],
   // Galerie „Realizările noastre" — poze reale ale produselor (editabilă din admin)
   gallery: [
     "/img/product-1.jpg", "/img/product-2.jpg", "/img/product-3.jpg",
@@ -247,16 +252,39 @@ async function getConfig(env) {
     await env.PRODUCTS.put(CONFIG_KEY, JSON.stringify(DEFAULT_CONFIG));
     return DEFAULT_CONFIG;
   }
-  // completează cu cheile noi apărute în DEFAULT_CONFIG (ex. pages)
+  // completează cu cheile noi apărute în DEFAULT_CONFIG
   return {
     ...DEFAULT_CONFIG,
     ...data,
-    pages: { ...DEFAULT_CONFIG.pages, ...(data.pages || {}) },
+    categories: migrateCategories(data),
     hours: { ...DEFAULT_CONFIG.hours, ...(data.hours || {}) },
     gallery: Array.isArray(data.gallery) ? data.gallery : DEFAULT_CONFIG.gallery,
     testimonials: Array.isArray(data.testimonials) ? data.testimonials : DEFAULT_CONFIG.testimonials,
     content: mergeContent(data.content),
   };
+}
+
+// Transformă în slug simplu (fără diacritice, litere mici, cratime).
+function slugify(s) {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/ă|â/g, "a").replace(/î/g, "i").replace(/ș|ş/g, "s").replace(/ț|ţ/g, "t")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+}
+
+// Întoarce lista de categorii, migrând vechiul format `pages` dacă e nevoie.
+function migrateCategories(data) {
+  if (Array.isArray(data.categories)) return data.categories;
+  if (data.pages && typeof data.pages === "object") {
+    const out = [];
+    for (const key of Object.keys(data.pages)) {
+      const p = data.pages[key] || {};
+      out.push({ id: key, slug: key, title: p.title || key, description: p.description || "",
+        priceMin: p.priceMin || "", priceMax: p.priceMax || "", images: Array.isArray(p.images) ? p.images : [] });
+    }
+    if (out.length) return out;
+  }
+  return DEFAULT_CONFIG.categories;
 }
 
 // Îmbină conținutul salvat cu structura implicită (păstrează cheile lipsă).
@@ -343,18 +371,26 @@ function sanitizeConfig(body) {
   const pt = body.pageTitles || {};
   const ct = body.contact || {};
   const promo = body.promo || {};
-  const pg = body.pages || {};
-  const page = (src, def) => {
-    src = src || {};
-    const imgs = Array.isArray(src.images) ? src.images.slice(0, 12).map((i) => str(i, 300)).filter(Boolean) : [];
+  // categorii de produse (dinamice)
+  const catsSrc = Array.isArray(body.categories) ? body.categories.slice(0, 30) : [];
+  const usedSlugs = {};
+  const categories = catsSrc.map((c, i) => {
+    c = c || {};
+    const title = str(c.title, 80) || ("Categorie " + (i + 1));
+    let slug = slugify(c.slug) || slugify(title) || ("categorie-" + (i + 1));
+    while (usedSlugs[slug]) slug = slug + "-" + (i + 1); // slug unic
+    usedSlugs[slug] = true;
+    const imgs = Array.isArray(c.images) ? c.images.slice(0, 12).map((x) => str(x, 300)).filter(Boolean) : [];
     return {
-      title: str(src.title, 80) || def.title,
-      description: str(src.description, 1500),
-      priceMin: str(src.priceMin, 30),
-      priceMax: str(src.priceMax, 30),
-      images: imgs.length ? imgs : def.images,
+      id: str(c.id, 60) || slug,
+      slug: slug,
+      title: title,
+      description: str(c.description, 1500),
+      priceMin: str(c.priceMin, 30),
+      priceMax: str(c.priceMax, 30),
+      images: imgs,
     };
-  };
+  }).filter((c) => c.title);
   const imagesSrc = body.images && typeof body.images === "object" ? body.images : {};
   const images = {};
   for (const k of Object.keys(imagesSrc).slice(0, 40)) {
@@ -402,10 +438,7 @@ function sanitizeConfig(body) {
       instagram: str(ct.instagram, 200),
       tiktok: str(ct.tiktok, 200),
     },
-    pages: {
-      torturi: page(pg.torturi, d.pages.torturi),
-      candybar: page(pg.candybar, d.pages.candybar),
-    },
+    categories: categories.length ? categories : d.categories,
     gallery,
     hours,
     testimonials,

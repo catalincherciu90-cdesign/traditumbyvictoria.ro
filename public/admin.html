@@ -182,13 +182,16 @@
                             <div class="tut">
                                 <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
                                 <ol>
-                                    <li>Aici editezi cele două pagini dedicate: <strong>Torturi</strong> și <strong>Candy Bar</strong>.</li>
-                                    <li>Completează titlul, descrierea și prețul minim/maxim (apar în dreapta paginii).</li>
-                                    <li>Cu <strong>Adaugă imagine</strong> pui pozele din galeria din stânga (se pot mări la click pe site).</li>
-                                    <li><strong>Generează cu AI</strong> îți sugerează titlu, descriere și preț. La final apasă <strong>Salvează conținutul</strong>.</li>
+                                    <li>Aici sunt <strong>categoriile</strong> tale de produse (Torturi, Candy Bar și oricâte mai adaugi).</li>
+                                    <li>Apasă <strong>Adaugă categorie</strong> pentru una nouă (ex. Prăjituri, Cozonaci, Macarons).</li>
+                                    <li>Completează titlul, descrierea, prețul minim/maxim și pozele. Coșul <i class="bi bi-trash"></i> șterge o categorie.</li>
+                                    <li>Fiecare categorie apare automat pe prima pagină, în meniu și pe „Toate produsele". La final apasă <strong>Salvează conținutul</strong>.</li>
                                 </ol>
                             </div>
-                            <h5 class="brand mb-3">Pagini Torturi &amp; Candy Bar</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="brand mb-0">Categorii de produse</h5>
+                                <button type="button" id="add-category" class="btn btn-sm btn-outline-dark"><i class="bi bi-plus-lg"></i> Adaugă categorie</button>
+                            </div>
                             <div id="product-pages"></div>
                         </div>
                     </div>
@@ -503,7 +506,7 @@
         } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
     });
 
-    // ---- pagini produse (Torturi / Candy Bar) ----
+    // ---- categorii de produse (dinamice) ----
     function pimgRow(url) {
         const row = document.createElement("div");
         row.className = "pimg d-flex align-items-center gap-2 mb-2";
@@ -514,64 +517,66 @@
             <button type="button" class="btn btn-sm btn-outline-danger" data-remove-pimg><i class="bi bi-x-lg"></i></button>`;
         return row;
     }
-    function pageEditor(key, label, p) {
-        p = p || {};
+    function categoryEditor(cat) {
+        cat = cat || {};
         const wrap = document.createElement("div");
-        wrap.className = "slide-card p-3 mb-3";
-        wrap.dataset.pkey = key;
+        wrap.className = "slide-card p-3 mb-3 cat-item";
+        if (cat.id) wrap.dataset.id = cat.id;
         wrap.innerHTML = `
-            <h6 class="mb-3 fw-bold">${label}</h6>
-            <label class="form-label">Titlu</label>
-            <input type="text" class="form-control form-control-sm mb-2 pg-title" value="${escapeHtml(p.title || '')}">
-            <label class="form-label">Descriere</label>
-            <textarea class="form-control form-control-sm mb-2 pg-desc" rows="3">${escapeHtml(p.description || '')}</textarea>
-            <div class="row g-2 mb-2">
-                <div class="col-6"><label class="form-label">Preț minim</label><input type="text" class="form-control form-control-sm pg-pmin" placeholder="ex. 150" value="${escapeHtml(p.priceMin || '')}"></div>
-                <div class="col-6"><label class="form-label">Preț maxim</label><input type="text" class="form-control form-control-sm pg-pmax" placeholder="ex. 600" value="${escapeHtml(p.priceMax || '')}"></div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong class="cat-name">Categorie</strong>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-remove-cat><i class="bi bi-trash"></i> Șterge</button>
             </div>
-            <button type="button" class="btn btn-sm btn-outline-primary mb-3 ai-page"><i class="bi bi-stars"></i> Generează titlu, descriere și preț cu AI</button>
-            <label class="form-label">Imagini (stânga paginii)</label>
+            <label class="form-label">Titlu (numele categoriei)</label>
+            <input type="text" class="form-control form-control-sm mb-2 pg-title" placeholder="ex. Prăjituri" value="${escapeHtml(cat.title || '')}">
+            <input type="hidden" class="pg-slug" value="${escapeHtml(cat.slug || '')}">
+            <label class="form-label">Descriere</label>
+            <textarea class="form-control form-control-sm mb-2 pg-desc" rows="3">${escapeHtml(cat.description || '')}</textarea>
+            <div class="row g-2 mb-2">
+                <div class="col-6"><label class="form-label">Preț minim</label><input type="text" class="form-control form-control-sm pg-pmin" placeholder="ex. 150" value="${escapeHtml(cat.priceMin || '')}"></div>
+                <div class="col-6"><label class="form-label">Preț maxim</label><input type="text" class="form-control form-control-sm pg-pmax" placeholder="ex. 600" value="${escapeHtml(cat.priceMax || '')}"></div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary mb-3 ai-page"><i class="bi bi-stars"></i> Generează descriere și preț cu AI</button>
+            <label class="form-label">Imagini (galeria paginii)</label>
             <div class="pg-images mb-2"></div>
             <button type="button" class="btn btn-sm btn-outline-dark" data-add-pimg><i class="bi bi-plus-lg"></i> Adaugă imagine</button>`;
         const imgs = wrap.querySelector(".pg-images");
-        (p.images || []).forEach(u => imgs.appendChild(pimgRow(u)));
+        (cat.images || []).forEach(u => imgs.appendChild(pimgRow(u)));
         return wrap;
     }
-    function renderProductPages(pages) {
+    function renderCategories(list) {
         const c = $("product-pages"); c.innerHTML = "";
-        pages = pages || {};
-        c.appendChild(pageEditor("torturi", "Torturi", pages.torturi));
-        c.appendChild(pageEditor("candybar", "Candy Bar", pages.candybar));
+        (list || []).forEach(cat => c.appendChild(categoryEditor(cat)));
     }
-    function gatherProductPages() {
-        const out = {};
-        document.querySelectorAll("#product-pages [data-pkey]").forEach(w => {
-            out[w.dataset.pkey] = {
-                title: w.querySelector(".pg-title").value,
-                description: w.querySelector(".pg-desc").value,
-                priceMin: w.querySelector(".pg-pmin").value,
-                priceMax: w.querySelector(".pg-pmax").value,
-                images: [...w.querySelectorAll(".pimg-url")].map(i => i.value).filter(Boolean),
-            };
-        });
-        return out;
+    function gatherCategories() {
+        return [...document.querySelectorAll("#product-pages .cat-item")].map(w => ({
+            id: w.dataset.id || "",
+            slug: w.querySelector(".pg-slug").value,
+            title: w.querySelector(".pg-title").value,
+            description: w.querySelector(".pg-desc").value,
+            priceMin: w.querySelector(".pg-pmin").value,
+            priceMax: w.querySelector(".pg-pmax").value,
+            images: [...w.querySelectorAll(".pimg-url")].map(i => i.value).filter(Boolean),
+        })).filter(c => c.title.trim());
     }
+    $("add-category").addEventListener("click", () => $("product-pages").appendChild(categoryEditor({})));
     $("product-pages").addEventListener("click", async (e) => {
+        const rmc = e.target.closest("[data-remove-cat]");
         const add = e.target.closest("[data-add-pimg]");
         const rm = e.target.closest("[data-remove-pimg]");
         const ai = e.target.closest(".ai-page");
-        if (add) { add.closest("[data-pkey]").querySelector(".pg-images").appendChild(pimgRow("")); return; }
+        if (rmc) { if (confirm("Ștergi această categorie?")) rmc.closest(".cat-item").remove(); return; }
+        if (add) { add.closest(".cat-item").querySelector(".pg-images").appendChild(pimgRow("")); return; }
         if (rm) { rm.closest(".pimg").remove(); return; }
         if (ai) {
-            const card = ai.closest("[data-pkey]");
-            const label = card.dataset.pkey === "candybar" ? "Candy Bar" : "Torturi";
+            const card = ai.closest(".cat-item");
             await withBusy(ai, async () => {
                 const cur = card.querySelector(".pg-title").value;
-                const out = await aiGenerate("page", label + (cur ? " — " + cur : ""));
-                if (out.title) card.querySelector(".pg-title").value = out.title;
+                const out = await aiGenerate("page", cur || "categorie de produse de cofetărie");
                 if (out.description) card.querySelector(".pg-desc").value = out.description;
                 if (out.priceMin) card.querySelector(".pg-pmin").value = out.priceMin;
                 if (out.priceMax) card.querySelector(".pg-pmax").value = out.priceMax;
+                if (!card.querySelector(".pg-title").value && out.title) card.querySelector(".pg-title").value = out.title;
             });
         }
     });
@@ -785,7 +790,7 @@
         renderSiteImages(cfg.images);
         $("carousel-slides").innerHTML = "";
         (cfg.carousel || []).forEach(addSlide);
-        renderProductPages(cfg.pages);
+        renderCategories(cfg.categories);
         renderGallery(cfg.gallery);
         renderTestimonials(cfg.testimonials);
         renderHours(cfg.hours);
@@ -807,7 +812,7 @@
         }));
         const pt = {}; ["about","service","product","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
         const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
-        return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, pages: gatherProductPages(), gallery: gatherGallery(), testimonials: gatherTestimonials(), hours: gatherHours(), content: gatherContent(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
+        return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, categories: gatherCategories(), gallery: gatherGallery(), testimonials: gatherTestimonials(), hours: gatherHours(), content: gatherContent(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
     async function loadConfig() { fillConfig(await api("/api/config")); }
     $("config-save").addEventListener("click", async () => {
