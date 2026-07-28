@@ -455,7 +455,7 @@ const AI_MODELS = [
   "@cf/meta/llama-3.1-8b-instruct-fp8",
   "@cf/meta/llama-3-8b-instruct",
 ];
-const AI_BRAND = "Ești copywriter pentru cofetăria premium „Traditum By Victoria\" (laborator de cofetărie artizanală: torturi, prăjituri, candy bar). Scrii exclusiv în limba română, pe un ton cald, elegant și autentic, fără clișee și fără emoji.";
+const AI_BRAND = "Ești copywriter SEO pentru cofetăria premium „Traditum By Victoria\" (laborator de cofetărie artizanală: torturi, prăjituri, candy bar). Scrii exclusiv în limba română corectă, cu diacritice, pe un ton cald, elegant și autentic, fără clișee și fără emoji. Textele tale sunt optimizate pentru motoarele de căutare: folosești natural cuvinte-cheie relevante (numele produsului/categoriei, „cofetărie\", „la comandă\", „artizanal\", tipuri de evenimente ca aniversări, nunți, botezuri, majorate, evenimente corporate), fără repetare forțată și fără keyword stuffing.";
 
 function stripQuotes(s) {
   return String(s || "").trim().replace(/^["'„”«»]+|["'„”«»]+$/g, "").trim();
@@ -467,7 +467,7 @@ async function runAI(env, user) {
       { role: "system", content: AI_BRAND },
       { role: "user", content: user },
     ],
-    max_tokens: 300,
+    max_tokens: 800,
   };
   let res, lastErr;
   for (const model of AI_MODELS) {
@@ -500,9 +500,9 @@ async function generateBanner(env, kind, hint) {
 
   if (kind === "product") {
     const nume = hint || "produs de cofetărie";
-    const text = await runAI(env, "Scrie textul pentru un produs de cofetărie care se numește „" + nume + "\". Nu schimba și nu repeta numele." +
-      " Răspunde EXACT în acest format, fiecare pe câte o linie:\n" +
-      "Descriere: <o frază apetisantă despre produs, maxim 25 de cuvinte>\n" +
+    const text = await runAI(env, "Scrie textul, optimizat SEO, pentru un produs de cofetărie care se numește „" + nume + "\". Nu schimba și nu repeta numele." +
+      " Răspunde EXACT în acest format, fiecare câmp pe o SINGURĂ linie:\n" +
+      "Descriere: <60-90 de cuvinte, apetisant, cu cuvinte-cheie naturale>\n" +
       "Categorie: <categorie, 1-2 cuvinte, ex. Torturi/Prăjituri/Mese dulci>\n" +
       "Pret: <preț orientativ, ex. 120 lei sau La comandă>");
     const f = parseFields(text, ["descriere", "categorie", "pret"]);
@@ -510,14 +510,16 @@ async function generateBanner(env, kind, hint) {
   }
 
   if (kind === "page") {
-    const text = await runAI(env, "Generează conținutul pentru o pagină de categorie de produse dintr-o cofetărie." + h +
-      " Răspunde EXACT în acest format, fiecare pe câte o linie:\n" +
-      "Titlu: <titlu, maxim 4 cuvinte>\n" +
-      "Descriere: <2-3 fraze apetisante, maxim 60 de cuvinte>\n" +
+    const text = await runAI(env, "Scrie conținutul, optimizat SEO, pentru pagina unei categorii de produse dintr-o cofetărie." + h +
+      " Descrierea trebuie să fie amplă (120-180 de cuvinte), împărțită în DOUĂ paragrafe, care să prezinte categoria, ocaziile potrivite, calitatea ingredientelor și posibilitatea de comandă personalizată, folosind natural cuvinte-cheie relevante." +
+      " Răspunde EXACT în acest format, fiecare câmp pe o SINGURĂ linie (fără rânduri noi în interiorul unui câmp):\n" +
+      "Titlu: <titlu scurt, 2-4 cuvinte>\n" +
+      "Descriere: <120-180 de cuvinte, cald și apetisant, cele două paragrafe separate prin secvența ||>\n" +
       "PretMin: <doar număr, ex. 150>\n" +
       "PretMax: <doar număr, ex. 600>");
     const f = parseFields(text, ["titlu", "descriere", "pretmin", "pretmax"]);
-    return { title: f.titlu || "", description: f.descriere || "", priceMin: digits(f.pretmin), priceMax: digits(f.pretmax) };
+    const description = String(f.descriere || "").replace(/\s*\|\|\s*/g, "\n\n").trim();
+    return { title: f.titlu || "", description: description, priceMin: digits(f.pretmin), priceMax: digits(f.pretmax) };
   }
 
   // implicit: slide de carousel
