@@ -71,8 +71,7 @@
             </ul>
             <!-- Sub-taburi (filtrate după categoria aleasă) -->
             <ul class="nav nav-tabs mb-4" role="tablist" id="sub-nav">
-                <li class="nav-item" data-cat="products"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-products" type="button"><i class="bi bi-box-seam"></i> Produse</button></li>
-                <li class="nav-item" data-cat="products"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pages" type="button"><i class="bi bi-basket"></i> Torturi &amp; Candy Bar</button></li>
+                <li class="nav-item" data-cat="products"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-pages" type="button"><i class="bi bi-basket"></i> Torturi &amp; Candy Bar</button></li>
                 <li class="nav-item" data-cat="content"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-content-pages" type="button"><i class="bi bi-file-text"></i> Conținut pagini</button></li>
                 <li class="nav-item" data-cat="content"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-titles" type="button"><i class="bi bi-fonts"></i> Titluri pagini</button></li>
                 <li class="nav-item" data-cat="content"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-testimonials" type="button"><i class="bi bi-chat-quote"></i> Testimoniale</button></li>
@@ -87,34 +86,6 @@
             </ul>
 
             <div class="tab-content">
-                <!-- PRODUSE -->
-                <div class="tab-pane fade show active" id="tab-products">
-                    <div class="tut">
-                        <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
-                        <ol>
-                            <li>Apasă <strong>Adaugă produs</strong> ca să pui un produs nou (nume, categorie, preț, poză).</li>
-                            <li>În fereastra produsului poți apăsa <strong>Generează descrierea cu AI</strong> — scrii doar numele, restul îl completează.</li>
-                            <li>Cu creionul <i class="bi bi-pencil"></i> editezi, iar cu coșul <i class="bi bi-trash"></i> ștergi un produs.</li>
-                            <li>Primele 3 produse apar automat pe prima pagină a site-ului.</li>
-                        </ol>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="brand mb-0">Produse</h4>
-                        <button id="add-btn" type="button" class="btn btn-dark"><i class="bi bi-plus-lg"></i> Adaugă produs</button>
-                    </div>
-                    <div class="card card-admin">
-                        <div class="table-responsive">
-                            <table class="table align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr><th></th><th>Nume</th><th>Categorie</th><th>Preț</th><th class="text-end">Acțiuni</th></tr>
-                                </thead>
-                                <tbody id="product-rows"></tbody>
-                            </table>
-                        </div>
-                        <div id="empty-state" class="text-center text-muted py-5" style="display:none">Niciun produs încă. Apasă „Adaugă produs".</div>
-                    </div>
-                </div>
-
                 <!-- LOGO -->
                 <div class="tab-pane fade" id="tab-logo">
                     <div class="card card-admin">
@@ -205,7 +176,7 @@
                 </div>
 
                 <!-- PAGINI -->
-                <div class="tab-pane fade" id="tab-pages">
+                <div class="tab-pane fade show active" id="tab-pages">
                     <div class="card card-admin">
                         <div class="card-body">
                             <div class="tut">
@@ -435,76 +406,10 @@
         </div>
     </div>
 
-    <!-- MODAL produs -->
-    <div class="modal fade" id="product-modal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="product-form">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modal-title">Adaugă produs</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" id="f-id">
-                        <div class="mb-3">
-                            <button type="button" id="ai-product" class="btn btn-sm btn-outline-primary"><i class="bi bi-stars"></i> Generează descrierea cu AI</button>
-                            <span class="form-text ms-2">scrie numele produsului, apoi generează (titlul rămâne neschimbat)</span>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nume *</label>
-                            <input type="text" id="f-name" class="form-control" required>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label">Categorie</label>
-                                <input type="text" id="f-category" class="form-control" placeholder="ex. Torturi" list="cat-list">
-                                <datalist id="cat-list"></datalist>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label">Preț</label>
-                                <input type="text" id="f-price" class="form-control" placeholder="ex. 150 lei / La comandă">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Etichetă <span class="text-muted small">(opțional)</span></label>
-                            <input type="text" id="f-badge" class="form-control" placeholder="ex. Nou / Best seller" list="badge-list">
-                            <datalist id="badge-list">
-                                <option value="Nou"></option>
-                                <option value="Best seller"></option>
-                                <option value="Recomandat"></option>
-                                <option value="Fără gluten"></option>
-                                <option value="Vegan"></option>
-                                <option value="Reducere"></option>
-                            </datalist>
-                            <div class="form-text">Apare ca o etichetă colorată în colțul produsului. Lasă gol dacă nu vrei etichetă.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Descriere</label>
-                            <textarea id="f-description" class="form-control" rows="3"></textarea>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">Imagine</label>
-                            <input type="file" id="f-image-file" class="form-control" accept="image/*">
-                            <div class="form-text">Încarcă o poză (max 5 MB) sau lasă gol ca să păstrezi imaginea curentă.</div>
-                        </div>
-                        <input type="hidden" id="f-image">
-                        <img id="f-image-preview" class="img-fluid rounded mt-2" style="max-height:160px; display:none">
-                        <div id="form-error" class="text-danger small mt-2"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anulează</button>
-                        <button type="submit" class="btn btn-dark" id="save-btn">Salvează</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     const $ = (id) => document.getElementById(id);
-    let products = [];
-    let modal;
 
     async function api(path, opts = {}) {
         const res = await fetch(path, { credentials: "same-origin", ...opts });
@@ -520,86 +425,6 @@
     function escapeHtml(s) {
         return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
     }
-
-    // ---------------- PRODUSE ----------------
-    function render() {
-        const rows = $("product-rows");
-        rows.innerHTML = "";
-        const cats = new Set();
-        products.forEach(p => {
-            if (p.category) cats.add(p.category);
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td><img class="thumb" src="${escapeHtml(p.image) || ''}" alt="" onerror="this.style.visibility='hidden'"></td>
-                <td>${escapeHtml(p.name)}</td>
-                <td>${escapeHtml(p.category)}</td>
-                <td>${escapeHtml(p.price)}</td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-outline-secondary" data-edit="${escapeHtml(p.id)}"><i class="bi bi-pencil"></i></button>
-                    <button class="btn btn-sm btn-outline-danger" data-del="${escapeHtml(p.id)}"><i class="bi bi-trash"></i></button>
-                </td>`;
-            rows.appendChild(tr);
-        });
-        $("empty-state").style.display = products.length ? "none" : "";
-        $("cat-list").innerHTML = [...cats].map(c => `<option value="${escapeHtml(c)}">`).join("");
-    }
-    async function loadProducts() { products = await api("/api/products"); render(); }
-    function openModal(product) {
-        $("form-error").textContent = "";
-        $("product-form").reset();
-        $("f-id").value = product ? product.id : "";
-        $("f-name").value = product ? product.name : "";
-        $("f-category").value = product ? product.category : "";
-        $("f-price").value = product ? product.price : "";
-        $("f-badge").value = product ? (product.badge || "") : "";
-        $("f-description").value = product ? product.description : "";
-        $("f-image").value = product ? (product.image || "") : "";
-        $("modal-title").textContent = product ? "Editează produs" : "Adaugă produs";
-        const prev = $("f-image-preview");
-        if (product && product.image) { prev.src = product.image; prev.style.display = ""; }
-        else { prev.style.display = "none"; }
-        modal.show();
-    }
-    $("add-btn").addEventListener("click", () => openModal(null));
-    $("ai-product").addEventListener("click", (e) => {
-        const name = $("f-name").value.trim();
-        if (!name) { alert("Scrie întâi numele produsului, apoi generează descrierea."); return; }
-        withBusy(e.currentTarget, async () => {
-            const out = await aiGenerate("product", name);
-            if (out.description) $("f-description").value = out.description;   // titlul rămâne neschimbat
-            if (out.category && !$("f-category").value) $("f-category").value = out.category;
-            if (out.price && !$("f-price").value) $("f-price").value = out.price;
-        });
-    });
-    $("product-rows").addEventListener("click", async (e) => {
-        const edit = e.target.closest("[data-edit]");
-        const del = e.target.closest("[data-del]");
-        if (edit) { openModal(products.find(x => x.id === edit.dataset.edit)); }
-        else if (del) {
-            if (!confirm("Sigur ștergi acest produs?")) return;
-            await api("/api/products/" + encodeURIComponent(del.dataset.del), { method: "DELETE" });
-            await loadProducts();
-        }
-    });
-    $("f-image-file").addEventListener("change", () => {
-        const file = $("f-image-file").files[0];
-        if (file) { const prev = $("f-image-preview"); prev.src = URL.createObjectURL(file); prev.style.display = ""; }
-    });
-    $("product-form").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        $("form-error").textContent = ""; $("save-btn").disabled = true;
-        try {
-            const file = $("f-image-file").files[0];
-            let image = $("f-image").value;
-            if (file) { const fd = new FormData(); fd.append("file", file); image = (await api("/api/upload", { method: "POST", body: fd })).url; }
-            const payload = { name: $("f-name").value, category: $("f-category").value, price: $("f-price").value, badge: $("f-badge").value, description: $("f-description").value, image };
-            const id = $("f-id").value;
-            if (id) await api("/api/products/" + encodeURIComponent(id), { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
-            else await api("/api/products", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
-            modal.hide(); await loadProducts();
-        } catch (err) { $("form-error").textContent = err.message; }
-        finally { $("save-btn").disabled = false; }
-    });
 
     // ---------------- CONȚINUT SITE ----------------
     function slideEditor(s) {
@@ -1036,7 +861,7 @@
 
     async function init() {
         const me = await api("/api/me");
-        if (me.authed) { show("app"); await loadProducts(); await loadConfig(); }
+        if (me.authed) { show("app"); await loadConfig(); }
         else { show("login"); }
     }
     // Categorii: arată doar sub-taburile din categoria aleasă
@@ -1048,16 +873,20 @@
             li.style.display = match ? "" : "none";
             if (match && !first) first = li.querySelector(".nav-link");
         });
-        if (first) new bootstrap.Tab(first).show();
+        if (first) {
+            new bootstrap.Tab(first).show();
+            const target = first.getAttribute("data-bs-target");
+            $("config-save-bar").style.display = target === "#tab-messages" ? "none" : "flex";
+            if (target === "#tab-messages") loadMessages();
+        }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        modal = new bootstrap.Modal($("product-modal"));
-        // bara de salvare apare doar pe tab-urile de conținut (nu pe Produse)
+        // bara de salvare apare pe tab-urile de conținut (nu pe Mesaje)
         document.querySelectorAll('[data-bs-toggle="tab"]').forEach((btn) => {
             btn.addEventListener("shown.bs.tab", (e) => {
                 const target = e.target.getAttribute("data-bs-target");
-                const noSave = target === "#tab-products" || target === "#tab-messages";
+                const noSave = target === "#tab-messages";
                 $("config-save-bar").style.display = noSave ? "none" : "flex";
                 if (target === "#tab-messages") loadMessages();
             });
