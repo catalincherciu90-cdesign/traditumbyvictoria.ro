@@ -249,7 +249,12 @@
         if (!host) return;
         var section = document.getElementById("tv-gallery-section");
         if (!Array.isArray(list) || !list.length) {
-            if (section) section.style.display = "none";
+            if (document.body.getAttribute("data-page") === "galerie") {
+                host.className = "row";
+                host.innerHTML = '<div class="col-12 text-center text-muted py-5">Momentan nu sunt poze în galerie.</div>';
+            } else if (section) {
+                section.style.display = "none";
+            }
             return;
         }
         host.innerHTML = list.map(function (src, i) {
@@ -377,6 +382,19 @@
         }
     }
 
+    function addGalleryNavLink() {
+        var page = document.body.getAttribute("data-page");
+        document.querySelectorAll(".navbar .navbar-nav").forEach(function (nav) {
+            if (nav.querySelector('a[href="galerie.html"]')) return;
+            var contact = nav.querySelector('a[href="contact.html"]');
+            var a = document.createElement("a");
+            a.className = "nav-item nav-link" + (page === "galerie" ? " active" : "");
+            a.href = "galerie.html";
+            a.textContent = "Galerie";
+            if (contact) nav.insertBefore(a, contact); else nav.appendChild(a);
+        });
+    }
+
     function footerLegalLink() {
         var links = document.querySelectorAll(".footer a.btn-link");
         if (!links.length) return;
@@ -449,6 +467,7 @@
     applyEyebrows();
     cookieBanner();
     footerLegalLink();
+    addGalleryNavLink();
 
     fetch("/api/config", { credentials: "same-origin" })
         .then(function (r) { return r.json(); })
