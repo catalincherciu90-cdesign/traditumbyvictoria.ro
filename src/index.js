@@ -705,12 +705,118 @@ const SECURITY_HEADERS = {
   "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
 };
 
-// Servește un asset static cu headere de securitate adăugate.
-async function asset(env, request) {
-  const res = await env.ASSETS.fetch(request);
+function addSecurity(res) {
   const headers = new Headers(res.headers);
   for (const [k, v] of Object.entries(SECURITY_HEADERS)) headers.set(k, v);
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+}
+
+// Servește un asset static cu headere de securitate adăugate.
+async function asset(env, request) {
+  return addSecurity(await env.ASSETS.fetch(request));
+}
+
+// ------------------------------------------------------------- SEO / meta
+class SetText { constructor(t) { this.t = t; } element(el) { el.setInnerContent(this.t); } }
+class SetAttr { constructor(a, v) { this.a = a; this.v = v; } element(el) { el.setAttribute(this.a, this.v); } }
+class AppendHtml { constructor(h) { this.h = h; } element(el) { el.append(this.h, { html: true }); } }
+
+function absUrl(url, path) {
+  if (/^https?:\/\//.test(path)) return path;
+  return url.origin + (path.charAt(0) === "/" ? path : "/" + path);
+}
+function metaDescription(text) {
+  let s = String(text || "").replace(/\s+/g, " ").trim();
+  if (s.length > 160) s = s.slice(0, 157).replace(/\s+\S*$/, "") + "…";
+  return s;
+}
+function jsonLd(obj) { return JSON.stringify(obj).replace(/</g, "\\u003c"); }
+function pad2(n) { n = String(n); return n.length < 2 ? "0" + n : n; }
+function openingHoursSpec(hours) {
+  hours = hours || {};
+  const map = { mon: "Monday", tue: "Tuesday", wed: "Wednesday", thu: "Thursday", fri: "Friday", sat: "Saturday", sun: "Sunday" };
+  const out = [];
+  for (const k of Object.keys(map)) {
+    const m = String(hours[k] || "").match(/(\d{1,2})[:.](\d{2})\s*[-–]\s*(\d{1,2})[:.](\d{2})/);
+    if (!m) continue;
+    out.push({ "@type": "OpeningHoursSpecification", dayOfWeek: map[k], opens: pad2(m[1]) + ":" + m[2], closes: pad2(m[3]) + ":" + m[4] });
+  }
+  return out;
+}
+
+// Pagina de categorie: titlu, meta description și date structurate Product.
+async function serveCategoryPage(env, request, url) {
+  const res = await env.ASSETS.fetch(new Request(new URL("/categorie.html", url), request));
+  let cfg = null;
+  try { cfg = await getConfig(env); } catch (e) {}
+  const slug = url.searchParams.get("c") || "";
+  const cat = cfg && Array.isArray(cfg.categories) ? cfg.categories.find((c) => c.slug === slug) : null;
+  if (!cat) return addSecurity(res);
+
+  const title = cat.title + " - Traditum By Victoria";
+  const desc = metaDescription(cat.description) || (cat.title + " la comandă de la Traditum By Victoria — cofetărie artizanală.");
+  const pageUrl = url.origin + "/categorie.html?c=" + encodeURIComponent(slug);
+  const image = (cat.images && cat.images[0]) ? absUrl(url, cat.images[0]) : url.origin + "/img/carousel-1.jpg";
+
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: cat.title,
+    description: desc,
+    image: image,
+    brand: { "@type": "Brand", name: "Traditum By Victoria" },
+    category: "Cofetărie",
+  };
+  const lo = digits(cat.priceMin), hi = digits(cat.priceMax);
+  if (lo || hi) {
+    ld.offers = {
+      "@type": "AggregateOffer",
+      priceCurrency: "RON",
+      lowPrice: lo || hi,
+      highPrice: hi || lo,
+      availability: "https://schema.org/InStock",
+      seller: { "@type": "Organization", name: "Traditum By Victoria" },
+    };
+  }
+  const script = '<script type="application/ld+json">' + jsonLd(ld) + "</script>";
+  const rw = new HTMLRewriter()
+    .on("title", new SetText(title))
+    .on('meta[name="description"]', new SetAttr("content", desc))
+    .on('meta[property="og:title"]', new SetAttr("content", title))
+    .on('meta[property="og:description"]', new SetAttr("content", desc))
+    .on('meta[property="og:url"]', new SetAttr("content", pageUrl))
+    .on('meta[property="og:image"]', new SetAttr("content", image))
+    .on("head", new AppendHtml(script));
+  return addSecurity(rw.transform(res));
+}
+
+// Prima pagină: date structurate Bakery (contact, program, social).
+async function serveHomePage(env, request, url) {
+  const res = await env.ASSETS.fetch(request);
+  let cfg = null;
+  try { cfg = await getConfig(env); } catch (e) {}
+  if (!cfg) return addSecurity(res);
+  const contact = cfg.contact || {};
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "Bakery",
+    name: "Traditum By Victoria",
+    description: "Laborator de cofetărie artizanală — torturi personalizate, prăjituri și candy bar realizate la comandă.",
+    image: url.origin + "/img/carousel-1.jpg",
+    url: url.origin + "/",
+    servesCuisine: "Deserturi",
+    priceRange: "$$",
+  };
+  if (contact.phone) ld.telephone = contact.phone;
+  if (contact.email) ld.email = contact.email;
+  if (contact.address) ld.address = { "@type": "PostalAddress", streetAddress: contact.address, addressCountry: "RO" };
+  const same = ["facebook", "instagram", "tiktok"].map((k) => contact[k]).filter(Boolean);
+  if (same.length) ld.sameAs = same;
+  const oh = openingHoursSpec(cfg.hours);
+  if (oh.length) ld.openingHoursSpecification = oh;
+  const script = '<script type="application/ld+json">' + jsonLd(ld) + "</script>";
+  const rw = new HTMLRewriter().on("head", new AppendHtml(script));
+  return addSecurity(rw.transform(res));
 }
 
 export default {
@@ -728,6 +834,14 @@ export default {
     // /admin -> servește pagina de administrare statică
     if (url.pathname === "/admin" || url.pathname === "/admin/") {
       return asset(env, new Request(new URL("/admin.html", url), request));
+    }
+
+    // pagini cu meta/date structurate injectate pe server (SEO)
+    if (url.pathname === "/categorie.html" || url.pathname === "/categorie") {
+      try { return await serveCategoryPage(env, request, url); } catch (e) { return asset(env, request); }
+    }
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      try { return await serveHomePage(env, request, url); } catch (e) { return asset(env, request); }
     }
 
     // restul: fișiere statice
