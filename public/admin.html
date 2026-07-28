@@ -272,22 +272,31 @@
 
                 <!-- GALERIE -->
                 <div class="tab-pane fade" id="tab-gallery">
-                    <div class="card card-admin">
+                    <div class="tut">
+                        <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
+                        <ol>
+                            <li>Ai <strong>două galerii separate</strong>, cu poze diferite dacă vrei.</li>
+                            <li><strong>Prima pagină</strong> = teaserul „Realizările noastre" de pe homepage (recomandat 3–6 poze).</li>
+                            <li><strong>Pagina Galerie</strong> = galeria completă de pe pagina dedicată (galerie.html).</li>
+                            <li>Apasă <strong>Adaugă poză</strong>, încarci imaginile, coșul le șterge. La final apasă <strong>Salvează conținutul</strong>.</li>
+                        </ol>
+                    </div>
+                    <div class="card card-admin mb-3">
                         <div class="card-body">
-                            <div class="tut">
-                                <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
-                                <ol>
-                                    <li>Galeria „Realizările noastre" apare pe prima pagină, cu pozele produselor tale.</li>
-                                    <li>Apasă <strong>Adaugă poză</strong> și încarcă imaginile reale ale torturilor/deserturilor.</li>
-                                    <li>Vizitatorii pot da click pe poze ca să le vadă mari.</li>
-                                    <li>Dacă ștergi toate pozele, secțiunea se ascunde automat. La final apasă <strong>Salvează conținutul</strong>.</li>
-                                </ol>
-                            </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="brand mb-0">Galerie „Realizările noastre"</h5>
+                                <h5 class="brand mb-0">Galerie prima pagină <span class="text-muted small">(teaser „Realizările noastre")</span></h5>
                                 <button type="button" id="add-gallery" class="btn btn-sm btn-outline-dark"><i class="bi bi-plus-lg"></i> Adaugă poză</button>
                             </div>
                             <div id="gallery-images" class="row g-3"></div>
+                        </div>
+                    </div>
+                    <div class="card card-admin">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="brand mb-0">Pagina Galerie <span class="text-muted small">(galeria completă)</span></h5>
+                                <button type="button" id="add-gallery-page" class="btn btn-sm btn-outline-dark"><i class="bi bi-plus-lg"></i> Adaugă poză</button>
+                            </div>
+                            <div id="gallery-page-images" class="row g-3"></div>
                         </div>
                     </div>
                 </div>
@@ -666,29 +675,33 @@
             </div>`;
         return col;
     }
-    function renderGallery(list) {
-        const c = $("gallery-images"); c.innerHTML = "";
+    function renderGalleryList(containerId, list) {
+        const c = $(containerId); c.innerHTML = "";
         (list || []).forEach(u => c.appendChild(galleryRow(u)));
     }
-    function gatherGallery() {
-        return [...document.querySelectorAll("#gallery-images .gi-url")].map(i => i.value).filter(Boolean);
+    function gatherGalleryList(containerId) {
+        return [...document.querySelectorAll("#" + containerId + " .gi-url")].map(i => i.value).filter(Boolean);
     }
-    $("add-gallery").addEventListener("click", () => $("gallery-images").appendChild(galleryRow("")));
-    $("gallery-images").addEventListener("click", (e) => {
-        const rm = e.target.closest("[data-remove-gi]");
-        if (rm) rm.closest(".g-item").remove();
-    });
-    $("gallery-images").addEventListener("change", async (e) => {
-        if (!e.target.classList.contains("gi-file")) return;
-        const file = e.target.files[0]; if (!file) return;
-        const col = e.target.closest(".g-item");
-        const prev = col.querySelector(".gi-preview");
-        prev.src = URL.createObjectURL(file); prev.style.visibility = "visible";
-        try {
-            const up = await api("/api/upload", { method: "POST", body: (function(){ const fd = new FormData(); fd.append("file", file); return fd; })() });
-            col.querySelector(".gi-url").value = up.url;
-        } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
-    });
+    function wireGallery(containerId, addBtnId) {
+        $(addBtnId).addEventListener("click", () => $(containerId).appendChild(galleryRow("")));
+        $(containerId).addEventListener("click", (e) => {
+            const rm = e.target.closest("[data-remove-gi]");
+            if (rm) rm.closest(".g-item").remove();
+        });
+        $(containerId).addEventListener("change", async (e) => {
+            if (!e.target.classList.contains("gi-file")) return;
+            const file = e.target.files[0]; if (!file) return;
+            const col = e.target.closest(".g-item");
+            const prev = col.querySelector(".gi-preview");
+            prev.src = URL.createObjectURL(file); prev.style.visibility = "visible";
+            try {
+                const up = await api("/api/upload", { method: "POST", body: (function(){ const fd = new FormData(); fd.append("file", file); return fd; })() });
+                col.querySelector(".gi-url").value = up.url;
+            } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
+        });
+    }
+    wireGallery("gallery-images", "add-gallery");
+    wireGallery("gallery-page-images", "add-gallery-page");
 
     // ---- testimoniale ----
     function testimonialRow(t) {
@@ -791,7 +804,8 @@
         $("carousel-slides").innerHTML = "";
         (cfg.carousel || []).forEach(addSlide);
         renderCategories(cfg.categories);
-        renderGallery(cfg.gallery);
+        renderGalleryList("gallery-images", cfg.gallery);
+        renderGalleryList("gallery-page-images", cfg.galleryPage);
         renderTestimonials(cfg.testimonials);
         renderHours(cfg.hours);
         renderContent(cfg.content);
@@ -812,7 +826,7 @@
         }));
         const pt = {}; ["about","service","product","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
         const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
-        return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, categories: gatherCategories(), gallery: gatherGallery(), testimonials: gatherTestimonials(), hours: gatherHours(), content: gatherContent(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
+        return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, categories: gatherCategories(), gallery: gatherGalleryList("gallery-images"), galleryPage: gatherGalleryList("gallery-page-images"), testimonials: gatherTestimonials(), hours: gatherHours(), content: gatherContent(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
     async function loadConfig() { fillConfig(await api("/api/config")); }
     $("config-save").addEventListener("click", async () => {

@@ -244,19 +244,8 @@
         });
     }
 
-    function applyGallery(list) {
-        var host = document.getElementById("tv-gallery");
-        if (!host) return;
-        var section = document.getElementById("tv-gallery-section");
-        if (!Array.isArray(list) || !list.length) {
-            if (document.body.getAttribute("data-page") === "galerie") {
-                host.className = "row";
-                host.innerHTML = '<div class="col-12 text-center text-muted py-5">Momentan nu sunt poze în galerie.</div>';
-            } else if (section) {
-                section.style.display = "none";
-            }
-            return;
-        }
+    function renderGalleryGrid(host, list) {
+        host.className = "row g-3";
         host.innerHTML = list.map(function (src, i) {
             return '<div class="col-lg-3 col-md-4 col-6 wow fadeInUp" data-wow-delay="' + (0.1 + (i % 4) * 0.1).toFixed(1) + 's">' +
                 '<div class="tv-gallery-item rounded overflow-hidden">' +
@@ -271,6 +260,30 @@
             var idx = [].indexOf.call(host.querySelectorAll(".tv-gallery-item"), img);
             openLightbox(imgs, idx < 0 ? 0 : idx);
         });
+    }
+
+    // Galerie „Realizările noastre" de pe prima pagină (teaser)
+    function applyGallery(list) {
+        var host = document.getElementById("tv-gallery");
+        if (!host) return;
+        if (!Array.isArray(list) || !list.length) {
+            var section = document.getElementById("tv-gallery-section");
+            if (section) section.style.display = "none";
+            return;
+        }
+        renderGalleryGrid(host, list);
+    }
+
+    // Pagina Galerie (galerie.html) — listă separată
+    function applyGalleryPage(list) {
+        var host = document.getElementById("tv-gallery-page");
+        if (!host) return;
+        if (!Array.isArray(list) || !list.length) {
+            host.className = "row";
+            host.innerHTML = '<div class="col-12 text-center text-muted py-5">Momentan nu sunt poze în galerie.</div>';
+            return;
+        }
+        renderGalleryGrid(host, list);
     }
 
     function applyHours(hours) {
@@ -484,6 +497,7 @@
             applyCarousel(cfg.carousel);
             applyTestimonials(cfg.testimonials);
             applyGallery(cfg.gallery);
+            applyGalleryPage(cfg.galleryPage);
             applyHours(cfg.hours);
             applyContent(cfg.content);
             renderHomeCategories(cfg.categories);

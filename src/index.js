@@ -78,10 +78,14 @@ const DEFAULT_CONFIG = {
       images: ["/img/product-3.jpg", "/img/service-2.jpg"],
     },
   ],
-  // Galerie „Realizările noastre" — poze reale ale produselor (editabilă din admin)
+  // Galerie „Realizările noastre" de pe prima pagină (teaser)
   gallery: [
     "/img/product-1.jpg", "/img/product-2.jpg", "/img/product-3.jpg",
-    "/img/about-1.jpg", "/img/service-1.jpg", "/img/service-2.jpg",
+  ],
+  // Galeria completă de pe pagina Galerie (galerie.html)
+  galleryPage: [
+    "/img/product-1.jpg", "/img/product-2.jpg", "/img/product-3.jpg",
+    "/img/about-1.jpg", "/img/about-2.jpg", "/img/service-1.jpg", "/img/service-2.jpg",
   ],
   // Program de lucru (gol = închis în ziua respectivă)
   hours: {
@@ -259,6 +263,7 @@ async function getConfig(env) {
     categories: migrateCategories(data),
     hours: { ...DEFAULT_CONFIG.hours, ...(data.hours || {}) },
     gallery: Array.isArray(data.gallery) ? data.gallery : DEFAULT_CONFIG.gallery,
+    galleryPage: Array.isArray(data.galleryPage) ? data.galleryPage : (Array.isArray(data.gallery) ? data.gallery : DEFAULT_CONFIG.galleryPage),
     testimonials: Array.isArray(data.testimonials) ? data.testimonials : DEFAULT_CONFIG.testimonials,
     content: mergeContent(data.content),
   };
@@ -397,10 +402,13 @@ function sanitizeConfig(body) {
     const key = str(k, 60), val = str(imagesSrc[k], 300);
     if (key && val) images[key] = val;
   }
-  // galerie „Realizările noastre"
+  // galerie „Realizările noastre" (prima pagină) și pagina Galerie
   const gallery = Array.isArray(body.gallery)
     ? body.gallery.slice(0, 40).map((i) => str(i, 300)).filter(Boolean)
     : d.gallery;
+  const galleryPage = Array.isArray(body.galleryPage)
+    ? body.galleryPage.slice(0, 80).map((i) => str(i, 300)).filter(Boolean)
+    : d.galleryPage;
   // program de lucru
   const hoursSrc = body.hours && typeof body.hours === "object" ? body.hours : {};
   const hours = {};
@@ -440,6 +448,7 @@ function sanitizeConfig(body) {
     },
     categories: categories.length ? categories : d.categories,
     gallery,
+    galleryPage,
     hours,
     testimonials,
     content: sanitizeContent(body.content),
