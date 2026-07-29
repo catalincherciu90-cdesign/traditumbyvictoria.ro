@@ -116,6 +116,14 @@
             '</div>';
     }
 
+    function categoryPrice(p) {
+        if (p && p.priceOnRequest) return "La cerere";
+        var min = String((p && p.priceMin) || "").trim(), max = String((p && p.priceMax) || "").trim();
+        if (min && max) return min + " – " + max + " lei";
+        if (min || max) return (min || max) + " lei";
+        return "";
+    }
+
     function getParam(name) {
         var m = new RegExp("[?&]" + name + "=([^&]*)").exec(window.location.search);
         return m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : "";
@@ -148,9 +156,7 @@
         }
         var priceEl = document.getElementById("page-price");
         if (priceEl) {
-            var min = (p.priceMin || "").trim(), max = (p.priceMax || "").trim(), txt = "";
-            if (min && max) txt = min + " – " + max + " lei";
-            else if (min || max) txt = (min || max) + " lei";
+            var txt = categoryPrice(p);
             if (txt) { priceEl.textContent = txt; }
             else { var w = priceEl.closest(".d-inline-flex"); if (w) w.style.display = "none"; }
         }
@@ -242,6 +248,33 @@
             navText: ['<i class="bi bi-chevron-left"></i>', '<i class="bi bi-chevron-right"></i>'],
             responsive: { 0: { items: 1 }, 768: { items: 2 }, 992: { items: 3 } },
         });
+    }
+
+    function reviewCardHtml(t) {
+        var initial = esc((t.name || "?").trim().charAt(0).toUpperCase());
+        var rating = Math.min(5, Math.max(1, parseInt(t.rating, 10) || 5));
+        var stars = "";
+        for (var i = 1; i <= 5; i++) stars += '<i class="' + (i <= rating ? "fa" : "far") + ' fa-star"></i>';
+        return '<div class="col-lg-6 wow fadeInUp">' +
+            '<div class="testimonial-item bg-white rounded p-4 h-100">' +
+            '  <div class="d-flex align-items-center mb-3">' +
+            '    <div class="flex-shrink-0 rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:56px;height:56px;font-size:1.4rem;font-weight:700;font-family:\'Playfair Display\',serif">' + initial + '</div>' +
+            '    <div class="ms-3"><h5 class="mb-1">' + esc(t.name) + '</h5><span>' + esc(t.role || "Client") + '</span></div>' +
+            '  </div>' +
+            '  <div class="tv-stars">' + stars + '</div>' +
+            '  <p class="mb-0">' + esc(t.text) + '</p>' +
+            '</div></div>';
+    }
+
+    // Pagina Recenzii (recenzii.html) — grilă cu toate recenziile aprobate
+    function applyReviewsPage(list) {
+        var host = document.getElementById("tv-reviews");
+        if (!host) return;
+        if (!Array.isArray(list) || !list.length) {
+            host.innerHTML = '<div class="col-12 text-center text-muted py-4">Momentan nu sunt recenzii. Fii primul care lasă una!</div>';
+            return;
+        }
+        host.innerHTML = list.map(reviewCardHtml).join("");
     }
 
     function renderGalleryGrid(host, list) {
@@ -395,16 +428,22 @@
         }
     }
 
-    function addGalleryNavLink() {
+    function addExtraNavLinks() {
         var page = document.body.getAttribute("data-page");
+        var extra = [
+            { href: "galerie.html", label: "Galerie", page: "galerie" },
+            { href: "recenzii.html", label: "Recenzii", page: "recenzii" },
+        ];
         document.querySelectorAll(".navbar .navbar-nav").forEach(function (nav) {
-            if (nav.querySelector('a[href="galerie.html"]')) return;
             var contact = nav.querySelector('a[href="contact.html"]');
-            var a = document.createElement("a");
-            a.className = "nav-item nav-link" + (page === "galerie" ? " active" : "");
-            a.href = "galerie.html";
-            a.textContent = "Galerie";
-            if (contact) nav.insertBefore(a, contact); else nav.appendChild(a);
+            extra.forEach(function (x) {
+                if (nav.querySelector('a[href="' + x.href + '"]')) return;
+                var a = document.createElement("a");
+                a.className = "nav-item nav-link" + (page === x.page ? " active" : "");
+                a.href = x.href;
+                a.textContent = x.label;
+                if (contact) nav.insertBefore(a, contact); else nav.appendChild(a);
+            });
         });
     }
 
@@ -439,9 +478,7 @@
         if (!p) return "";
         var href = "categorie.html?c=" + encodeURIComponent(p.slug || "");
         var img = (p.images && p.images[0]) ? p.images[0] : "";
-        var min = String(p.priceMin || "").trim(), max = String(p.priceMax || "").trim(), price = "";
-        if (min && max) price = min + " – " + max + " lei";
-        else if (min || max) price = (min || max) + " lei";
+        var price = categoryPrice(p);
         var priceHtml = price ? '<div class="d-inline-block border border-primary rounded-pill px-3 mb-3">' + esc(price) + '</div>' : '';
         var desc = String(p.description || "");
         if (desc.length > 130) desc = desc.slice(0, 130).replace(/\s+\S*$/, "") + "…";
@@ -480,7 +517,7 @@
     applyEyebrows();
     cookieBanner();
     footerLegalLink();
-    addGalleryNavLink();
+    addExtraNavLinks();
 
     fetch("/api/config", { credentials: "same-origin" })
         .then(function (r) { return r.json(); })
@@ -496,6 +533,7 @@
             applyProductPage(cfg.categories);
             applyCarousel(cfg.carousel);
             applyTestimonials(cfg.testimonials);
+            applyReviewsPage(cfg.testimonials);
             applyGallery(cfg.gallery);
             applyGalleryPage(cfg.galleryPage);
             applyHours(cfg.hours);
@@ -522,6 +560,35 @@
                     if (res && res.ok) {
                         cf.reset();
                         if (status) status.innerHTML = '<div class="alert alert-success mb-0">Mulțumim! Mesajul a fost trimis. Te contactăm în curând.</div>';
+                    } else {
+                        if (status) status.innerHTML = '<div class="alert alert-danger mb-0">' + esc((res && res.error) || "A apărut o eroare. Încearcă din nou.") + '</div>';
+                    }
+                })
+                .catch(function () {
+                    if (status) status.innerHTML = '<div class="alert alert-danger mb-0">Eroare de rețea. Încearcă din nou.</div>';
+                })
+                .finally(function () { btn.disabled = false; btn.innerHTML = old; });
+        });
+    })();
+
+    // Formular „Lasă o recenzie" -> /api/review
+    (function () {
+        var rf = document.getElementById("review-form");
+        if (!rf) return;
+        rf.addEventListener("submit", function (e) {
+            e.preventDefault();
+            var btn = rf.querySelector('button[type="submit"]');
+            var status = document.getElementById("review-status");
+            function val(id) { var el = document.getElementById(id); return el ? el.value : ""; }
+            var payload = { name: val("r-name"), rating: val("r-rating"), text: val("r-text") };
+            var old = btn.innerHTML; btn.disabled = true; btn.textContent = "Se trimite...";
+            if (status) status.innerHTML = "";
+            fetch("/api/review", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok) {
+                        rf.reset();
+                        if (status) status.innerHTML = '<div class="alert alert-success mb-0">Mulțumim pentru recenzie! Va apărea pe site după verificare.</div>';
                     } else {
                         if (status) status.innerHTML = '<div class="alert alert-danger mb-0">' + esc((res && res.error) || "A apărut o eroare. Încearcă din nou.") + '</div>';
                     }

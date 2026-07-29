@@ -9,6 +9,7 @@
 
 const PRODUCTS_KEY = "products";
 const MESSAGES_KEY = "messages";
+const REVIEWS_KEY = "reviews";
 const IMG_PREFIX = "img:";
 const COOKIE_NAME = "tv_session";
 const SESSION_TTL = 60 * 60 * 8; // 8 ore
@@ -393,6 +394,7 @@ function sanitizeConfig(body) {
       description: str(c.description, 1500),
       priceMin: str(c.priceMin, 30),
       priceMax: str(c.priceMax, 30),
+      priceOnRequest: !!c.priceOnRequest,
       images: imgs,
     };
   }).filter((c) => c.title);
@@ -602,6 +604,19 @@ async function handleApi(request, env, url) {
     return json({ ok: true });
   }
 
+  // primire recenzie de la vizitator (public) — intră în așteptare, se aprobă din admin
+  if (pathname === "/api/review" && method === "POST") {
+    const body = await request.json().catch(() => ({}));
+    const name = str(body.name, 80), text = str(body.text, 600);
+    const rating = Math.min(5, Math.max(1, parseInt(body.rating, 10) || 5));
+    if (!name || !text) return json({ error: "Numele și textul recenziei sunt obligatorii." }, 400);
+    const list = (await env.PRODUCTS.get(REVIEWS_KEY, "json")) || [];
+    list.unshift({ id: crypto.randomUUID(), name, text, rating, date: new Date().toISOString() });
+    if (list.length > 200) list.length = 200;
+    await env.PRODUCTS.put(REVIEWS_KEY, JSON.stringify(list));
+    return json({ ok: true });
+  }
+
   // imagine (public)
   if (pathname.startsWith("/api/img/") && method === "GET") {
     const key = IMG_PREFIX + pathname.slice("/api/img/".length);
@@ -647,6 +662,19 @@ async function handleApi(request, env, url) {
     let list = (await env.PRODUCTS.get(MESSAGES_KEY, "json")) || [];
     list = list.filter((m) => m.id !== id);
     await env.PRODUCTS.put(MESSAGES_KEY, JSON.stringify(list));
+    return json({ ok: true });
+  }
+
+  // recenzii primite de la vizitatori — în așteptare (autentificat)
+  if (pathname === "/api/reviews" && method === "GET") {
+    return json((await env.PRODUCTS.get(REVIEWS_KEY, "json")) || []);
+  }
+  const mRev = pathname.match(/^\/api\/reviews\/([^/]+)$/);
+  if (mRev && method === "DELETE") {
+    const id = decodeURIComponent(mRev[1]);
+    let list = (await env.PRODUCTS.get(REVIEWS_KEY, "json")) || [];
+    list = list.filter((r) => r.id !== id);
+    await env.PRODUCTS.put(REVIEWS_KEY, JSON.stringify(list));
     return json({ ok: true });
   }
 
@@ -777,7 +805,7 @@ async function serveCategoryPage(env, request, url) {
     category: "Cofetărie",
   };
   const lo = digits(cat.priceMin), hi = digits(cat.priceMax);
-  if (lo || hi) {
+  if (!cat.priceOnRequest && (lo || hi)) {
     ld.offers = {
       "@type": "AggregateOffer",
       priceCurrency: "RON",
