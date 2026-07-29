@@ -472,7 +472,7 @@ const AI_MODELS = [
   "@cf/meta/llama-3.1-8b-instruct-fp8",
   "@cf/meta/llama-3-8b-instruct",
 ];
-const AI_BRAND = "Ești copywriter SEO pentru cofetăria premium „Traditum By Victoria\" (laborator de cofetărie artizanală: torturi, prăjituri, candy bar). Scrii exclusiv în limba română corectă, cu diacritice, pe un ton cald, elegant și autentic, fără clișee și fără emoji. Textele tale sunt optimizate pentru motoarele de căutare: folosești natural cuvinte-cheie relevante (numele produsului/categoriei, „cofetărie\", „la comandă\", „artizanal\", tipuri de evenimente ca aniversări, nunți, botezuri, majorate, evenimente corporate), fără repetare forțată și fără keyword stuffing.";
+const AI_BRAND = "Ești copywriter SEO pentru cofetăria premium „Traditum By Victoria\" din București (laborator de cofetărie artizanală: torturi, prăjituri, candy bar), care livrează în București și Ilfov. Scrii exclusiv în limba română corectă, cu diacritice, pe un ton cald, elegant și autentic, fără clișee și fără emoji. Textele tale sunt optimizate pentru motoarele de căutare: folosești natural cuvinte-cheie relevante (numele produsului/categoriei, „cofetărie București\", „la comandă\", „artizanal\", tipuri de evenimente ca aniversări, nunți, botezuri, majorate, evenimente corporate), fără repetare forțată și fără keyword stuffing.";
 
 function stripQuotes(s) {
   return String(s || "").trim().replace(/^["'„”«»]+|["'„”«»]+$/g, "").trim();
@@ -796,7 +796,7 @@ async function serveCategoryPage(env, request, url) {
   const cat = cfg && Array.isArray(cfg.categories) ? cfg.categories.find((c) => c.slug === slug) : null;
   if (!cat) return addSecurity(res);
 
-  const title = cat.title + " - Traditum By Victoria";
+  const title = cat.title + " București – Traditum By Victoria";
   const desc = metaDescription(cat.description) || (cat.title + " la comandă de la Traditum By Victoria — cofetărie artizanală.");
   const pageUrl = url.origin + "/categorie.html?c=" + encodeURIComponent(slug);
   const image = (cat.images && cat.images[0]) ? absUrl(url, cat.images[0]) : url.origin + "/img/carousel-1.jpg";
@@ -853,7 +853,17 @@ async function serveHomePage(env, request, url) {
   };
   if (contact.phone) ld.telephone = contact.phone;
   if (contact.email) ld.email = contact.email;
-  if (contact.address) ld.address = { "@type": "PostalAddress", streetAddress: contact.address, addressCountry: "RO" };
+  ld.address = {
+    "@type": "PostalAddress",
+    streetAddress: contact.address && !/Adresa ta/i.test(contact.address) ? contact.address : "Strada Libertății 53",
+    addressLocality: "București",
+    addressRegion: "București",
+    addressCountry: "RO",
+  };
+  ld.areaServed = [
+    { "@type": "City", name: "București" },
+    { "@type": "AdministrativeArea", name: "Ilfov" },
+  ];
   const same = ["facebook", "instagram", "tiktok"].map((k) => contact[k]).filter(Boolean);
   if (same.length) ld.sameAs = same;
   const oh = openingHoursSpec(cfg.hours);
