@@ -787,6 +787,44 @@ function openingHoursSpec(hours) {
   return out;
 }
 
+function breadcrumbLd(items) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({ "@type": "ListItem", position: i + 1, name: it.name, item: it.url })),
+  };
+}
+function ldScriptTag(obj) { return '<script type="application/ld+json">' + jsonLd(obj) + "</script>"; }
+
+// Breadcrumb pentru paginile interioare simple.
+function crumbsFor(pathname, origin) {
+  const home = { name: "Acasă", url: origin + "/" };
+  const map = {
+    "/about.html": [home, { name: "Despre noi", url: origin + "/about.html" }],
+    "/service.html": [home, { name: "Servicii", url: origin + "/service.html" }],
+    "/product.html": [home, { name: "Produse", url: origin + "/product.html" }],
+    "/galerie.html": [home, { name: "Galerie", url: origin + "/galerie.html" }],
+    "/recenzii.html": [home, { name: "Recenzii", url: origin + "/recenzii.html" }],
+    "/contact.html": [home, { name: "Contact", url: origin + "/contact.html" }],
+  };
+  return map[pathname] || null;
+}
+
+// Întrebări frecvente (folosite și în schema FAQPage, și în HTML-ul din contact.html).
+const FAQ_ITEMS = [
+  { q: "Cu cât timp înainte trebuie să comand un tort?", a: "Recomandăm să comanzi cu cel puțin 3-5 zile înainte, iar pentru torturile personalizate complexe și pentru candy bar cu 1-2 săptămâni înainte, ca să ne putem ocupa de fiecare detaliu." },
+  { q: "Livrați în București și Ilfov?", a: "Da, livrăm torturile, prăjiturile și candy bar-ul proaspete în București și în Ilfov. Detaliile de livrare le stabilim la plasarea comenzii." },
+  { q: "Pot comanda un tort personalizat pentru un anumit eveniment?", a: "Absolut. Realizăm torturi personalizate pentru aniversări, nunți, botezuri, majorate și evenimente corporate, după tema și dorința ta." },
+  { q: "Cum plasez o comandă?", a: "Ne poți suna, scrie pe WhatsApp sau completa formularul din pagina de Contact. Îți confirmăm disponibilitatea și detaliile comenzii." },
+];
+function faqLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ_ITEMS.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+  };
+}
+
 // Pagina de categorie: titlu, meta description și date structurate Product.
 async function serveCategoryPage(env, request, url) {
   const res = await env.ASSETS.fetch(new Request(new URL("/categorie.html", url), request));
@@ -821,8 +859,13 @@ async function serveCategoryPage(env, request, url) {
       seller: { "@type": "Organization", name: "Traditum By Victoria" },
     };
   }
+  const crumbs = breadcrumbLd([
+    { name: "Acasă", url: url.origin + "/" },
+    { name: "Produse", url: url.origin + "/product.html" },
+    { name: cat.title, url: pageUrl },
+  ]);
   const canonical = '<link rel="canonical" href="' + pageUrl + '">';
-  const script = '<script type="application/ld+json">' + jsonLd(ld) + "</script>";
+  const script = ldScriptTag(ld) + ldScriptTag(crumbs);
   const rw = new HTMLRewriter()
     .on("title", new SetText(title))
     .on('meta[name="description"]', new SetAttr("content", desc))
@@ -831,6 +874,29 @@ async function serveCategoryPage(env, request, url) {
     .on('meta[property="og:url"]', new SetAttr("content", pageUrl))
     .on('meta[property="og:image"]', new SetAttr("content", image))
     .on("head", new AppendHtml(canonical + script));
+  return addSecurity(rw.transform(res));
+}
+
+// Pagina Produse: canonical + breadcrumb + ItemList cu toate categoriile.
+async function serveProductPage(env, request, url) {
+  const res = await env.ASSETS.fetch(request);
+  let cfg = null;
+  try { cfg = await getConfig(env); } catch (e) {}
+  const cats = (cfg && Array.isArray(cfg.categories)) ? cfg.categories : [];
+  const canonical = '<link rel="canonical" href="' + url.origin + '/product.html">';
+  let scripts = ldScriptTag(breadcrumbLd(crumbsFor("/product.html", url.origin)));
+  if (cats.length) {
+    const itemList = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      itemListElement: cats.map((c, i) => ({
+        "@type": "ListItem", position: i + 1, name: c.title,
+        url: url.origin + "/categorie.html?c=" + encodeURIComponent(c.slug || ""),
+      })),
+    };
+    scripts += ldScriptTag(itemList);
+  }
+  const rw = new HTMLRewriter().on("head", new AppendHtml(canonical + scripts));
   return addSecurity(rw.transform(res));
 }
 
@@ -885,8 +951,11 @@ async function serveHtmlCanonical(env, request, url) {
   const res = await env.ASSETS.fetch(request);
   const ct = res.headers.get("content-type") || "";
   if (!ct.includes("text/html")) return addSecurity(res);
-  const canonical = '<link rel="canonical" href="' + url.origin + url.pathname + '">';
-  const rw = new HTMLRewriter().on("head", new AppendHtml(canonical));
+  let extra = '<link rel="canonical" href="' + url.origin + url.pathname + '">';
+  const crumbs = crumbsFor(url.pathname, url.origin);
+  if (crumbs) extra += ldScriptTag(breadcrumbLd(crumbs));
+  if (url.pathname === "/contact.html") extra += ldScriptTag(faqLd());
+  const rw = new HTMLRewriter().on("head", new AppendHtml(extra));
   return addSecurity(rw.transform(res));
 }
 
@@ -946,6 +1015,9 @@ export default {
     }
     if (url.pathname === "/" || url.pathname === "/index.html") {
       try { return await serveHomePage(env, request, url); } catch (e) { return asset(env, request); }
+    }
+    if (url.pathname === "/product.html") {
+      try { return await serveProductPage(env, request, url); } catch (e) { return asset(env, request); }
     }
 
     // celelalte pagini HTML: adaugă canonical

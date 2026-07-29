@@ -314,7 +314,7 @@
         host.innerHTML = list.map(function (src, i) {
             return '<div class="col-lg-3 col-md-4 col-6 wow fadeInUp" data-wow-delay="' + (0.1 + (i % 4) * 0.1).toFixed(1) + 's">' +
                 '<div class="tv-gallery-item rounded overflow-hidden">' +
-                '<img loading="lazy" class="w-100" src="' + esc(src) + '" alt="Realizare Traditum By Victoria">' +
+                '<img loading="lazy" class="w-100" src="' + esc(src) + '" alt="Tort / candy bar Traditum By Victoria București – poza ' + (i + 1) + '">' +
                 '<div class="tv-gallery-zoom"><i class="fa fa-search-plus"></i></div>' +
                 '</div></div>';
         }).join("");
