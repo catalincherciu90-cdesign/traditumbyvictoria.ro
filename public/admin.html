@@ -203,7 +203,7 @@
                         <div class="tut-head"><i class="bi bi-info-circle"></i> Cum folosești</div>
                         <ol>
                             <li>Aici editezi textele de pe prima pagină, pagina „Despre noi" și „Servicii".</li>
-                            <li>Modifică ce vrei în câmpurile de mai jos — poze și iconițele rămân neschimbate.</li>
+                            <li>Modifică textele din câmpurile de mai jos; la secțiunea „Despre noi" poți schimba și cele două poze.</li>
                             <li>Câmpurile de titlu, dacă le lași goale, revin la textul implicit.</li>
                             <li>La final apasă <strong>Salvează conținutul</strong> jos.</li>
                         </ol>
@@ -222,6 +222,23 @@
                                 <div class="col-md-6"><input type="text" id="cnt-ha-b1" class="form-control"></div>
                                 <div class="col-md-6"><input type="text" id="cnt-ha-b2" class="form-control"></div>
                                 <div class="col-md-6"><input type="text" id="cnt-ha-b3" class="form-control"></div>
+                                <div class="col-12 mt-2"><label class="form-label fw-bold">Pozele din această secțiune (prima pagină)</label></div>
+                                <div class="col-md-6">
+                                    <div class="slide-card p-2">
+                                        <div class="small fw-bold mb-1">Poza 1 (stânga-sus)</div>
+                                        <img id="cnt-ha-img1-preview" class="w-100 rounded mb-2" style="height:120px;object-fit:cover" src="img/about-1.jpg" onerror="this.style.visibility='hidden'">
+                                        <input type="hidden" id="cnt-ha-img1-url">
+                                        <input type="file" id="cnt-ha-img1-file" class="form-control form-control-sm" accept="image/*">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="slide-card p-2">
+                                        <div class="small fw-bold mb-1">Poza 2 (dreapta-jos)</div>
+                                        <img id="cnt-ha-img2-preview" class="w-100 rounded mb-2" style="height:120px;object-fit:cover" src="img/about-2.jpg" onerror="this.style.visibility='hidden'">
+                                        <input type="hidden" id="cnt-ha-img2-url">
+                                        <input type="file" id="cnt-ha-img2-file" class="form-control form-control-sm" accept="image/*">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -629,8 +646,6 @@
 
     // ---- imagini site ----
     const SITE_IMAGE_SLOTS = [
-        { key: "about-1.jpg", label: "Despre — imagine 1", sample: "img/about-1.jpg" },
-        { key: "about-2.jpg", label: "Despre — imagine 2", sample: "img/about-2.jpg" },
         { key: "service-1.jpg", label: "Servicii — imagine 1", sample: "img/service-1.jpg" },
         { key: "service-2.jpg", label: "Servicii — imagine 2", sample: "img/service-2.jpg" },
         { key: "product-1.jpg", label: "Homepage — card Torturi", sample: "img/product-1.jpg" },
@@ -859,6 +874,36 @@
         };
     }
 
+    // Poze secțiunea „Despre noi" de pe prima pagină (cheile about-1.jpg / about-2.jpg din images)
+    function wireAboutImg(baseId) {
+        $(baseId + "-file").addEventListener("change", async (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const prev = $(baseId + "-preview");
+            prev.src = URL.createObjectURL(file); prev.style.visibility = "visible";
+            try {
+                const up = await api("/api/upload", { method: "POST", body: (function(){ const fd = new FormData(); fd.append("file", file); return fd; })() });
+                $(baseId + "-url").value = up.url;
+            } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
+        });
+    }
+    wireAboutImg("cnt-ha-img1");
+    wireAboutImg("cnt-ha-img2");
+    function fillAboutImages(images) {
+        images = images || {};
+        const pairs = [["cnt-ha-img1", "about-1.jpg", "img/about-1.jpg"], ["cnt-ha-img2", "about-2.jpg", "img/about-2.jpg"]];
+        pairs.forEach(([base, key, sample]) => {
+            $(base + "-url").value = images[key] || "";
+            const prev = $(base + "-preview");
+            prev.src = images[key] || sample;
+            prev.style.visibility = "visible";
+        });
+    }
+    function gatherAboutImages(images) {
+        if ($("cnt-ha-img1-url").value) images["about-1.jpg"] = $("cnt-ha-img1-url").value;
+        if ($("cnt-ha-img2-url").value) images["about-2.jpg"] = $("cnt-ha-img2-url").value;
+        return images;
+    }
+
     function fillConfig(cfg) {
         const logo = cfg.logo || "";
         $("logo-url").value = logo;
@@ -873,6 +918,7 @@
         renderTestimonials(cfg.testimonials);
         renderHours(cfg.hours);
         renderContent(cfg.content);
+        fillAboutImages(cfg.images);
         $("c-promo-title").value = (cfg.promo && cfg.promo.title) || "";
         const pt = cfg.pageTitles || {};
         ["about","service","product","contact","notfound"].forEach(k => { $("pt-" + k).value = pt[k] || ""; });
@@ -890,7 +936,7 @@
         }));
         const pt = {}; ["about","service","product","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
         const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
-        return { logo: $("logo-url").value, images: gatherSiteImages(), carousel, categories: gatherCategories(), gallery: gatherGalleryList("gallery-images"), galleryPage: gatherGalleryList("gallery-page-images"), testimonials: gatherTestimonials(), hours: gatherHours(), content: gatherContent(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
+        return { logo: $("logo-url").value, images: gatherAboutImages(gatherSiteImages()), carousel, categories: gatherCategories(), gallery: gatherGalleryList("gallery-images"), galleryPage: gatherGalleryList("gallery-page-images"), testimonials: gatherTestimonials(), hours: gatherHours(), content: gatherContent(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
     async function loadConfig() { fillConfig(await api("/api/config")); }
     $("config-save").addEventListener("click", async () => {
