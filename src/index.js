@@ -387,6 +387,11 @@ function sanitizeConfig(body) {
     while (usedSlugs[slug]) slug = slug + "-" + (i + 1); // slug unic
     usedSlugs[slug] = true;
     const imgs = Array.isArray(c.images) ? c.images.slice(0, 12).map((x) => str(x, 300)).filter(Boolean) : [];
+    const products = Array.isArray(c.products) ? c.products.slice(0, 100).map((pr) => ({
+      name: str(pr && pr.name, 120),
+      price: str(pr && pr.price, 60),
+      image: str(pr && pr.image, 300),
+    })).filter((pr) => pr.image || pr.name) : [];
     return {
       id: str(c.id, 60) || slug,
       slug: slug,
@@ -396,6 +401,7 @@ function sanitizeConfig(body) {
       priceMax: str(c.priceMax, 30),
       priceOnRequest: !!c.priceOnRequest,
       images: imgs,
+      products: products,
     };
   }).filter((c) => c.title);
   const imagesSrc = body.images && typeof body.images === "object" ? body.images : {};

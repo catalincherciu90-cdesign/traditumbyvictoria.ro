@@ -185,6 +185,7 @@
                                     <li>Aici sunt <strong>categoriile</strong> tale de produse (Torturi, Candy Bar și oricâte mai adaugi).</li>
                                     <li>Apasă <strong>Adaugă categorie</strong> pentru una nouă (ex. Prăjituri, Cozonaci, Macarons).</li>
                                     <li>Completează titlul, descrierea, prețul minim/maxim și pozele. Coșul <i class="bi bi-trash"></i> șterge o categorie.</li>
+                                    <li>La <strong>Produse din categorie</strong> adaugi modelele individuale (poză + nume + preț) — apar ca o galerie pe pagina categoriei.</li>
                                     <li>Fiecare categorie apare automat pe prima pagină, în meniu și pe „Toate produsele". La final apasă <strong>Salvează conținutul</strong>.</li>
                                 </ol>
                             </div>
@@ -554,6 +555,19 @@
             <button type="button" class="btn btn-sm btn-outline-danger" data-remove-pimg><i class="bi bi-x-lg"></i></button>`;
         return row;
     }
+    function catProductRow(pr) {
+        pr = pr || {};
+        const row = document.createElement("div");
+        row.className = "cprod d-flex align-items-center gap-2 mb-2 flex-wrap";
+        row.innerHTML = `
+            <img class="thumb cprod-preview" src="${escapeHtml(pr.image || '')}" style="${pr.image ? '' : 'visibility:hidden'}">
+            <input type="hidden" class="cprod-image" value="${escapeHtml(pr.image || '')}">
+            <input type="file" class="form-control form-control-sm cprod-file" accept="image/*" style="max-width:170px">
+            <input type="text" class="form-control form-control-sm cprod-name" placeholder="Nume model" value="${escapeHtml(pr.name || '')}" style="max-width:200px">
+            <input type="text" class="form-control form-control-sm cprod-price" placeholder="Preț (opțional)" value="${escapeHtml(pr.price || '')}" style="max-width:150px">
+            <button type="button" class="btn btn-sm btn-outline-danger" data-remove-cprod><i class="bi bi-x-lg"></i></button>`;
+        return row;
+    }
     function categoryEditor(cat) {
         cat = cat || {};
         const wrap = document.createElement("div");
@@ -578,11 +592,17 @@
                 <label class="form-check-label">Preț la cerere <span class="text-muted small">(ascunde prețul și afișează „La cerere")</span></label>
             </div>
             <button type="button" class="btn btn-sm btn-outline-primary mb-3 ai-page"><i class="bi bi-stars"></i> Generează descriere și preț cu AI</button>
-            <label class="form-label">Imagini (galeria paginii)</label>
+            <label class="form-label">Imagini (galeria mare de sus, pe pagina categoriei)</label>
             <div class="pg-images mb-2"></div>
-            <button type="button" class="btn btn-sm btn-outline-dark" data-add-pimg><i class="bi bi-plus-lg"></i> Adaugă imagine</button>`;
+            <button type="button" class="btn btn-sm btn-outline-dark mb-3" data-add-pimg><i class="bi bi-plus-lg"></i> Adaugă imagine</button>
+            <hr class="my-2">
+            <label class="form-label fw-bold">Produse din categorie <span class="text-muted small">(galerie individuală — poză + nume + preț)</span></label>
+            <div class="cprod-list mb-2"></div>
+            <button type="button" class="btn btn-sm btn-outline-dark" data-add-cprod><i class="bi bi-plus-lg"></i> Adaugă produs</button>`;
         const imgs = wrap.querySelector(".pg-images");
         (cat.images || []).forEach(u => imgs.appendChild(pimgRow(u)));
+        const cprods = wrap.querySelector(".cprod-list");
+        (cat.products || []).forEach(pr => cprods.appendChild(catProductRow(pr)));
         return wrap;
     }
     function renderCategories(list) {
@@ -599,6 +619,11 @@
             priceMax: w.querySelector(".pg-pmax").value,
             priceOnRequest: w.querySelector(".pg-onreq").checked,
             images: [...w.querySelectorAll(".pimg-url")].map(i => i.value).filter(Boolean),
+            products: [...w.querySelectorAll(".cprod")].map(r => ({
+                image: r.querySelector(".cprod-image").value,
+                name: r.querySelector(".cprod-name").value,
+                price: r.querySelector(".cprod-price").value,
+            })).filter(pr => pr.image || pr.name.trim()),
         })).filter(c => c.title.trim());
     }
     $("add-category").addEventListener("click", () => $("product-pages").appendChild(categoryEditor({})));
@@ -606,10 +631,14 @@
         const rmc = e.target.closest("[data-remove-cat]");
         const add = e.target.closest("[data-add-pimg]");
         const rm = e.target.closest("[data-remove-pimg]");
+        const addp = e.target.closest("[data-add-cprod]");
+        const rmp = e.target.closest("[data-remove-cprod]");
         const ai = e.target.closest(".ai-page");
         if (rmc) { if (confirm("Ștergi această categorie?")) rmc.closest(".cat-item").remove(); return; }
         if (add) { add.closest(".cat-item").querySelector(".pg-images").appendChild(pimgRow("")); return; }
         if (rm) { rm.closest(".pimg").remove(); return; }
+        if (addp) { addp.closest(".cat-item").querySelector(".cprod-list").appendChild(catProductRow({})); return; }
+        if (rmp) { rmp.closest(".cprod").remove(); return; }
         if (ai) {
             const card = ai.closest(".cat-item");
             await withBusy(ai, async () => {
@@ -623,14 +652,17 @@
         }
     });
     $("product-pages").addEventListener("change", async (e) => {
-        if (!e.target.classList.contains("pimg-file")) return;
+        let rowSel, prevSel, urlSel;
+        if (e.target.classList.contains("pimg-file")) { rowSel = ".pimg"; prevSel = ".pimg-preview"; urlSel = ".pimg-url"; }
+        else if (e.target.classList.contains("cprod-file")) { rowSel = ".cprod"; prevSel = ".cprod-preview"; urlSel = ".cprod-image"; }
+        else return;
         const file = e.target.files[0]; if (!file) return;
-        const row = e.target.closest(".pimg");
-        const prev = row.querySelector(".pimg-preview");
+        const row = e.target.closest(rowSel);
+        const prev = row.querySelector(prevSel);
         prev.src = URL.createObjectURL(file); prev.style.visibility = "visible";
         try {
             const up = await api("/api/upload", { method: "POST", body: (function(){ const fd = new FormData(); fd.append("file", file); return fd; })() });
-            row.querySelector(".pimg-url").value = up.url;
+            row.querySelector(urlSel).value = up.url;
         } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
     });
 

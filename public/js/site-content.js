@@ -186,6 +186,38 @@
                 }
             });
         }
+
+        // Galeria de produse individuale din această categorie
+        var prodHost = document.getElementById("category-products");
+        var prodSection = document.getElementById("category-products-section");
+        if (prodHost) {
+            var products = Array.isArray(p.products) ? p.products : [];
+            if (!products.length) {
+                if (prodSection) prodSection.style.display = "none";
+            } else {
+                if (prodSection) prodSection.style.display = "";
+                var imgs = [];
+                prodHost.innerHTML = products.map(function (pr) {
+                    var imgHtml = "";
+                    if (pr.image) {
+                        var idx = imgs.length; imgs.push(pr.image);
+                        imgHtml = '<img loading="lazy" class="w-100" data-lb="' + idx + '" style="height:240px;object-fit:cover;cursor:zoom-in" src="' + esc(pr.image) + '" alt="' + esc(pr.name || p.title) + '">';
+                    }
+                    var name = pr.name ? '<h5 class="mb-1">' + esc(pr.name) + '</h5>' : '';
+                    var price = pr.price ? '<div class="text-primary fw-bold">' + esc(pr.price) + '</div>' : '';
+                    var body = (name || price) ? '<div class="text-center p-3">' + name + price + '</div>' : '';
+                    return '<div class="col-lg-4 col-md-6 wow fadeInUp">' +
+                        '<div class="product-item bg-white rounded overflow-hidden h-100 shadow-sm">' +
+                        '<div class="tv-gallery-item">' + imgHtml + '</div>' + body +
+                        '</div></div>';
+                }).join("");
+                prodHost.addEventListener("click", function (e) {
+                    var im = e.target.closest("[data-lb]");
+                    if (!im) return;
+                    openLightbox(imgs, parseInt(im.getAttribute("data-lb"), 10) || 0);
+                });
+            }
+        }
     }
 
     function applyWhatsApp(contact) {
