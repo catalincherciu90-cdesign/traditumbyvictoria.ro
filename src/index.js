@@ -821,6 +821,7 @@ async function serveCategoryPage(env, request, url) {
       seller: { "@type": "Organization", name: "Traditum By Victoria" },
     };
   }
+  const canonical = '<link rel="canonical" href="' + pageUrl + '">';
   const script = '<script type="application/ld+json">' + jsonLd(ld) + "</script>";
   const rw = new HTMLRewriter()
     .on("title", new SetText(title))
@@ -829,7 +830,7 @@ async function serveCategoryPage(env, request, url) {
     .on('meta[property="og:description"]', new SetAttr("content", desc))
     .on('meta[property="og:url"]', new SetAttr("content", pageUrl))
     .on('meta[property="og:image"]', new SetAttr("content", image))
-    .on("head", new AppendHtml(script));
+    .on("head", new AppendHtml(canonical + script));
   return addSecurity(rw.transform(res));
 }
 
@@ -857,9 +858,50 @@ async function serveHomePage(env, request, url) {
   if (same.length) ld.sameAs = same;
   const oh = openingHoursSpec(cfg.hours);
   if (oh.length) ld.openingHoursSpecification = oh;
+  // rating agregat din recenzii (pentru stele în Google)
+  const ratings = (cfg.testimonials || []).map((t) => parseInt(t && t.rating, 10)).filter((n) => n >= 1 && n <= 5);
+  if (ratings.length) {
+    const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+    ld.aggregateRating = { "@type": "AggregateRating", ratingValue: avg.toFixed(1), reviewCount: String(ratings.length), bestRating: "5", worstRating: "1" };
+  }
+  const canonical = '<link rel="canonical" href="' + url.origin + '/">';
   const script = '<script type="application/ld+json">' + jsonLd(ld) + "</script>";
-  const rw = new HTMLRewriter().on("head", new AppendHtml(script));
+  const rw = new HTMLRewriter().on("head", new AppendHtml(canonical + script));
   return addSecurity(rw.transform(res));
+}
+
+// Canonical pentru paginile HTML statice (about, service, contact, galerie, recenzii...).
+async function serveHtmlCanonical(env, request, url) {
+  const res = await env.ASSETS.fetch(request);
+  const ct = res.headers.get("content-type") || "";
+  if (!ct.includes("text/html")) return addSecurity(res);
+  const canonical = '<link rel="canonical" href="' + url.origin + url.pathname + '">';
+  const rw = new HTMLRewriter().on("head", new AppendHtml(canonical));
+  return addSecurity(rw.transform(res));
+}
+
+// Sitemap generat dinamic: pagini statice + o pagină pentru fiecare categorie.
+async function serveSitemap(env, url) {
+  let cfg = null;
+  try { cfg = await getConfig(env); } catch (e) {}
+  const base = "https://traditumbyvictoria.ro";
+  const urls = [
+    { loc: base + "/", pr: "1.0" },
+    { loc: base + "/about.html", pr: "0.8" },
+    { loc: base + "/service.html", pr: "0.7" },
+    { loc: base + "/product.html", pr: "0.8" },
+    { loc: base + "/galerie.html", pr: "0.7" },
+    { loc: base + "/recenzii.html", pr: "0.7" },
+    { loc: base + "/contact.html", pr: "0.6" },
+  ];
+  const cats = (cfg && Array.isArray(cfg.categories)) ? cfg.categories : [];
+  for (const c of cats) {
+    if (c && c.slug) urls.push({ loc: base + "/categorie.html?c=" + encodeURIComponent(c.slug), pr: "0.8" });
+  }
+  const body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    urls.map((u) => "  <url><loc>" + u.loc.replace(/&/g, "&amp;") + "</loc><priority>" + u.pr + "</priority></url>").join("\n") +
+    "\n</urlset>\n";
+  return new Response(body, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
 }
 
 export default {
@@ -879,12 +921,26 @@ export default {
       return asset(env, new Request(new URL("/admin.html", url), request));
     }
 
+    // 301: paginile vechi -> pagina de categorie (evită conținut duplicat)
+    if (url.pathname === "/torturi.html") return Response.redirect(url.origin + "/categorie.html?c=torturi", 301);
+    if (url.pathname === "/candybar.html") return Response.redirect(url.origin + "/categorie.html?c=candybar", 301);
+
+    // sitemap dinamic (include categoriile)
+    if (url.pathname === "/sitemap.xml") {
+      try { return await serveSitemap(env, url); } catch (e) { return asset(env, request); }
+    }
+
     // pagini cu meta/date structurate injectate pe server (SEO)
     if (url.pathname === "/categorie.html" || url.pathname === "/categorie") {
       try { return await serveCategoryPage(env, request, url); } catch (e) { return asset(env, request); }
     }
     if (url.pathname === "/" || url.pathname === "/index.html") {
       try { return await serveHomePage(env, request, url); } catch (e) { return asset(env, request); }
+    }
+
+    // celelalte pagini HTML: adaugă canonical
+    if (url.pathname.endsWith(".html")) {
+      try { return await serveHtmlCanonical(env, request, url); } catch (e) { return asset(env, request); }
     }
 
     // restul: fișiere statice

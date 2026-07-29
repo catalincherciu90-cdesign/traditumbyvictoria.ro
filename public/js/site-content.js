@@ -109,7 +109,7 @@
             '  <div class="owl-carousel-inner">' +
             '    <div class="container"><div class="row justify-content-start"><div class="col-lg-8">' +
             eyebrow +
-            '      <h1 class="display-1 text-light mb-4 animated slideInDown">' + esc(s.title) + '</h1>' +
+            '      <h2 class="display-1 text-light mb-4 animated slideInDown">' + esc(s.title) + '</h2>' +
             subtitle + button +
             '    </div></div></div>' +
             '  </div>' +
