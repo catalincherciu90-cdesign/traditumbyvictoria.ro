@@ -763,6 +763,38 @@ async function asset(env, request) {
 class SetText { constructor(t) { this.t = t; } element(el) { el.setInnerContent(this.t); } }
 class SetAttr { constructor(a, v) { this.a = a; this.v = v; } element(el) { el.setAttribute(this.a, this.v); } }
 class AppendHtml { constructor(h) { this.h = h; } element(el) { el.append(this.h, { html: true }); } }
+class SetInner { constructor(h) { this.h = h; } element(el) { el.setInnerContent(this.h, { html: true }); } }
+
+function escHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function categoryPriceTxt(p) {
+  if (p && p.priceOnRequest) return "La cerere";
+  const mn = String((p && p.priceMin) || "").trim(), mx = String((p && p.priceMax) || "").trim();
+  if (mn && mx) return mn + " – " + mx + " lei";
+  if (mn || mx) return (mn || mx) + " lei";
+  return "";
+}
+// Cardurile de categorie randate pe server (identice cu cele din JS) — vizibile fără JS și pentru Google.
+function categoryCardsHtml(cats) {
+  if (!Array.isArray(cats) || !cats.length) return '<div class="col-12 text-center text-muted py-4">Momentan nu sunt categorii.</div>';
+  return cats.map((p) => {
+    const href = "categorie.html?c=" + encodeURIComponent(p.slug || "");
+    const img = (p.images && p.images[0]) ? p.images[0] : "";
+    const price = categoryPriceTxt(p);
+    const priceHtml = price ? '<div class="d-inline-block border border-primary rounded-pill px-3 mb-3">' + escHtml(price) + "</div>" : "";
+    let desc = String(p.description || "");
+    if (desc.length > 130) desc = desc.slice(0, 130).replace(/\s+\S*$/, "") + "…";
+    const imgHtml = img ? '<img loading="lazy" class="img-fluid w-100" style="height:260px;object-fit:cover" src="' + escHtml(img) + '" alt="' + escHtml(p.title) + '">' : "";
+    return '<div class="col-lg-4 col-md-6">' +
+      '<a href="' + href + '" class="text-decoration-none text-dark d-block h-100">' +
+      '<div class="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">' +
+      '<div class="text-center p-4">' + priceHtml + '<h3 class="mb-3">' + escHtml(p.title) + "</h3><span>" + escHtml(desc) + "</span></div>" +
+      '<div class="position-relative mt-auto">' + imgHtml +
+      '<div class="product-overlay"><span class="btn btn-lg-square btn-outline-light rounded-circle"><i class="fa fa-eye text-primary"></i></span></div>' +
+      "</div></div></a></div>";
+  }).join("");
+}
 
 function absUrl(url, path) {
   if (/^https?:\/\//.test(path)) return path;
@@ -896,7 +928,9 @@ async function serveProductPage(env, request, url) {
     };
     scripts += ldScriptTag(itemList);
   }
-  const rw = new HTMLRewriter().on("head", new AppendHtml(canonical + scripts));
+  const rw = new HTMLRewriter()
+    .on("head", new AppendHtml(canonical + scripts))
+    .on("#product-list", new SetInner(categoryCardsHtml(cats)));
   return addSecurity(rw.transform(res));
 }
 
@@ -942,7 +976,10 @@ async function serveHomePage(env, request, url) {
   }
   const canonical = '<link rel="canonical" href="' + url.origin + '/">';
   const script = '<script type="application/ld+json">' + jsonLd(ld) + "</script>";
-  const rw = new HTMLRewriter().on("head", new AppendHtml(canonical + script));
+  const cats = Array.isArray(cfg.categories) ? cfg.categories : [];
+  const rw = new HTMLRewriter()
+    .on("head", new AppendHtml(canonical + script))
+    .on("#home-products", new SetInner(categoryCardsHtml(cats)));
   return addSecurity(rw.transform(res));
 }
 
