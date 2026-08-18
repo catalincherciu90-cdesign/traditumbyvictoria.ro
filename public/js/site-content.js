@@ -480,15 +480,31 @@
     }
 
     function footerLegalLink() {
-        var links = document.querySelectorAll(".footer a.btn-link");
-        if (!links.length) return;
-        if (document.querySelector('.footer a.btn-link[href="confidentialitate.html"]')) return;
-        var last = links[links.length - 1];
-        var a = document.createElement("a");
-        a.className = "btn btn-link";
-        a.href = "confidentialitate.html";
-        a.textContent = "Confidențialitate";
-        last.parentNode.appendChild(a);
+        var first = document.querySelector(".footer a.btn-link");
+        if (first) {
+            var parent = first.parentNode;
+            [
+                { href: "confidentialitate.html", label: "Confidențialitate" },
+                { href: "termeni.html", label: "Termeni și condiții" },
+                { href: "cookie.html", label: "Politica de cookie-uri" },
+            ].forEach(function (l) {
+                if (parent.querySelector('a.btn-link[href="' + l.href + '"]')) return;
+                var a = document.createElement("a");
+                a.className = "btn btn-link";
+                a.href = l.href;
+                a.textContent = l.label;
+                parent.appendChild(a);
+            });
+        }
+        // ANPC / SOL în zona de copyright
+        var cr = document.querySelector(".copyright .row > div");
+        if (cr && !document.querySelector(".tv-anpc")) {
+            var box = document.createElement("div");
+            box.className = "tv-anpc small mt-2";
+            box.innerHTML = '<a class="text-light me-3 text-decoration-none" href="https://anpc.ro/" target="_blank" rel="noopener">ANPC</a>' +
+                '<a class="text-light text-decoration-none" href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">Soluționarea online a litigiilor (SOL)</a>';
+            cr.appendChild(box);
+        }
     }
 
     function applyCarousel(slides) {
