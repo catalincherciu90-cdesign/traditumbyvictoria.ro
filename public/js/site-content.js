@@ -631,4 +631,47 @@
                 .finally(function () { btn.disabled = false; btn.innerHTML = old; });
         });
     })();
+
+    // Formular „Solicită ofertă" -> /api/contact (mesaj structurat)
+    (function () {
+        var of = document.getElementById("offer-form");
+        if (!of) return;
+        of.addEventListener("submit", function (e) {
+            e.preventDefault();
+            var btn = of.querySelector('button[type="submit"]');
+            var status = document.getElementById("offer-status");
+            function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; }
+            var name = val("o-name"), phone = val("o-phone");
+            if (!name || !phone) {
+                if (status) status.innerHTML = '<div class="alert alert-warning mb-0">Te rugăm să completezi numele și telefonul.</div>';
+                return;
+            }
+            var wants = [].slice.call(document.querySelectorAll(".o-want:checked")).map(function (c) { return c.value; }).join(", ");
+            var lines = [
+                "Telefon: " + phone,
+                val("o-event") ? "Tip eveniment: " + val("o-event") : "",
+                val("o-date") ? "Data: " + val("o-date") : "",
+                val("o-people") ? "Nr. persoane: " + val("o-people") : "",
+                wants ? "Interesat de: " + wants : "",
+                val("o-message") ? "Detalii: " + val("o-message") : "",
+            ].filter(Boolean);
+            var payload = { name: name, email: "", subject: "Cerere ofertă" + (val("o-event") ? " — " + val("o-event") : ""), message: lines.join("\n") };
+            var old = btn.innerHTML; btn.disabled = true; btn.textContent = "Se trimite...";
+            if (status) status.innerHTML = "";
+            fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok) {
+                        of.reset();
+                        if (status) status.innerHTML = '<div class="alert alert-success mb-0">Mulțumim! Am primit cererea ta de ofertă. Te contactăm în cel mai scurt timp.</div>';
+                    } else {
+                        if (status) status.innerHTML = '<div class="alert alert-danger mb-0">' + esc((res && res.error) || "A apărut o eroare. Încearcă din nou.") + '</div>';
+                    }
+                })
+                .catch(function () {
+                    if (status) status.innerHTML = '<div class="alert alert-danger mb-0">Eroare de rețea. Încearcă din nou.</div>';
+                })
+                .finally(function () { btn.disabled = false; btn.innerHTML = old; });
+        });
+    })();
 })();

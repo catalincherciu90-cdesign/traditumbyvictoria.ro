@@ -101,8 +101,86 @@
     <!-- Page Header End -->
 
 
+    <!-- Solicită ofertă Start -->
+    <div class="container-xxl py-6" id="oferta">
+        <div class="container">
+            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 560px;">
+                <p class="text-primary text-uppercase mb-2">// Solicită o ofertă</p>
+                <h2 class="display-6 mb-3">Hai să pregătim împreună deserturile evenimentului tău</h2>
+                <p class="text-muted">Completează câteva detalii și îți trimitem o ofertă personalizată. Fără obligații.</p>
+            </div>
+            <div class="row g-0 justify-content-center">
+                <div class="col-lg-9 wow fadeInUp" data-wow-delay="0.1s">
+                    <form id="offer-form" class="bg-light rounded p-4 p-md-5">
+                        <div class="row g-3">
+                            <div class="col-12" id="offer-status"></div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="o-name" placeholder="Numele tău">
+                                    <label for="o-name">Numele tău *</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="o-phone" placeholder="Telefon">
+                                    <label for="o-phone">Telefon *</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="o-event">
+                                        <option value="" selected>Alege...</option>
+                                        <option>Aniversare</option>
+                                        <option>Nuntă</option>
+                                        <option>Botez</option>
+                                        <option>Majorat</option>
+                                        <option>Eveniment corporate</option>
+                                        <option>Altul</option>
+                                    </select>
+                                    <label for="o-event">Tip eveniment</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="o-date" placeholder="Data">
+                                    <label for="o-date">Data evenimentului</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-floating">
+                                    <input type="number" min="1" class="form-control" id="o-people" placeholder="Nr. persoane">
+                                    <label for="o-people">Nr. persoane</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label mb-2">Ce te interesează?</label>
+                                <div class="d-flex flex-wrap gap-3">
+                                    <div class="form-check"><input class="form-check-input o-want" type="checkbox" value="Tort" id="o-w1"><label class="form-check-label" for="o-w1">Tort</label></div>
+                                    <div class="form-check"><input class="form-check-input o-want" type="checkbox" value="Candy Bar" id="o-w2"><label class="form-check-label" for="o-w2">Candy Bar</label></div>
+                                    <div class="form-check"><input class="form-check-input o-want" type="checkbox" value="Prăjituri" id="o-w3"><label class="form-check-label" for="o-w3">Prăjituri</label></div>
+                                    <div class="form-check"><input class="form-check-input o-want" type="checkbox" value="Produse tradiționale" id="o-w4"><label class="form-check-label" for="o-w4">Produse tradiționale</label></div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" placeholder="Detalii" id="o-message" style="height: 120px"></textarea>
+                                    <label for="o-message">Detalii (temă, culori, preferințe)</label>
+                                </div>
+                            </div>
+                            <div class="col-12 text-center">
+                                <button class="btn btn-primary rounded-pill py-3 px-5" type="submit">Trimite cererea de ofertă</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Solicită ofertă End -->
+
+
     <!-- Contact Start -->
-    <div class="container-xxl py-6">
+    <div class="container-xxl bg-light py-6">
         <div class="container">
             <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
                 <p class="text-primary text-uppercase mb-2">// Contact</p>
