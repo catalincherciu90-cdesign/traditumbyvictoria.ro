@@ -339,16 +339,48 @@
         renderGalleryGrid(host, list);
     }
 
-    // Pagina Galerie (galerie.html) — listă separată
+    // Pagina Galerie (galerie.html) — listă separată, cu categorii/filtre (portofoliu)
     function applyGalleryPage(list) {
         var host = document.getElementById("tv-gallery-page");
         if (!host) return;
-        if (!Array.isArray(list) || !list.length) {
+        var items = (Array.isArray(list) ? list : []).map(function (x) {
+            return (typeof x === "string") ? { url: x, cat: "" } : { url: (x && x.url) || "", cat: (x && x.cat) || "" };
+        }).filter(function (i) { return i.url; });
+        if (!items.length) {
             host.className = "row";
             host.innerHTML = '<div class="col-12 text-center text-muted py-5">Momentan nu sunt poze în galerie.</div>';
             return;
         }
-        renderGalleryGrid(host, list);
+        var cats = [];
+        items.forEach(function (i) { if (i.cat && cats.indexOf(i.cat) === -1) cats.push(i.cat); });
+        var bar = document.getElementById("tv-gallery-filters");
+        if (bar && cats.length) {
+            bar.innerHTML = '<button class="btn btn-sm btn-outline-primary rounded-pill me-2 mb-2 active" data-filter="*">Toate</button>' +
+                cats.map(function (c) { return '<button class="btn btn-sm btn-outline-primary rounded-pill me-2 mb-2" data-filter="' + esc(c) + '">' + esc(c) + '</button>'; }).join("");
+            bar.style.display = "";
+            bar.addEventListener("click", function (e) {
+                var b = e.target.closest("[data-filter]"); if (!b) return;
+                bar.querySelectorAll("[data-filter]").forEach(function (x) { x.classList.remove("active"); });
+                b.classList.add("active");
+                var f = b.getAttribute("data-filter");
+                host.querySelectorAll("[data-cat]").forEach(function (col) {
+                    col.style.display = (f === "*" || col.getAttribute("data-cat") === f) ? "" : "none";
+                });
+            });
+        }
+        var urls = items.map(function (i) { return i.url; });
+        host.className = "row g-3";
+        host.innerHTML = items.map(function (it, i) {
+            return '<div class="col-lg-3 col-md-4 col-6" data-cat="' + esc(it.cat) + '">' +
+                '<div class="tv-gallery-item rounded overflow-hidden">' +
+                '<img loading="lazy" class="w-100" data-lb="' + i + '" src="' + esc(it.url) + '" alt="' + esc(it.cat || "Realizare") + ' Traditum By Victoria București – poza ' + (i + 1) + '">' +
+                '<div class="tv-gallery-zoom"><i class="fa fa-search-plus"></i></div>' +
+                '</div></div>';
+        }).join("");
+        host.addEventListener("click", function (e) {
+            var im = e.target.closest("[data-lb]"); if (!im) return;
+            openLightbox(urls, parseInt(im.getAttribute("data-lb"), 10) || 0);
+        });
     }
 
     function applyHours(hours) {

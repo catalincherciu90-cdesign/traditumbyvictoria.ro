@@ -295,7 +295,7 @@
                         <ol>
                             <li>Ai <strong>două galerii separate</strong>, cu poze diferite dacă vrei.</li>
                             <li><strong>Prima pagină</strong> = teaserul „Realizările noastre" de pe homepage (recomandat 3–6 poze).</li>
-                            <li><strong>Pagina Galerie</strong> = galeria completă de pe pagina dedicată (galerie.html).</li>
+                            <li><strong>Pagina Galerie</strong> = portofoliul complet de pe galerie.html. Alege o <strong>categorie</strong> pentru fiecare poză (Torturi, Candy Bar, Evenimente...) și vizitatorii pot filtra.</li>
                             <li>Apasă <strong>Adaugă poză</strong>, încarci imaginile, coșul le șterge. La final apasă <strong>Salvează conținutul</strong>.</li>
                         </ol>
                     </div>
@@ -724,13 +724,33 @@
     });
 
     // ---- galerie „Realizările noastre" ----
-    function galleryRow(url) {
+    const GAL_CATS = ["Torturi", "Candy Bar", "Evenimente", "Tradițional", "Târguri", "Altele"];
+    function galItemUrl(x) { return (typeof x === "string") ? x : ((x && x.url) || ""); }
+    function galleryRow(x) {
+        const url = galItemUrl(x);
         const col = document.createElement("div");
         col.className = "col-md-4 col-lg-3 g-item";
         col.innerHTML = `
             <div class="slide-card p-2 h-100">
-                <img class="gi-preview w-100 rounded mb-2" style="height:110px;object-fit:cover" src="${escapeHtml(url || '')}" onerror="this.style.visibility='hidden'">
-                <input type="hidden" class="gi-url" value="${escapeHtml(url || '')}">
+                <img class="gi-preview w-100 rounded mb-2" style="height:110px;object-fit:cover" src="${escapeHtml(url)}" onerror="this.style.visibility='hidden'">
+                <input type="hidden" class="gi-url" value="${escapeHtml(url)}">
+                <div class="d-flex gap-2">
+                    <input type="file" class="form-control form-control-sm gi-file" accept="image/*">
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-remove-gi><i class="bi bi-trash"></i></button>
+                </div>
+            </div>`;
+        return col;
+    }
+    function galleryRowCat(x) {
+        const url = galItemUrl(x), cat = (x && typeof x === "object") ? (x.cat || "") : "";
+        const col = document.createElement("div");
+        col.className = "col-md-4 col-lg-3 g-item";
+        const opts = '<option value="">— categorie —</option>' + GAL_CATS.map(c => `<option ${c === cat ? "selected" : ""}>${c}</option>`).join("");
+        col.innerHTML = `
+            <div class="slide-card p-2 h-100">
+                <img class="gi-preview w-100 rounded mb-2" style="height:110px;object-fit:cover" src="${escapeHtml(url)}" onerror="this.style.visibility='hidden'">
+                <input type="hidden" class="gi-url" value="${escapeHtml(url)}">
+                <select class="form-select form-select-sm gi-cat mb-2">${opts}</select>
                 <div class="d-flex gap-2">
                     <input type="file" class="form-control form-control-sm gi-file" accept="image/*">
                     <button type="button" class="btn btn-sm btn-outline-danger" data-remove-gi><i class="bi bi-trash"></i></button>
@@ -742,11 +762,21 @@
         const c = $(containerId); c.innerHTML = "";
         (list || []).forEach(u => c.appendChild(galleryRow(u)));
     }
+    function renderGalleryPageList(list) {
+        const c = $("gallery-page-images"); c.innerHTML = "";
+        (list || []).forEach(u => c.appendChild(galleryRowCat(u)));
+    }
     function gatherGalleryList(containerId) {
         return [...document.querySelectorAll("#" + containerId + " .gi-url")].map(i => i.value).filter(Boolean);
     }
-    function wireGallery(containerId, addBtnId) {
-        $(addBtnId).addEventListener("click", () => $(containerId).appendChild(galleryRow("")));
+    function gatherGalleryPageList() {
+        return [...document.querySelectorAll("#gallery-page-images .g-item")].map(w => ({
+            url: w.querySelector(".gi-url").value,
+            cat: w.querySelector(".gi-cat") ? w.querySelector(".gi-cat").value : "",
+        })).filter(i => i.url);
+    }
+    function wireGallery(containerId, addBtnId, rowBuilder) {
+        $(addBtnId).addEventListener("click", () => $(containerId).appendChild(rowBuilder("")));
         $(containerId).addEventListener("click", (e) => {
             const rm = e.target.closest("[data-remove-gi]");
             if (rm) rm.closest(".g-item").remove();
@@ -763,8 +793,8 @@
             } catch (err) { alert("Eroare la încărcarea imaginii: " + err.message); }
         });
     }
-    wireGallery("gallery-images", "add-gallery");
-    wireGallery("gallery-page-images", "add-gallery-page");
+    wireGallery("gallery-images", "add-gallery", galleryRow);
+    wireGallery("gallery-page-images", "add-gallery-page", galleryRowCat);
 
     // ---- testimoniale ----
     function testimonialRow(t) {
@@ -946,7 +976,7 @@
         (cfg.carousel || []).forEach(addSlide);
         renderCategories(cfg.categories);
         renderGalleryList("gallery-images", cfg.gallery);
-        renderGalleryList("gallery-page-images", cfg.galleryPage);
+        renderGalleryPageList(cfg.galleryPage);
         renderTestimonials(cfg.testimonials);
         renderHours(cfg.hours);
         renderContent(cfg.content);
@@ -968,7 +998,7 @@
         }));
         const pt = {}; ["about","service","product","contact","notfound"].forEach(k => pt[k] = $("pt-" + k).value);
         const ct = {}; ["phone","email","address","facebook","instagram","tiktok"].forEach(k => ct[k] = $("ct-" + k).value);
-        return { logo: $("logo-url").value, images: gatherAboutImages(gatherSiteImages()), carousel, categories: gatherCategories(), gallery: gatherGalleryList("gallery-images"), galleryPage: gatherGalleryList("gallery-page-images"), testimonials: gatherTestimonials(), hours: gatherHours(), content: gatherContent(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
+        return { logo: $("logo-url").value, images: gatherAboutImages(gatherSiteImages()), carousel, categories: gatherCategories(), gallery: gatherGalleryList("gallery-images"), galleryPage: gatherGalleryPageList(), testimonials: gatherTestimonials(), hours: gatherHours(), content: gatherContent(), promo: { title: $("c-promo-title").value }, pageTitles: pt, contact: ct };
     }
     async function loadConfig() { fillConfig(await api("/api/config")); }
     $("config-save").addEventListener("click", async () => {

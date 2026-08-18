@@ -414,8 +414,9 @@ function sanitizeConfig(body) {
   const gallery = Array.isArray(body.gallery)
     ? body.gallery.slice(0, 40).map((i) => str(i, 300)).filter(Boolean)
     : d.gallery;
+  const galItem = (x) => (typeof x === "string" ? { url: str(x, 300), cat: "" } : { url: str(x && x.url, 300), cat: str(x && x.cat, 40) });
   const galleryPage = Array.isArray(body.galleryPage)
-    ? body.galleryPage.slice(0, 80).map((i) => str(i, 300)).filter(Boolean)
+    ? body.galleryPage.slice(0, 120).map(galItem).filter((i) => i.url)
     : d.galleryPage;
   // program de lucru
   const hoursSrc = body.hours && typeof body.hours === "object" ? body.hours : {};
