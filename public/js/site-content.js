@@ -511,6 +511,37 @@
         });
     }
 
+    // Indicator auriu care alunecă între linkurile din meniu (desktop)
+    function initNavPill() {
+        if (window.innerWidth < 992) return;
+        document.querySelectorAll(".navbar .navbar-nav").forEach(function (nav) {
+            if (nav.querySelector(".nav-pill")) return;
+            var pill = document.createElement("span");
+            pill.className = "nav-pill";
+            nav.insertBefore(pill, nav.firstChild);
+            function links() { return [].slice.call(nav.querySelectorAll(".nav-link")); }
+            function current() { return nav.querySelector(".nav-link.active") || links()[0]; }
+            function moveTo(link) {
+                if (!link) return;
+                pill.style.transform = "translate(" + link.offsetLeft + "px," + link.offsetTop + "px)";
+                pill.style.width = link.offsetWidth + "px";
+                pill.style.height = link.offsetHeight + "px";
+                pill.classList.add("ready");
+                links().forEach(function (l) { l.classList.toggle("on-pill", l === link); });
+            }
+            nav.addEventListener("mouseover", function (e) {
+                var l = e.target.closest(".nav-link");
+                if (l && nav.contains(l)) moveTo(l);
+            });
+            nav.addEventListener("mouseleave", function () { moveTo(current()); });
+            var reflow = function () { moveTo(current()); };
+            setTimeout(reflow, 60);
+            window.addEventListener("resize", reflow);
+            window.addEventListener("load", reflow);
+            if (document.fonts && document.fonts.ready) { document.fonts.ready.then(reflow); }
+        });
+    }
+
     function footerLegalLink() {
         var first = document.querySelector(".footer a.btn-link");
         if (first) {
@@ -598,6 +629,7 @@
     cookieBanner();
     footerLegalLink();
     addExtraNavLinks();
+    initNavPill();
 
     fetch("/api/config", { credentials: "same-origin" })
         .then(function (r) { return r.json(); })
