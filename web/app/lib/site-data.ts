@@ -172,7 +172,9 @@ export async function getReviews(): Promise<Review[]> {
   const kv = await getKV();
   if (!kv) return [];
   try {
-    return ((await kv.get("reviews", "json")) as Review[]) || [];
+    const list = ((await kv.get("reviews", "json")) as (Review & { approved?: boolean })[]) || [];
+    // arată doar recenziile aprobate (cele vechi, fără câmp, rămân vizibile)
+    return list.filter((r) => r.approved !== false);
   } catch {
     return [];
   }

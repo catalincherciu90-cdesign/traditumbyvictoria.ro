@@ -43,3 +43,6 @@ next-env.d.ts
 # opennext / cloudflare build output
 /.open-next/
 /shot.mjs
+
+# local dev secrets
+.dev.vars

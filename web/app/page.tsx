@@ -3,14 +3,18 @@ import Link from "next/link";
 import SiteNav from "./components/SiteNav";
 import SiteFooter from "./components/SiteFooter";
 import Stars from "./components/Stars";
-import { getConfig, categoryPrice } from "./lib/site-data";
+import JsonLd from "./components/JsonLd";
+import { getConfig, getReviews, categoryPrice } from "./lib/site-data";
+import { bakeryLd } from "./lib/jsonld";
 
 export default async function Home() {
   const cfg = await getConfig();
+  const reviews = await getReviews();
   const { content } = cfg;
 
   return (
     <>
+      <JsonLd data={bakeryLd(cfg, [...reviews, ...cfg.testimonials])} />
       <SiteNav />
 
       {/* HERO */}

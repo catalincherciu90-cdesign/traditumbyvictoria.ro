@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   if (!kv) return Response.json({ error: "Indisponibil" }, { status: 503 });
 
   const list = ((await kv.get("reviews", "json")) as unknown[]) || [];
-  list.unshift({ id: crypto.randomUUID(), name, text, rating, date: new Date().toISOString() });
+  list.unshift({ id: crypto.randomUUID(), name, text, rating, approved: false, date: new Date().toISOString() });
   if (list.length > 200) list.length = 200;
   await kv.put("reviews", JSON.stringify(list));
   return Response.json({ ok: true });

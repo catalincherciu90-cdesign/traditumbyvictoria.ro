@@ -5,7 +5,9 @@ import { notFound } from "next/navigation";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import PageHeader from "../../components/PageHeader";
+import JsonLd from "../../components/JsonLd";
 import { getConfig, categoryPrice } from "../../lib/site-data";
+import { categoryLd, breadcrumbLd } from "../../lib/jsonld";
 
 async function findCat(slug: string) {
   const cfg = await getConfig();
@@ -33,6 +35,8 @@ export default async function CategoryPage({ params }: PageProps<"/produse/[slug
 
   return (
     <>
+      <JsonLd data={categoryLd(c)} />
+      <JsonLd data={breadcrumbLd([{ name: "Acasă", path: "/" }, { name: "Produse", path: "/produse" }, { name: c.title, path: `/produse/${c.slug}` }])} />
       <SiteNav />
       <PageHeader eyebrow="Categorie de produse" title={c.title} />
 
