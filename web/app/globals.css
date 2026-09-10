@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* ===== Tema Traditum By Victoria (tokens) ===== */
+@theme {
+  --color-cream: #fbf6ec;
+  --color-cream-2: #f4ecdc;
+  --color-ink: #241d15;
+  --color-ink-soft: #6d6151;
+  --color-gold: #c9a45c;
+  --color-gold-deep: #9c7a34;
+  --color-dark: #1e1916;
+  --color-line: #e8dcc6;
+
+  --font-display: var(--font-display), Georgia, serif;
+  --font-body: var(--font-body), system-ui, sans-serif;
+}
+
+@layer base {
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-wrap: balance;
+  }
+  ::selection {
+    background: var(--color-gold);
+    color: #fff;
+  }
+}
+
+/* utilitar mic pentru „eyebrow"-uri */
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-gold-deep);
+}
