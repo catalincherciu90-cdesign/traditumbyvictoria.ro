@@ -32,13 +32,19 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Build + Deploy pe Cloudflare
-        run: npx opennextjs-cloudflare build && npx opennextjs-cloudflare deploy
+      - name: Verifică secretele Cloudflare
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "::error::CLOUDFLARE_API_TOKEN lipsește din secretele GitHub"; exit 1; else echo "Token prezent (lungime ${#CLOUDFLARE_API_TOKEN})"; fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then echo "::warning::CLOUDFLARE_ACCOUNT_ID lipsește"; else echo "Account ID prezent (lungime ${#CLOUDFLARE_ACCOUNT_ID})"; fi
+
+      - name: Build (Next.js + OpenNext)
+        run: npx opennextjs-cloudflare build
+
+      - name: Deploy pe Cloudflare (wrangler)
+        run: npx wrangler deploy
 
       # Setează parola de admin ca secret pe worker (doar dacă a fost furnizată în GitHub).
       # Dacă worker-ul are deja secretul, pasul poate fi omis — secretele se păstrează între deploy-uri.
       - name: Setează ADMIN_PASSWORD (opțional)
         if: ${{ env.ADMIN_PASSWORD != '' }}
         run: printf '%s' "$ADMIN_PASSWORD" | npx wrangler secret put ADMIN_PASSWORD
-
-# (declanșare deploy)
