@@ -1,0 +1,42 @@
+name: Deploy web (Next.js) to Cloudflare
+
+# Publică versiunea nouă (folderul web/, Next.js + OpenNext) pe Cloudflare Workers.
+# Rulează la fiecare push pe branch-ul de dezvoltare și poate fi pornit și manual.
+on:
+  push:
+    branches: [claude/youthful-davinci-2k9vb7]
+    paths:
+      - "web/**"
+      - ".github/workflows/deploy-web.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Build + Deploy pe Cloudflare
+        run: npx opennextjs-cloudflare build && npx opennextjs-cloudflare deploy
+
+      # Setează parola de admin ca secret pe worker (doar dacă a fost furnizată în GitHub).
+      # Dacă worker-ul are deja secretul, pasul poate fi omis — secretele se păstrează între deploy-uri.
+      - name: Setează ADMIN_PASSWORD (opțional)
+        if: ${{ env.ADMIN_PASSWORD != '' }}
+        run: printf '%s' "$ADMIN_PASSWORD" | npx wrangler secret put ADMIN_PASSWORD
