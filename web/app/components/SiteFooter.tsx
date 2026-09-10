@@ -24,9 +24,17 @@ export default function SiteFooter() {
           <ul className="space-y-2 text-cream/80">
             <li><Link href="/produse" className="hover:text-gold">Produse</Link></li>
             <li><Link href="/galerie" className="hover:text-gold">Galerie</Link></li>
+            <li><Link href="/recenzii" className="hover:text-gold">Recenzii</Link></li>
             <li><Link href="/contact" className="hover:text-gold">Contact</Link></li>
+            <li><Link href="/termeni" className="hover:text-gold">Termeni și condiții</Link></li>
             <li><Link href="/confidentialitate" className="hover:text-gold">Confidențialitate</Link></li>
+            <li><Link href="/cookie-uri" className="hover:text-gold">Politica de cookie-uri</Link></li>
           </ul>
+          <p className="mt-4 text-xs text-cream/50">
+            <a href="https://anpc.ro/" target="_blank" rel="noopener" className="hover:text-gold">ANPC</a>
+            {" · "}
+            <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener" className="hover:text-gold">SOL/ODR</a>
+          </p>
         </div>
       </div>
       <div className="border-t border-white/10">
