@@ -113,6 +113,7 @@ export function sanitizeConfig(body: Any) {
   return {
     promo: { title: str(promo.title, 160) || d.promo.title },
     ordersEnabled: !!body.ordersEnabled,
+    logo: str(body.logo, 300),
     contact: {
       phone: str(ct.phone, 60),
       email: str(ct.email, 120),

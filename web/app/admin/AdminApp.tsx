@@ -181,7 +181,7 @@ export default function AdminApp() {
           ))}
         </nav>
 
-        {tab === "contact" && <ContactTab cfg={cfg} patch={patch} />}
+        {tab === "contact" && <ContactTab cfg={cfg} patch={patch} uploadImage={uploadImage} />}
         {tab === "categorii" && <CategoriiTab cfg={cfg} patch={patch} uploadImage={uploadImage} flash={flash} />}
         {tab === "continut" && <ContinutTab cfg={cfg} patch={patch} />}
         {tab === "testimoniale" && <TestimonialeTab cfg={cfg} patch={patch} />}
@@ -205,10 +205,26 @@ export default function AdminApp() {
 }
 
 // ======================= TAB: Contact & Program =======================
-function ContactTab({ cfg, patch }: { cfg: SiteConfig; patch: (fn: (c: SiteConfig) => void) => void }) {
+function ContactTab({ cfg, patch, uploadImage }: { cfg: SiteConfig; patch: (fn: (c: SiteConfig) => void) => void; uploadImage: (f: File) => Promise<string> }) {
   const days: [keyof SiteConfig["hours"], string][] = [["mon", "Luni"], ["tue", "Marți"], ["wed", "Miercuri"], ["thu", "Joi"], ["fri", "Vineri"], ["sat", "Sâmbătă"], ["sun", "Duminică"]];
   return (
     <div className="space-y-6">
+      <Card title="Logo" hint="Apare în meniul de sus al site-ului. Lasă gol pentru a afișa numele ca text.">
+        <div className="flex items-center gap-4">
+          {cfg.logo ? (
+            <div className="rounded-xl bg-dark p-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={cfg.logo} alt="Logo" className="h-12 w-auto" />
+            </div>
+          ) : (
+            <div className="grid h-16 w-24 place-items-center rounded-xl bg-cream-2 text-xs text-ink-soft">fără logo</div>
+          )}
+          <div className="flex flex-col gap-2">
+            <UploadButton uploadImage={uploadImage} onUpload={(url) => patch((c) => { c.logo = url; })} label={cfg.logo ? "Schimbă logo" : "+ Încarcă logo"} />
+            {cfg.logo && <button className={btnGhost} onClick={() => patch((c) => { c.logo = ""; })}>Elimină logo</button>}
+          </div>
+        </div>
+      </Card>
       <Card title="Date de contact">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Telefon" value={cfg.contact.phone} onChange={(v) => patch((c) => { c.contact.phone = v; })} />

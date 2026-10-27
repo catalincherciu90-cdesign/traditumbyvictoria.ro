@@ -41,6 +41,7 @@ export type SiteConfig = {
   content: SiteContent;
   testimonials: Testimonial[];
   ordersEnabled?: boolean;
+  logo?: string;
 };
 
 export type Order = {
@@ -56,6 +57,7 @@ export type Order = {
 
 export const DEFAULT_CONFIG: SiteConfig = {
   ordersEnabled: false,
+  logo: "",
   promo: { title: "Cea mai dulce cofetărie din orașul tău" },
   contact: {
     phone: "0725 252 493",

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const links = [
   { href: "/", label: "Acasă" },
@@ -15,14 +15,27 @@ const links = [
 
 export default function SiteNav() {
   const [open, setOpen] = useState(false);
+  const [logo, setLogo] = useState<string>("");
   const pathname = usePathname();
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((c) => { const l = (c as { logo?: string })?.logo; if (typeof l === "string") setLogo(l); })
+      .catch(() => {});
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line/60 bg-cream/85 backdrop-blur-md">
       <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3">
-        <Link href="/" className="font-display text-xl font-bold tracking-tight text-ink" onClick={() => setOpen(false)}>
-          Traditum <span className="text-gold">By Victoria</span>
+        <Link href="/" className="flex items-center gap-2 font-display text-xl font-bold tracking-tight text-ink" onClick={() => setOpen(false)}>
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logo} alt="Traditum By Victoria" className="h-11 w-auto" />
+          ) : (
+            <span>Traditum <span className="text-gold">By Victoria</span></span>
+          )}
         </Link>
 
         {/* Meniu desktop */}
