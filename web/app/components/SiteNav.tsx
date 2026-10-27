@@ -32,7 +32,7 @@ export default function SiteNav() {
         <Link href="/" className="flex items-center gap-2 font-display text-xl font-bold tracking-tight text-ink" onClick={() => setOpen(false)}>
           {logo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logo} alt="Traditum By Victoria" className="h-11 w-auto" />
+            <img src={logo} alt="Traditum By Victoria" className="h-14 w-auto sm:h-16" />
           ) : (
             <span>Traditum <span className="text-gold">By Victoria</span></span>
           )}
