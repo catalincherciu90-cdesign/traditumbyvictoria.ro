@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Pe Cloudflare/OpenNext optimizatorul de imagini (/_next/image) nu rulează
+  // corect; servim imaginile direct din /public, ca să se afișeze mereu.
+  images: { unoptimized: true },
   async redirects() {
     return [
       { source: "/index.html", destination: "/", permanent: true },
