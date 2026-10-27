@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { SiteConfig, Category } from "../lib/site-data";
 import { DEFAULT_CONFIG } from "../lib/site-data";
+import QrImage from "../components/QrImage";
+import QrScanner from "../components/QrScanner";
 
 type Msg = { id: string; name: string; email?: string; subject?: string; message: string; date?: string };
 type Rev = { id: string; name: string; text: string; rating: number; approved?: boolean; date?: string };
@@ -15,6 +17,7 @@ const TABS = [
   ["galerie", "Galerie"],
   ["mesaje", "Mesaje"],
   ["recenzii", "Recenzii"],
+  ["aplicatie", "Aplicație"],
 ] as const;
 
 const inp = "w-full rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none focus:border-gold";
@@ -39,6 +42,7 @@ export default function AdminApp() {
   const [toast, setToast] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [reviews, setReviews] = useState<Rev[]>([]);
+  const [scanning, setScanning] = useState(false);
 
   const flash = (t: string) => { setToast(t); setTimeout(() => setToast(""), 2500); };
 
@@ -48,15 +52,39 @@ export default function AdminApp() {
     setCfg({ ...DEFAULT_CONFIG, ...c, content: { ...DEFAULT_CONFIG.content, ...c.content }, contact: { ...DEFAULT_CONFIG.contact, ...c.contact }, hours: { ...DEFAULT_CONFIG.hours, ...c.hours } });
   }, []);
 
+  // Autentificare prin tokenul scanat dintr-un QR (din text brut sau URL ?qr=...).
+  const consumeQr = useCallback(async (raw: string): Promise<boolean> => {
+    const m = String(raw).match(/[a-f0-9]{40,80}/);
+    if (!m) return false;
+    try {
+      await api("/api/login-qr/consume", { method: "POST", body: JSON.stringify({ token: m[0] }) });
+      setScanning(false);
+      setAuthed(true);
+      await loadConfig();
+      return true;
+    } catch (err) {
+      setLoginErr((err as Error).message);
+      return false;
+    }
+  }, [loadConfig]);
+
   useEffect(() => {
     (async () => {
+      // dacă pagina a fost deschisă prin scanarea unui QR de login (?qr=token)
+      const params = new URLSearchParams(window.location.search);
+      const qr = params.get("qr");
+      if (qr) {
+        const ok = await consumeQr(qr);
+        window.history.replaceState({}, "", window.location.pathname);
+        if (ok) return;
+      }
       try {
         const me = (await api("/api/me")) as { authed: boolean };
         setAuthed(me.authed);
         if (me.authed) await loadConfig();
       } catch { setAuthed(false); }
     })();
-  }, [loadConfig]);
+  }, [loadConfig, consumeQr]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -98,14 +126,30 @@ export default function AdminApp() {
   if (!authed) {
     return (
       <div className="grid min-h-dvh place-items-center bg-cream px-5">
-        <form onSubmit={login} className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg ring-1 ring-line">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg ring-1 ring-line">
           <p className="font-display text-2xl font-bold text-ink">Traditum <span className="text-gold">Admin</span></p>
           <p className="mt-1 text-sm text-ink-soft">Autentifică-te pentru a edita site-ul.</p>
-          <label className={`${lbl} mt-6`}>Parolă</label>
-          <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} className={inp} autoFocus />
-          {loginErr && <p className="mt-2 text-sm text-red-600">{loginErr}</p>}
-          <button className={`${btn} mt-5 w-full`}>Intră în admin</button>
-        </form>
+
+          {scanning ? (
+            <div className="mt-5">
+              <p className="mb-2 text-sm font-medium text-ink">Scanează codul QR afișat în adminul de pe calculator.</p>
+              <QrScanner onResult={(t) => consumeQr(t)} onError={(m) => setLoginErr(m)} />
+              {loginErr && <p className="mt-2 text-sm text-red-600">{loginErr}</p>}
+              <button onClick={() => { setScanning(false); setLoginErr(""); }} className={`${btnGhost} mt-3 w-full`}>Înapoi la parolă</button>
+            </div>
+          ) : (
+            <>
+              <form onSubmit={login}>
+                <label className={`${lbl} mt-6`}>Parolă</label>
+                <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} className={inp} autoFocus />
+                {loginErr && <p className="mt-2 text-sm text-red-600">{loginErr}</p>}
+                <button className={`${btn} mt-5 w-full`}>Intră în admin</button>
+              </form>
+              <div className="my-4 flex items-center gap-3 text-xs text-ink-soft"><span className="h-px flex-1 bg-line" />sau<span className="h-px flex-1 bg-line" /></div>
+              <button onClick={() => { setScanning(true); setLoginErr(""); }} className={`${btnGhost} w-full`}>📷 Autentificare prin cod QR</button>
+            </>
+          )}
+        </div>
       </div>
     );
   }
@@ -144,6 +188,7 @@ export default function AdminApp() {
         {tab === "recenzii" && <RecenziiTab reviews={reviews}
           onApprove={async (id) => { await api(`/api/reviews/${id}`, { method: "PATCH", body: JSON.stringify({ approved: true }) }); setReviews((r) => r.map((x) => x.id === id ? { ...x, approved: true } : x)); }}
           onDelete={async (id) => { await api(`/api/reviews/${id}`, { method: "DELETE" }); setReviews((r) => r.filter((x) => x.id !== id)); }} />}
+        {tab === "aplicatie" && <AplicatieTab />}
       </div>
 
       {/* Save bar mobil */}
@@ -385,6 +430,61 @@ function RecenziiTab({ reviews, onApprove, onDelete }: { reviews: Rev[]; onAppro
           <p className="mt-2 text-xs">{r.approved === false ? <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-700">în așteptare</span> : <span className="rounded-full bg-green-100 px-2 py-0.5 font-semibold text-green-700">publicată</span>}</p>
         </Card>
       ))}
+    </div>
+  );
+}
+
+// ======================= TAB: Aplicație =======================
+function AplicatieTab() {
+  const [token, setToken] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [left, setLeft] = useState(0);
+  const [err, setErr] = useState("");
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const apkUrl = `${origin}/app/traditum-admin.apk`;
+
+  async function genToken() {
+    setLoading(true); setErr("");
+    try {
+      const r = (await api("/api/login-qr", { method: "POST" })) as { token: string; expiresIn: number };
+      setToken(r.token); setLeft(r.expiresIn || 120);
+    } catch (e) { setErr((e as Error).message); }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    if (!token || left <= 0) return;
+    const t = setInterval(() => setLeft((s) => { if (s <= 1) { setToken(""); return 0; } return s - 1; }), 1000);
+    return () => clearInterval(t);
+  }, [token, left]);
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <Card title="Autentificare pe telefon (prin QR)" hint="Generează un cod, apoi scanează-l din aplicația de pe telefon pentru a te loga fără parolă.">
+        {token ? (
+          <div className="flex flex-col items-center gap-3 text-center">
+            <QrImage text={`${origin}/admin?qr=${token}`} size={220} />
+            <p className="text-sm text-ink-soft">Codul expiră în <span className="font-semibold text-ink">{left}s</span>. Scanează-l din aplicație (ecranul „Autentificare prin cod QR").</p>
+            <button onClick={genToken} className={btnGhost}>Generează cod nou</button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-ink-soft">Apasă pentru a genera un cod QR de autentificare valabil 2 minute.</p>
+            <button onClick={genToken} disabled={loading} className={btn}>{loading ? "Se generează…" : "Generează cod QR de login"}</button>
+            {err && <p className="text-sm text-red-600">{err}</p>}
+          </div>
+        )}
+      </Card>
+
+      <Card title="Descarcă aplicația Android (.apk)" hint="Scanează cu telefonul pentru a descărca aplicația de administrare.">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <QrImage text={apkUrl} size={220} />
+          <p className="break-all text-xs text-ink-soft">{apkUrl}</p>
+          <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            Fișierul .apk va fi disponibil aici după ce îl publicăm. La instalare, activează pe telefon „Instalare din surse necunoscute".
+          </p>
+        </div>
+      </Card>
     </div>
   );
 }
