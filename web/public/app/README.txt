@@ -1,1 +1,1 @@
-Aici va fi găzduit fișierul aplicației (traditum-admin.apk) după ce îl generăm.
+retry 2026-10-27T20:43:55Z
