@@ -1,0 +1,17 @@
+{
+  "name": "Traditum Admin",
+  "short_name": "Traditum Admin",
+  "description": "Administrare Traditum By Victoria — produse, comenzi, mesaje, recenzii.",
+  "start_url": "/admin",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1e1916",
+  "theme_color": "#1e1916",
+  "lang": "ro",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

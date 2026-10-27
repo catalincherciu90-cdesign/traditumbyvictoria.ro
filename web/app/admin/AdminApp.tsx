@@ -88,6 +88,11 @@ export default function AdminApp() {
     })();
   }, [loadConfig, consumeQr]);
 
+  // Înregistrează service worker-ul (pentru instalarea aplicației pe telefon).
+  useEffect(() => {
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }, []);
+
   async function login(e: React.FormEvent) {
     e.preventDefault();
     setLoginErr("");
@@ -503,7 +508,7 @@ function AplicatieTab() {
   const [left, setLeft] = useState(0);
   const [err, setErr] = useState("");
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const apkUrl = `${origin}/app/traditum-admin.apk`;
+  const installUrl = `${origin}/admin`;
 
   async function genToken() {
     setLoading(true); setErr("");
@@ -538,12 +543,12 @@ function AplicatieTab() {
         )}
       </Card>
 
-      <Card title="Descarcă aplicația Android (.apk)" hint="Scanează cu telefonul pentru a descărca aplicația de administrare.">
+      <Card title="Instalează aplicația pe telefon" hint="Scanează cu telefonul pentru a instala aplicația de administrare pe ecranul principal.">
         <div className="flex flex-col items-center gap-3 text-center">
-          <QrImage text={apkUrl} size={220} />
-          <p className="break-all text-xs text-ink-soft">{apkUrl}</p>
-          <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            Fișierul .apk va fi disponibil aici după ce îl publicăm. La instalare, activează pe telefon „Instalare din surse necunoscute".
+          <QrImage text={installUrl} size={220} />
+          <p className="break-all text-xs text-ink-soft">{installUrl}</p>
+          <p className="rounded-lg bg-cream-2 px-3 py-2 text-xs text-ink-soft">
+            După scanare, deschide în <b>Chrome</b> și apasă meniul <b>⋮ → „Instalează aplicația"</b> (sau „Adaugă la ecranul principal"). Vei avea o iconiță care deschide adminul pe tot ecranul, ca o aplicație. Apoi te poți loga prin codul QR din stânga.
           </p>
         </div>
       </Card>
