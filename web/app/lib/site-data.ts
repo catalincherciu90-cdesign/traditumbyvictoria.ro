@@ -40,9 +40,22 @@ export type SiteConfig = {
   hours: Record<"mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun", string>;
   content: SiteContent;
   testimonials: Testimonial[];
+  ordersEnabled?: boolean;
+};
+
+export type Order = {
+  id: string;
+  name: string;
+  phone: string;
+  product: string;
+  date?: string;
+  details?: string;
+  status?: "noua" | "confirmata" | "finalizata";
+  createdAt?: string;
 };
 
 export const DEFAULT_CONFIG: SiteConfig = {
+  ordersEnabled: false,
   promo: { title: "Cea mai dulce cofetărie din orașul tău" },
   contact: {
     phone: "0725 252 493",

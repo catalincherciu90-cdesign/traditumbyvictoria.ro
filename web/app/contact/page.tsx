@@ -3,6 +3,7 @@ import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
 import PageHeader from "../components/PageHeader";
 import OfferForm from "../components/OfferForm";
+import OrderForm from "../components/OrderForm";
 import JsonLd from "../components/JsonLd";
 import { getConfig } from "../lib/site-data";
 import { faqLd } from "../lib/jsonld";
@@ -77,6 +78,19 @@ export default async function ContactPage() {
           <OfferForm />
         </div>
       </section>
+
+      {cfg.ordersEnabled && (
+        <section id="comanda" className="bg-cream-2">
+          <div className="mx-auto max-w-3xl px-5 py-16">
+            <div className="mb-8 text-center">
+              <p className="eyebrow mb-2">Comandă online</p>
+              <h2 className="text-3xl text-ink">Plasează o comandă</h2>
+              <p className="mt-3 text-ink-soft">Completează detaliile și te contactăm telefonic pentru confirmare.</p>
+            </div>
+            <OrderForm />
+          </div>
+        </section>
+      )}
 
       <section className="bg-cream-2">
         <div className="mx-auto max-w-3xl px-5 py-16">

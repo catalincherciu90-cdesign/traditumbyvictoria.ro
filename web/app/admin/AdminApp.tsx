@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { SiteConfig, Category } from "../lib/site-data";
+import type { SiteConfig, Category, Order } from "../lib/site-data";
 import { DEFAULT_CONFIG } from "../lib/site-data";
 import QrImage from "../components/QrImage";
 import QrScanner from "../components/QrScanner";
@@ -16,6 +16,7 @@ const TABS = [
   ["testimoniale", "Testimoniale"],
   ["galerie", "Galerie"],
   ["mesaje", "Mesaje"],
+  ["comenzi", "Comenzi"],
   ["recenzii", "Recenzii"],
   ["aplicatie", "Aplicație"],
 ] as const;
@@ -42,6 +43,7 @@ export default function AdminApp() {
   const [toast, setToast] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [reviews, setReviews] = useState<Rev[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [scanning, setScanning] = useState(false);
 
   const flash = (t: string) => { setToast(t); setTimeout(() => setToast(""), 2500); };
@@ -172,7 +174,7 @@ export default function AdminApp() {
         {/* Tabs */}
         <nav className="mb-6 flex flex-wrap gap-2">
           {TABS.map(([k, label]) => (
-            <button key={k} onClick={() => { setTab(k); if (k === "mesaje") api("/api/messages").then((m) => setMessages(m as Msg[])).catch(() => {}); if (k === "recenzii") api("/api/reviews").then((r) => setReviews(r as Rev[])).catch(() => {}); }}
+            <button key={k} onClick={() => { setTab(k); if (k === "mesaje") api("/api/messages").then((m) => setMessages(m as Msg[])).catch(() => {}); if (k === "recenzii") api("/api/reviews").then((r) => setReviews(r as Rev[])).catch(() => {}); if (k === "comenzi") api("/api/orders").then((o) => setOrders(o as Order[])).catch(() => {}); }}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${tab === k ? "bg-gold text-white" : "bg-white text-ink-soft ring-1 ring-line hover:text-gold-deep"}`}>
               {label}
             </button>
@@ -185,6 +187,9 @@ export default function AdminApp() {
         {tab === "testimoniale" && <TestimonialeTab cfg={cfg} patch={patch} />}
         {tab === "galerie" && <GalerieTab cfg={cfg} patch={patch} uploadImage={uploadImage} />}
         {tab === "mesaje" && <MesajeTab messages={messages} onDelete={async (id) => { await api(`/api/messages/${id}`, { method: "DELETE" }); setMessages((m) => m.filter((x) => x.id !== id)); }} />}
+        {tab === "comenzi" && <ComenziTab cfg={cfg} patch={patch} save={save} orders={orders}
+          onStatus={async (id, status) => { await api(`/api/orders/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }); setOrders((o) => o.map((x) => x.id === id ? { ...x, status } : x)); }}
+          onDelete={async (id) => { await api(`/api/orders/${id}`, { method: "DELETE" }); setOrders((o) => o.filter((x) => x.id !== id)); }} />}
         {tab === "recenzii" && <RecenziiTab reviews={reviews}
           onApprove={async (id) => { await api(`/api/reviews/${id}`, { method: "PATCH", body: JSON.stringify({ approved: true }) }); setReviews((r) => r.map((x) => x.id === id ? { ...x, approved: true } : x)); }}
           onDelete={async (id) => { await api(`/api/reviews/${id}`, { method: "DELETE" }); setReviews((r) => r.filter((x) => x.id !== id)); }} />}
@@ -430,6 +435,47 @@ function RecenziiTab({ reviews, onApprove, onDelete }: { reviews: Rev[]; onAppro
           <p className="mt-2 text-xs">{r.approved === false ? <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-700">în așteptare</span> : <span className="rounded-full bg-green-100 px-2 py-0.5 font-semibold text-green-700">publicată</span>}</p>
         </Card>
       ))}
+    </div>
+  );
+}
+
+// ======================= TAB: Comenzi =======================
+function ComenziTab({ cfg, patch, save, orders, onStatus, onDelete }: {
+  cfg: SiteConfig; patch: (fn: (c: SiteConfig) => void) => void; save: () => void; orders: Order[];
+  onStatus: (id: string, status: Order["status"]) => void; onDelete: (id: string) => void;
+}) {
+  return (
+    <div className="space-y-5">
+      <Card title="Comenzi online" hint="Pornește sau oprește primirea comenzilor prin formularul de pe site.">
+        <label className="flex cursor-pointer items-center gap-3">
+          <input type="checkbox" checked={!!cfg.ordersEnabled} onChange={(e) => patch((c) => { c.ordersEnabled = e.target.checked; })}
+            className="h-5 w-5 accent-gold" />
+          <span className="text-sm font-medium text-ink">
+            {cfg.ordersEnabled ? "Pornit — site-ul primește comenzi" : "Oprit — formularul de comandă e ascuns pe site"}
+          </span>
+        </label>
+        <button onClick={save} className={`${btn} mt-4`}>Salvează setarea</button>
+      </Card>
+
+      {orders.length === 0 ? (
+        <Card title="Comenzi primite"><p className="text-sm text-ink-soft">Nicio comandă deocamdată.</p></Card>
+      ) : (
+        orders.map((o) => (
+          <Card key={o.id} title={`${o.name} · ${o.product}`}
+            actions={<button className={btnGhost} onClick={() => onDelete(o.id)}>Șterge</button>}>
+            <p className="text-sm text-ink">📞 {o.phone}{o.date ? ` · 📅 ${o.date}` : ""}</p>
+            {o.details && <p className="mt-1 whitespace-pre-wrap text-sm text-ink-soft">{o.details}</p>}
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <select value={o.status || "noua"} onChange={(e) => onStatus(o.id, e.target.value as Order["status"])} className={`${inp} max-w-[170px]`}>
+                <option value="noua">🆕 Nouă</option>
+                <option value="confirmata">✅ Confirmată</option>
+                <option value="finalizata">📦 Finalizată</option>
+              </select>
+              <span className="text-xs text-ink-soft/70">{o.createdAt ? new Date(o.createdAt).toLocaleString("ro-RO") : ""}</span>
+            </div>
+          </Card>
+        ))
+      )}
     </div>
   );
 }
