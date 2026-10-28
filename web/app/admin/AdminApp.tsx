@@ -170,8 +170,12 @@ export default function AdminApp() {
                 {loginErr && <p className="mt-2 text-sm text-red-600">{loginErr}</p>}
                 <button className={`${btn} mt-5 w-full`}>Intră în admin</button>
               </form>
-              <div className="my-4 flex items-center gap-3 text-xs text-ink-soft"><span className="h-px flex-1 bg-line" />sau<span className="h-px flex-1 bg-line" /></div>
-              <button onClick={() => { setScanning(true); setLoginErr(""); }} className={`${btnGhost} w-full`}>📷 Autentificare prin cod QR</button>
+              {appMode && (
+                <>
+                  <div className="my-4 flex items-center gap-3 text-xs text-ink-soft"><span className="h-px flex-1 bg-line" />sau<span className="h-px flex-1 bg-line" /></div>
+                  <button onClick={() => { setScanning(true); setLoginErr(""); }} className={`${btnGhost} w-full`}>📷 Autentificare prin cod QR</button>
+                </>
+              )}
             </>
           )}
         </div>
