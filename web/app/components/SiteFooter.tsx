@@ -1,6 +1,27 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+const DEF = {
+  address: "Strada Libertății 53, București",
+  phone: "0725 252 493",
+  email: "contact@traditumbyvictoria.ro",
+};
 
 export default function SiteFooter() {
+  const [c, setC] = useState(DEF);
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((cfg) => {
+        const ct = (cfg as { contact?: Partial<typeof DEF> })?.contact;
+        if (ct) setC({ address: ct.address || DEF.address, phone: ct.phone || DEF.phone, email: ct.email || DEF.email });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <footer className="mt-24 bg-dark text-cream">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:grid-cols-2 lg:grid-cols-3">
@@ -15,9 +36,13 @@ export default function SiteFooter() {
         </div>
         <div className="text-sm">
           <h3 className="mb-4 font-display text-lg text-gold">Contact</h3>
-          <p className="text-cream/80">Strada Libertății 53, București</p>
-          <p className="mt-1 text-cream/80">0725 252 493</p>
-          <p className="mt-1 text-cream/80">contact@traditumbyvictoria.ro</p>
+          <p className="text-cream/80">{c.address}</p>
+          <p className="mt-1">
+            <a href={`tel:${c.phone.replace(/\s/g, "")}`} className="text-cream/80 hover:text-gold">{c.phone}</a>
+          </p>
+          <p className="mt-1">
+            <a href={`mailto:${c.email}`} className="text-cream/80 hover:text-gold">{c.email}</a>
+          </p>
         </div>
         <div className="text-sm">
           <h3 className="mb-4 font-display text-lg text-gold">Linkuri</h3>
