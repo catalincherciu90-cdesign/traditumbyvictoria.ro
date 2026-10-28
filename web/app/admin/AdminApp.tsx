@@ -185,28 +185,47 @@ export default function AdminApp() {
   const visibleTabs = appMode ? TABS.filter(([k]) => APP_TABS.includes(k)) : TABS;
 
   return (
-    <div className="min-h-dvh bg-cream">
+    <div className={`min-h-dvh bg-cream ${appMode ? "pb-24" : ""}`}>
       {/* Top bar */}
-      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-line bg-white px-5 py-3">
-        <p className="font-display text-lg font-bold text-ink">Traditum <span className="text-gold">Admin</span></p>
-        <div className="flex items-center gap-3">
-          {toast && <span className="text-sm font-medium text-green-700">{toast}</span>}
-          <a href="/" target="_blank" className={btnGhost}>Vezi site-ul ↗</a>
-          <button onClick={save} disabled={saving} className={btn}>{saving ? "Se salvează…" : "Salvează tot"}</button>
-          <button onClick={logout} className={btnGhost}>Ieși</button>
-        </div>
-      </header>
+      {appMode ? (
+        <header className="sticky top-0 z-40 flex items-center justify-between gap-3 bg-dark px-5 py-3 text-cream shadow-sm">
+          <p className="font-display text-lg font-bold">Traditum <span className="text-gold">Admin</span></p>
+          <div className="flex items-center gap-2">
+            {toast && <span className="text-xs font-medium text-green-300">{toast}</span>}
+            <button onClick={save} disabled={saving} className={btn}>{saving ? "…" : "Salvează"}</button>
+            <button onClick={logout} className="rounded-full border border-white/20 px-3 py-1.5 text-sm font-medium text-cream/80 hover:text-white">Ieși</button>
+          </div>
+        </header>
+      ) : (
+        <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-line bg-white px-5 py-3">
+          <p className="font-display text-lg font-bold text-ink">Traditum <span className="text-gold">Admin</span></p>
+          <div className="flex items-center gap-3">
+            {toast && <span className="text-sm font-medium text-green-700">{toast}</span>}
+            <a href="/" target="_blank" className={btnGhost}>Vezi site-ul ↗</a>
+            <button onClick={save} disabled={saving} className={btn}>{saving ? "Se salvează…" : "Salvează tot"}</button>
+            <button onClick={logout} className={btnGhost}>Ieși</button>
+          </div>
+        </header>
+      )}
 
       <div className="mx-auto max-w-5xl px-5 py-6">
-        {/* Tabs */}
-        <nav className="mb-6 flex flex-wrap gap-2">
-          {visibleTabs.map(([k, label]) => (
-            <button key={k} onClick={() => setTab(k)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${tab === k ? "bg-gold text-white" : "bg-white text-ink-soft ring-1 ring-line hover:text-gold-deep"}`}>
-              {appMode && k === "categorii" ? "Produse" : label}
-            </button>
-          ))}
-        </nav>
+        {/* Tabs (doar în browser; în aplicație folosim bara de jos) */}
+        {!appMode && (
+          <nav className="mb-6 flex flex-wrap gap-2">
+            {visibleTabs.map(([k, label]) => (
+              <button key={k} onClick={() => setTab(k)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${tab === k ? "bg-gold text-white" : "bg-white text-ink-soft ring-1 ring-line hover:text-gold-deep"}`}>
+                {label}
+              </button>
+            ))}
+          </nav>
+        )}
+
+        {appMode && (
+          <h1 className="mb-4 font-display text-2xl text-ink">
+            {tab === "categorii" ? "Produse" : tab === "comenzi" ? "Comenzi" : "Mesaje"}
+          </h1>
+        )}
 
         {tab === "contact" && <ContactTab cfg={cfg} patch={patch} uploadImage={uploadImage} />}
         {tab === "categorii" && <CategoriiTab cfg={cfg} patch={patch} uploadImage={uploadImage} flash={flash} />}
@@ -223,10 +242,15 @@ export default function AdminApp() {
         {tab === "aplicatie" && <AplicatieTab />}
       </div>
 
-      {/* Save bar mobil */}
-      <div className="sticky bottom-0 border-t border-line bg-white px-5 py-3 md:hidden">
-        <button onClick={save} disabled={saving} className={`${btn} w-full`}>{saving ? "Se salvează…" : "Salvează tot"}</button>
-      </div>
+      {/* Save bar mobil (doar browser) */}
+      {!appMode && (
+        <div className="sticky bottom-0 border-t border-line bg-white px-5 py-3 md:hidden">
+          <button onClick={save} disabled={saving} className={`${btn} w-full`}>{saving ? "Se salvează…" : "Salvează tot"}</button>
+        </div>
+      )}
+
+      {/* Bară de navigare jos (stil aplicație) */}
+      {appMode && <BottomTabBar tab={tab} setTab={setTab} />}
     </div>
   );
 }
@@ -576,6 +600,41 @@ function AplicatieTab() {
       </Card>
     </div>
   );
+}
+
+// ======================= Bară navigare jos (aplicație) =======================
+function BottomTabBar({ tab, setTab }: { tab: string; setTab: (t: string) => void }) {
+  const items: { k: string; label: string; icon: React.ReactNode }[] = [
+    { k: "categorii", label: "Produse", icon: <IconCake /> },
+    { k: "comenzi", label: "Comenzi", icon: <IconBag /> },
+    { k: "mesaje", label: "Mesaje", icon: <IconMail /> },
+  ];
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+      <div className="mx-auto flex max-w-md items-stretch justify-around">
+        {items.map((it) => {
+          const active = tab === it.k;
+          return (
+            <button key={it.k} type="button" onClick={() => setTab(it.k)}
+              className={`flex flex-1 flex-col items-center gap-1 py-2 text-[11px] font-medium transition-colors ${active ? "text-gold-deep" : "text-ink-soft"}`}>
+              <span className={`grid h-9 w-16 place-items-center rounded-full transition-colors ${active ? "bg-gold/15" : ""}`}>{it.icon}</span>
+              {it.label}
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
+function IconCake() {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3" /><path d="M5 21v-7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7" /><path d="M5 16c1.1 1 2.3 1 3.5 0s2.4-1 3.5 0 2.3 1 3.5 0 2.4-1 3.5 0" /><path d="M3.5 21h17" /></svg>);
+}
+function IconBag() {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 4 6v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6l-2-4z" /><path d="M4 6h16" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>);
+}
+function IconMail() {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>);
 }
 
 // ======================= UI primitives =======================
