@@ -559,6 +559,27 @@ function AplicatieTab() {
   const [err, setErr] = useState("");
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const installUrl = `${origin}/admin`;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [installEvt, setInstallEvt] = useState<any>(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const onPrompt = (e: Event) => { e.preventDefault(); setInstallEvt(e); };
+    const onInstalled = () => { setInstalled(true); setInstallEvt(null); };
+    window.addEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => { window.removeEventListener("beforeinstallprompt", onPrompt); window.removeEventListener("appinstalled", onInstalled); };
+  }, []);
+
+  async function installApp() {
+    if (installEvt) {
+      installEvt.prompt();
+      try { await installEvt.userChoice; } catch { /* noop */ }
+      setInstallEvt(null);
+    } else {
+      window.open(installUrl, "_blank");
+    }
+  }
 
   async function genToken() {
     setLoading(true); setErr("");
@@ -593,12 +614,20 @@ function AplicatieTab() {
         )}
       </Card>
 
-      <Card title="Instalează aplicația pe telefon" hint="Scanează cu telefonul pentru a instala aplicația de administrare pe ecranul principal.">
+      <Card title="Instalează aplicația pe telefon" hint="Apasă butonul pentru a instala aplicația, sau scanează codul QR cu telefonul.">
         <div className="flex flex-col items-center gap-3 text-center">
           <QrImage text={installUrl} size={220} />
+          {installed ? (
+            <p className="text-sm font-semibold text-green-700">Aplicația e instalată ✓</p>
+          ) : (
+            <button onClick={installApp} className={`${btn} inline-flex items-center gap-2`}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></svg>
+              Instalează aplicația
+            </button>
+          )}
           <p className="break-all text-xs text-ink-soft">{installUrl}</p>
           <p className="rounded-lg bg-cream-2 px-3 py-2 text-xs text-ink-soft">
-            După scanare, deschide în <b>Chrome</b> și apasă meniul <b>⋮ → „Instalează aplicația"</b> (sau „Adaugă la ecranul principal"). Vei avea o iconiță care deschide adminul pe tot ecranul, ca o aplicație. Apoi te poți loga prin codul QR din stânga.
+            Pe telefon: scanează QR-ul (sau deschide link-ul) → apasă <b>„Instalează aplicația"</b>. Pe iPhone (Safari): butonul <b>Share → „Add to Home Screen"</b>. Vei avea o iconiță care deschide adminul pe tot ecranul.
           </p>
         </div>
       </Card>
