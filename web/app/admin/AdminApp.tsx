@@ -45,6 +45,7 @@ export default function AdminApp() {
   const [reviews, setReviews] = useState<Rev[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [scanning, setScanning] = useState(false);
+  const [appMode, setAppMode] = useState(false);
 
   const flash = (t: string) => { setToast(t); setTimeout(() => setToast(""), 2500); };
 
@@ -92,6 +93,23 @@ export default function AdminApp() {
   useEffect(() => {
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
+
+  // Mod „aplicație instalată" (standalone): arătăm doar Comenzi, Produse, Mesaje.
+  // ?app=1 forțează acest mod în browser (pentru previzualizare).
+  useEffect(() => {
+    const forced = new URLSearchParams(window.location.search).get("app") === "1";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const standalone = forced || window.matchMedia?.("(display-mode: standalone)")?.matches || (navigator as any).standalone === true;
+    if (standalone) { setAppMode(true); setTab("comenzi"); }
+  }, []);
+
+  // Încarcă datele tabului activ (funcționează și la schimbarea automată a tabului).
+  useEffect(() => {
+    if (!authed || !cfg) return;
+    if (tab === "mesaje") api("/api/messages").then((m) => setMessages(m as Msg[])).catch(() => {});
+    else if (tab === "recenzii") api("/api/reviews").then((r) => setReviews(r as Rev[])).catch(() => {});
+    else if (tab === "comenzi") api("/api/orders").then((o) => setOrders(o as Order[])).catch(() => {});
+  }, [authed, cfg, tab]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -162,6 +180,10 @@ export default function AdminApp() {
   }
   if (!cfg) return <div className="grid min-h-dvh place-items-center text-ink-soft">Se încarcă datele…</div>;
 
+  // În aplicația instalată arătăm doar: Comenzi, Produse (categorii), Mesaje.
+  const APP_TABS = ["comenzi", "categorii", "mesaje"];
+  const visibleTabs = appMode ? TABS.filter(([k]) => APP_TABS.includes(k)) : TABS;
+
   return (
     <div className="min-h-dvh bg-cream">
       {/* Top bar */}
@@ -178,10 +200,10 @@ export default function AdminApp() {
       <div className="mx-auto max-w-5xl px-5 py-6">
         {/* Tabs */}
         <nav className="mb-6 flex flex-wrap gap-2">
-          {TABS.map(([k, label]) => (
-            <button key={k} onClick={() => { setTab(k); if (k === "mesaje") api("/api/messages").then((m) => setMessages(m as Msg[])).catch(() => {}); if (k === "recenzii") api("/api/reviews").then((r) => setReviews(r as Rev[])).catch(() => {}); if (k === "comenzi") api("/api/orders").then((o) => setOrders(o as Order[])).catch(() => {}); }}
+          {visibleTabs.map(([k, label]) => (
+            <button key={k} onClick={() => setTab(k)}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${tab === k ? "bg-gold text-white" : "bg-white text-ink-soft ring-1 ring-line hover:text-gold-deep"}`}>
-              {label}
+              {appMode && k === "categorii" ? "Produse" : label}
             </button>
           ))}
         </nav>
